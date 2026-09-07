@@ -70,7 +70,13 @@ class AdminController extends Controller
 
         $orders = DB::table('orders')->orderBy('id', 'desc')->get();
 
-        return view('admin.dashboard', compact('settings', 'brands', 'series', 'mobiles', 'orders'));
+        // Safety check for refund_requests table
+        $refunds = [];
+        try {
+            $refunds = DB::table('refund_requests')->orderBy('id', 'desc')->get();
+        } catch (\Exception $e) {}
+
+        return view('admin.dashboard', compact('settings', 'brands', 'series', 'mobiles', 'orders', 'refunds'));
     }
 
     public function updateSettings(Request $request)
@@ -146,25 +152,44 @@ class AdminController extends Controller
 
     public function addMobile(Request $request)
     {
-        $request->validate(['name' => 'required', 'brand_id' => 'required', 'price' => 'required']);
+        $request->validate([
+            'name' => 'required',
+            'brand_id' => 'required',
+            'price' => 'required'
+        ]);
+
         $imageUrl = null;
         if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $fileName = 'mobile_' . time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/mobiles'), $fileName);
-            $imageUrl = '/uploads/mobiles/' . $fileName;
+            try {
+                $file = $request->file('image');
+                $fileName = 'mobile_' . time() . '.' . $file->getClientOriginalExtension();
+                $destPath = public_path('uploads/mobiles');
+                if (!File::exists($destPath)) {
+                    File::makeDirectory($destPath, 0755, true);
+                }
+                $file->move($destPath, $fileName);
+                $imageUrl = '/uploads/mobiles/' . $fileName;
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'File upload error: ' . $e->getMessage()], 500);
+            }
         }
-        DB::table('mobiles')->insert([
-            'brand_id' => $request->brand_id,
-            'series_id' => $request->series_id,
-            'name' => $request->name,
-            'price' => $request->price,
-            'specs' => $request->specs,
-            'image_url' => $imageUrl,
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
-        return response()->json(['message' => 'Mobile added']);
+
+        try {
+            DB::table('mobiles')->insert([
+                'brand_id' => $request->brand_id,
+                'series_id' => $request->series_id ?: null,
+                'name' => $request->name,
+                'price' => $request->price,
+                'specs' => $request->specs,
+                'colors' => $request->colors,
+                'image_url' => $imageUrl,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+            return response()->json(['message' => 'Mobile added']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Database error: Ensure you have executed the ALTER TABLE query to add the "colors" column. Detail: ' . $e->getMessage()], 500);
+        }
     }
 
     public function deleteMobile($id)
@@ -183,6 +208,18 @@ class AdminController extends Controller
     {
         DB::table('orders')->where('id', $id)->delete();
         return response()->json(['message' => 'Order deleted']);
+    }
+
+    public function updateRefundStatus(Request $request)
+    {
+        DB::table('refund_requests')->where('id', $request->id)->update(['status' => $request->status, 'updated_at' => now()]);
+        return response()->json(['message' => 'Refund status updated']);
+    }
+
+    public function deleteRefund($id)
+    {
+        DB::table('refund_requests')->where('id', $id)->delete();
+        return response()->json(['message' => 'Refund request deleted']);
     }
 
     public function updatePassword(Request $request)

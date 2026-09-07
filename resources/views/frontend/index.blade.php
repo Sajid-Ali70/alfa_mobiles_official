@@ -12,133 +12,108 @@
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
 </head>
 <body>
-    @php
-        $appName = $settings->app_name ?? 'Alfa Mobiles';
-    @endphp
-
-    <div class="mobile-wrapper">
+    <div class="mobile-wrapper home-page-layout">
         <!-- Header -->
-        <header>
-            <div class="logo">
-                <img src="{{ $settings->app_icon ?? asset('asset/image/01_app_icon.png') }}" alt="{{ $appName }}">
-            </div>
-            <div class="header-right">
-                <a href="{{ route('track') }}" class="btn-track">
-                    <i class="fas fa-truck-moving"></i> Track
-                </a>
-                <div class="contact-icons">
-                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $settings->contact_number ?? '') }}" class="contact-circle bg-whatsapp" target="_blank" rel="noopener noreferrer">
-                        <i class="fab fa-whatsapp"></i>
-                    </a>
-                    <a href="mailto:{{ $settings->contact_email ?? 'info@alfamobiles.com' }}" class="contact-circle bg-mail" target="_blank">
-                        <i class="fas fa-envelope"></i>
-                    </a>
-                </div>
-            </div>
-        </header>
+        @include('frontend.partials.header')
 
         <!-- Banner Section -->
-        <section class="banner-section p-0">
-            <img src="{{ $settings->banner_url ?? asset('img/banner.png') }}" alt="Alfa Mobiles Banner" class="w-100 d-block">
+        <section class="banner-section">
+            <img src="{{ $settings->banner_url ?? asset('img/banner.png') }}" alt="Banner" class="w-100">
         </section>
 
         <!-- Promo Section -->
-        <div class="promo-section">
-            <div class="promo-container">
-                <i class="fas fa-bullhorn megaphone-icon"></i>
-                <h2 class="promo-text">BUY NOW, <span>PAY LATER!</span></h2>
+        <div class="promo-section-container">
+            <div class="promo-flex-box">
+                <img src="{{ asset('img/megaphone.png') }}" alt="Megaphone" class="megaphone-img-home" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1997/1997890.png'">
+                <h2 class="promo-text-home">BUY NOW, <span>PAY LATER!</span></h2>
             </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons-home">
+            <a href="{{ route('shop') }}" class="action-card-home bg-blue">
+                <div class="action-icon-home"><i class="fas fa-mobile-alt"></i></div>
+                <span class="btn-text">Book Your Mobile</span>
+                <i class="fas fa-chevron-right chevron-home"></i>
+            </a>
+            <a href="{{ route('calculator') }}" class="action-card-home bg-purple">
+                <div class="action-icon-home"><i class="fas fa-calculator"></i></div>
+                <span class="btn-text">Installment Calculator</span>
+                <i class="fas fa-chevron-right chevron-home"></i>
+            </a>
+            <a href="{{ route('refund') }}" class="action-card-home bg-red">
+                <div class="action-icon-home"><i class="fas fa-sync-alt"></i></div>
+                <span class="btn-text">Refund Payment</span>
+                <i class="fas fa-chevron-right chevron-home"></i>
+            </a>
         </div>
 
         <!-- Partners -->
-        <div class="partners-section">
-            <div class="partner-item">
-                <img src="{{ asset('img/logo_payment/statebankofpakistan.webp') }}" class="partner-logo" alt="SBP">
-                <span class="partner-name">PAKISTAN ALL BANKS</span>
-            </div>
-            <div class="partner-item">
-                <img src="{{ asset('img/logo_payment/mastercard.png') }}" class="partner-logo" alt="Mastercard">
-                <span class="partner-name">MASTERCARD</span>
-            </div>
-            <div class="partner-item">
-                <img src="{{ asset('img/logo_payment/visacard.webp') }}" class="partner-logo" alt="Visa">
-                <span class="partner-name">VISA CARD</span>
-            </div>
-            <div class="partner-item">
-                <img src="{{ asset('img/logo_payment/easypaisa.webp') }}" class="partner-logo" alt="Easypaisa">
-                <span class="partner-name">EASYPAISA</span>
-            </div>
-            <div class="partner-item">
-                <img src="{{ asset('img/logo_payment/upaisa.png') }}" class="partner-logo" alt="Upaisa">
-                <span class="partner-name">UPAISA</span>
+        <div class="partners-section-home">
+            <div class="partners-flex-home">
+                <div class="partner-logo-box">
+                    <img src="{{ asset('img/logo_payment/bankalfalah.png') }}" alt="Bank Alfalah">
+                    <span>Bank Alfalah</span>
+                </div>
+                <div class="partner-logo-box">
+                    <img src="{{ asset('img/logo_payment/mastercard.png') }}" alt="Mastercard">
+                    <span>Mastercard</span>
+                </div>
+                <div class="partner-logo-box">
+                    <img src="{{ asset('img/logo_payment/visacard.webp') }}" alt="Visa Card">
+                    <span>Visa Card</span>
+                </div>
+                <div class="partner-box-item">
+                    <img src="{{ asset('img/logo_payment/easypaisa.webp') }}" alt="Easypaisa">
+                    <span>easypaisa</span>
+                </div>
+                <div class="partner-box-item">
+                    <img src="{{ asset('img/logo_payment/upaisa.png') }}" alt="U-Paisa">
+                    <span>U-Paisa</span>
+                </div>
             </div>
         </div>
 
-        <!-- Features Grid -->
-        <div class="features-section">
-            <div class="features-grid">
-                <div class="feature-box">
-                    <div class="feature-icon-circle f-blue">
-                        <i class="fas fa-shield-alt"></i>
+        <!-- Features Grid Bottom -->
+        <div class="bottom-features-home">
+            <div class="bottom-grid-home">
+                <div class="feature-card-home">
+                    <div class="feature-icon-box blue-bg">
+                        <i class="fas fa-calendar-alt"></i>
                     </div>
-                    <div class="feature-content">
-                        <h3>EASY INSTALLMENTS</h3>
-                        <p>Up to 60 Months</p>
+                    <div class="feature-text-box">
+                        <h5>EASY INSTALLMENTS</h5>
+                        <p>Up to 6 Months</p>
                     </div>
                 </div>
-                <div class="feature-box">
-                    <div class="feature-icon-circle f-red">
-                        <i class="fas fa-percentage"></i>
+                <div class="feature-card-home">
+                    <div class="feature-icon-box red-bg">
+                        <i class="fas fa-percent"></i>
                     </div>
-                    <div class="feature-content">
-                        <h3>0% MARKUP</h3>
+                    <div class="feature-text-box">
+                        <h5>0% MARKUP</h5>
                         <p>No Hidden Charges</p>
                     </div>
                 </div>
-                <div class="feature-box">
-                    <div class="feature-icon-circle f-green">
+                <div class="feature-card-home">
+                    <div class="feature-icon-box green-bg">
                         <i class="fas fa-truck"></i>
                     </div>
-                    <div class="feature-content">
-                        <h3>CASH ON DELIVERY</h3>
-                        <p>Postpaid</p>
+                    <div class="feature-text-box">
+                        <h5>CASH ON DELIVERY</h5>
+                        <p>Nationwide</p>
                     </div>
                 </div>
-                <div class="feature-box">
-                    <div class="feature-icon-circle f-orange">
-                        <i class="fas fa-credit-card"></i>
+                <div class="feature-card-home">
+                    <div class="feature-icon-box purple-bg">
+                        <i class="fas fa-shield-alt"></i>
                     </div>
-                    <div class="feature-content">
-                        <h3>CARDS ACCEPTED</h3>
-                        <p>All Major Cards</p>
-                    </div>
-                </div>
-                <div class="feature-box">
-                    <div class="feature-icon-circle f-purple">
-                        <i class="fas fa-certificate"></i>
-                    </div>
-                    <div class="feature-content">
-                        <h3>100% ORIGINAL</h3>
+                    <div class="feature-text-box">
+                        <h5>100% ORIGINAL</h5>
                         <p>Official Warranty</p>
                     </div>
                 </div>
-                <div class="feature-box">
-                    <div class="feature-icon-circle f-cyan">
-                        <i class="fas fa-lock"></i>
-                    </div>
-                    <div class="feature-content">
-                        <h3>SECURE PAYMENTS</h3>
-                        <p>Safe & Reliable</p>
-                    </div>
-                </div>
             </div>
-        </div>
-
-        <!-- Footer Action -->
-        <div class="footer-action">
-            <a href="{{ route('shop') }}" class="btn-shop-now">
-                <i class="fas fa-shopping-cart"></i> Shop Now
-            </a>
         </div>
     </div>
 

@@ -298,12 +298,13 @@
     <div class="sidebar" id="sidebar">
         <div class="brand-section">
             <img src="{{ $settings->app_icon ?? '' }}" alt="Logo" class="brand-logo-img">
-            <span class="brand-name">{{ $settings->app_name ?? 'Alfa Mobiles' }}</span>
+            <span class="brand-name">{{ $settings->app_icon ? '' : ($settings->app_name ?? 'Alfa Mobiles') }}</span>
             <div class="admin-badge">Admin</div>
         </div>
 
         <nav class="nav flex-column">
             <a class="nav-link active" onclick="showSection('orders')"><i class="fas fa-shopping-cart"></i> Orders</a>
+            <a class="nav-link" onclick="showSection('refunds')"><i class="fas fa-undo"></i> Refund Requests</a>
             <a class="nav-link" onclick="showSection('brands')"><i class="fas fa-tags"></i> Brands & Series</a>
             <a class="nav-link" onclick="showSection('mobiles')"><i class="fas fa-mobile-alt"></i> Mobiles</a>
             <a class="nav-link" onclick="showSection('settings')"><i class="fas fa-cog"></i> Website Settings</a>
@@ -329,6 +330,7 @@
 
         <div class="custom-tabs">
             <div class="custom-tab-item active" id="tab-orders" onclick="showSection('orders')">Orders</div>
+            <div class="custom-tab-item" id="tab-refunds" onclick="showSection('refunds')">Refund Requests</div>
             <div class="custom-tab-item" id="tab-brands" onclick="showSection('brands')">Brands & Series</div>
             <div class="custom-tab-item" id="tab-mobiles" onclick="showSection('mobiles')">Mobiles</div>
             <div class="custom-tab-item" id="tab-settings" onclick="showSection('settings')">Settings</div>
@@ -359,9 +361,48 @@
                                 <td><span class="badge-status badge-{{ strtolower($order->status) }}">{{ $order->status }}</span></td>
                                 <td>
                                     <div class="d-flex gap-2">
-                                        <button class="btn btn-sm btn-info" onclick="viewOrder({{ $order->id }})"><i class="fas fa-eye"></i></button>
+                                        <button class="btn btn-sm btn-info" onclick="viewOrder({{ json_encode($order) }})"><i class="fas fa-eye"></i></button>
                                         <button class="btn btn-sm btn-success" onclick="updateOrderStatus({{ $order->id }}, 'Completed')"><i class="fas fa-check"></i></button>
                                         <button class="btn btn-sm btn-danger" onclick="deleteOrder({{ $order->id }})"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Refunds -->
+        <section id="refundsSection" class="dashboard-section d-none">
+            <div class="admin-card">
+                <h5 class="section-title">Refund Requests</h5>
+                <div class="table-responsive">
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th>Refund ID</th>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($refunds as $refund)
+                            <tr>
+                                <td>{{ $refund->refund_id }}</td>
+                                <td>{{ $refund->order_id }}</td>
+                                <td>{{ $refund->customer_name }}</td>
+                                <td>Rs. {{ number_format($refund->refund_amount) }}</td>
+                                <td><span class="badge-status badge-{{ strtolower($refund->status) }}">{{ $refund->status }}</span></td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-sm btn-info" onclick="viewRefund({{ json_encode($refund) }})"><i class="fas fa-eye"></i></button>
+                                        <button class="btn btn-sm btn-success" onclick="updateRefundStatus({{ $refund->id }}, 'Completed')"><i class="fas fa-check"></i></button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteRefund({{ $refund->id }})"><i class="fas fa-trash"></i></button>
                                     </div>
                                 </td>
                             </tr>
@@ -475,6 +516,10 @@
                             <label class="form-label">Image</label>
                             <input type="file" name="image" class="form-control" accept="image/*">
                         </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Available Colors (Comma separated)</label>
+                            <input type="text" name="colors" class="form-control" placeholder="Black, Silver, Blue">
+                        </div>
                         <div class="col-12">
                             <label class="form-label">Specs Summary</label>
                             <textarea name="specs" class="form-control" placeholder="Specs Summary"></textarea>
@@ -486,7 +531,7 @@
             <div class="admin-card">
                 <h5 class="section-title">Mobile Inventory</h5>
                 <table class="table-custom">
-                    <thead><tr><th>Image</th><th>Name</th><th>Brand</th><th>Series</th><th>Price</th><th>Action</th></tr></thead>
+                    <thead><tr><th>Image</th><th>Name</th><th>Brand</th><th>Series</th><th>Price</th><th>Colors</th><th>Action</th></tr></thead>
                     <tbody>
                         @foreach($mobiles as $mobile)
                         <tr>
@@ -495,6 +540,7 @@
                             <td>{{ $mobile->brand_name }}</td>
                             <td>{{ $mobile->series_name ?? '-' }}</td>
                             <td>{{ $mobile->price }}</td>
+                            <td>{{ $mobile->colors ?? 'N/A' }}</td>
                             <td><button class="btn btn-sm btn-danger" onclick="deleteMobile({{ $mobile->id }})"><i class="fas fa-trash"></i></button></td>
                         </tr>
                         @endforeach
@@ -564,6 +610,22 @@
         </section>
     </main>
 
+    <!-- Modals for Viewing Details -->
+    <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content bg-dark text-white border-secondary">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="modalTitle">Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <!-- Content dynamic -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const allSeries = @json($series);
 
@@ -592,6 +654,40 @@
                 reader.onload = e => document.getElementById(previewId).src = e.target.result;
                 reader.readAsDataURL(input.files[0]);
             }
+        }
+
+        function viewOrder(order) {
+            const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+            document.getElementById('modalTitle').innerText = "Order Details: " + order.order_number;
+            document.getElementById('modalBody').innerHTML = `
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="text-secondary small">Customer Name</label><p>${order.full_name}</p></div>
+                    <div class="col-md-6"><label class="text-secondary small">Mobile Number</label><p>${order.mobile_number}</p></div>
+                    <div class="col-md-6"><label class="text-secondary small">CNIC</label><p>${order.cnic}</p></div>
+                    <div class="col-md-6"><label class="text-secondary small">Address</label><p>${order.address}</p></div>
+                    <div class="col-md-6"><label class="text-secondary small">Payment Method</label><p>${order.payment_method} (${order.wallet_service})</p></div>
+                    <div class="col-md-6"><label class="text-secondary small">Account Holder</label><p>${order.account_holder}</p></div>
+                    <div class="col-md-6"><label class="text-secondary small">Monthly EMI</label><p>Rs. ${order.monthly_emi}</p></div>
+                    <div class="col-md-6"><label class="text-secondary small">Total Price</label><p>Rs. ${order.total_price}</p></div>
+                    <div class="col-12"><label class="text-secondary small">Proof Image</label><br><img src="${order.proof_image}" class="w-100 rounded border border-secondary mt-2"></div>
+                </div>
+            `;
+            modal.show();
+        }
+
+        function viewRefund(refund) {
+            const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+            document.getElementById('modalTitle').innerText = "Refund Request: " + refund.refund_id;
+            document.getElementById('modalBody').innerHTML = `
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="text-secondary small">Customer Name</label><p>${refund.customer_name}</p></div>
+                    <div class="col-md-6"><label class="text-secondary small">Refund Amount</label><p>Rs. ${refund.refund_amount}</p></div>
+                    <div class="col-md-6"><label class="text-secondary small">Original Order ID</label><p>${refund.order_id}</p></div>
+                    <div class="col-md-6"><label class="text-secondary small">Verification Method</label><p>${refund.payment_method}</p></div>
+                    <div class="col-12"><label class="text-secondary small">Verification Screenshot</label><br><img src="${refund.proof_image}" class="w-100 rounded border border-secondary mt-2"></div>
+                </div>
+            `;
+            modal.show();
         }
 
         document.getElementById('settingsForm').onsubmit = async (e) => {
@@ -628,8 +724,16 @@
 
         document.getElementById('addMobileForm').onsubmit = async (e) => {
             e.preventDefault();
-            const res = await fetch("{{ route('admin.mobiles.add') }}", { method: 'POST', body: new FormData(e.target) });
+            const res = await fetch("{{ route('admin.mobiles.add') }}", {
+                method: 'POST',
+                headers: {'Accept': 'application/json'},
+                body: new FormData(e.target)
+            });
             if (res.ok) location.reload();
+            else {
+                const err = await res.json();
+                alert("Error adding mobile: " + (err.message || "Internal Server Error"));
+            }
         };
 
         async function deleteMobile(id) {
@@ -651,6 +755,22 @@
         async function deleteOrder(id) {
             if (confirm("Delete order?")) {
                 const res = await fetch(`/admin/orders/delete/${id}`, { method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'} });
+                if (res.ok) location.reload();
+            }
+        }
+
+        async function updateRefundStatus(id, status) {
+            const res = await fetch("{{ route('admin.refunds.update_status') }}", {
+                method: 'POST',
+                headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json'},
+                body: JSON.stringify({ id, status })
+            });
+            if (res.ok) location.reload();
+        }
+
+        async function deleteRefund(id) {
+            if (confirm("Delete refund request?")) {
+                const res = await fetch(`/admin/refunds/delete/${id}`, { method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'} });
                 if (res.ok) location.reload();
             }
         }

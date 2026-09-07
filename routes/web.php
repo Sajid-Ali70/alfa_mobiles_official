@@ -11,8 +11,16 @@ Route::get('/plan', [FrontendController::class, 'plan'])->name('plan');
 Route::get('/customer-info', [FrontendController::class, 'customerInfo'])->name('customer_info');
 Route::get('/agreement', [FrontendController::class, 'agreement'])->name('agreement');
 Route::get('/track', [FrontendController::class, 'track'])->name('track');
+Route::get('/refund', [FrontendController::class, 'refund'])->name('refund');
+Route::post('/refund/agreement', [FrontendController::class, 'refundAgreement'])->name('refund.agreement');
+Route::post('/refund/submit', [FrontendController::class, 'submitRefund'])->name('refund.submit');
+Route::get('/refund/success', [FrontendController::class, 'refundSuccess'])->name('refund.success');
 Route::post('/track/status', [FrontendController::class, 'checkStatus'])->name('track.status');
 Route::post('/order/submit', [FrontendController::class, 'submitOrder'])->name('order.submit');
+
+// Calculator Route
+Route::get('/calculator', [FrontendController::class, 'calculator'])->name('calculator');
+Route::get('/get-models/{brandId}', [FrontendController::class, 'getModels']);
 
 // Admin Login Routes
 Route::get('/admin/login', [AdminController::class, 'showLogin'])->name('admin.login');
@@ -41,6 +49,10 @@ Route::middleware(['admin.auth'])->group(function () {
     // Order Management
     Route::post('/admin/orders/update-status', [AdminController::class, 'updateOrderStatus'])->name('admin.orders.update_status');
     Route::post('/admin/orders/delete/{id}', [AdminController::class, 'deleteOrder'])->name('admin.orders.delete');
+
+    // Refund Management
+    Route::post('/admin/refunds/update-status', [AdminController::class, 'updateRefundStatus'])->name('admin.refunds.update_status');
+    Route::post('/admin/refunds/delete/{id}', [AdminController::class, 'deleteRefund'])->name('admin.refunds.delete');
 
     // Security
     Route::post('/admin/password/update', [AdminController::class, 'updatePassword'])->name('admin.password.update');

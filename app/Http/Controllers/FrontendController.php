@@ -64,7 +64,6 @@ class FrontendController extends Controller
     public function customerInfo(Request $request)
     {
         $settings = DB::table('app_settings')->where('id', 1)->first();
-        // Capture plan details from request if any, or just proceed
         Session::put('order_color', $request->color);
         Session::put('order_tenure', $request->tenure);
         Session::put('order_emi', $request->emi);
@@ -76,7 +75,6 @@ class FrontendController extends Controller
     public function agreement(Request $request)
     {
         $settings = DB::table('app_settings')->where('id', 1)->first();
-        // Save customer info to session
         Session::put('order_customer', $request->all());
         return view('frontend.agreement', compact('settings'));
     }
@@ -144,5 +142,70 @@ class FrontendController extends Controller
 
         $settings = DB::table('app_settings')->where('id', 1)->first();
         return view('frontend.track_result', compact('settings', 'order'));
+    }
+
+    public function refund()
+    {
+        $settings = DB::table('app_settings')->where('id', 1)->first();
+        return view('frontend.refund', compact('settings'));
+    }
+
+    public function refundAgreement(Request $request)
+    {
+        $settings = DB::table('app_settings')->where('id', 1)->first();
+        Session::put('refund_details', $request->all());
+        return view('frontend.refund_agreement', compact('settings'));
+    }
+
+    public function submitRefund(Request $request)
+    {
+        $details = Session::get('refund_details');
+
+        $proofPath = null;
+        if ($request->hasFile('proof_image')) {
+            $file = $request->file('proof_image');
+            $fileName = 'refund_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/refunds'), $fileName);
+            $proofPath = '/uploads/refunds/' . $fileName;
+        }
+
+        $refundId = 'RRF-' . date('Ymd') . '-' . rand(100000, 999999);
+
+        DB::table('refund_requests')->insert([
+            'refund_id' => $refundId,
+            'customer_name' => $details['customer_name'] ?? 'N/A',
+            'order_id' => $details['order_id'] ?? 'N/A',
+            'refund_amount' => $details['refund_amount'] ?? 0,
+            'payment_method' => $request->payment_method ?? 'N/A',
+            'proof_image' => $proofPath,
+            'status' => 'Pending',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        Session::forget('refund_details');
+
+        return response()->json(['success' => true, 'refund_id' => $refundId]);
+    }
+
+    public function refundSuccess(Request $request)
+    {
+        $settings = DB::table('app_settings')->where('id', 1)->first();
+        $refund_id = $request->query('refund_id');
+        $refund = DB::table('refund_requests')->where('refund_id', $refund_id)->first();
+        return view('frontend.refund_success', compact('settings', 'refund'));
+    }
+
+    public function calculator()
+    {
+        $settings = DB::table('app_settings')->where('id', 1)->first();
+        $brands = DB::table('brands')->get();
+        return view('frontend.calculator', compact('settings', 'brands'));
+    }
+
+    public function getModels($brandId)
+    {
+        $mobiles = DB::table('mobiles')->where('brand_id', $brandId)->get();
+        return response()->json($mobiles);
     }
 }
