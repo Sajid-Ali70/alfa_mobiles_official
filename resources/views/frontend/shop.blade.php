@@ -120,9 +120,9 @@
             text-align: center;
         }
 
-        /* Series Select Picker */
-        .series-dropdown-container {
-            margin-bottom: 45px;
+        /* Series & Storage Select Picker */
+        .series-dropdown-container, .storage-dropdown-container {
+            margin-bottom: 25px;
         }
         .shop-select-custom {
             width: 100%;
@@ -227,7 +227,7 @@
             </div>
 
             <h1 class="shop-main-h">Select Your Mobile</h1>
-            <p class="shop-main-p">Choose a brand and series, then tap "Buy Now" on any phone model to pick your EMI plan.</p>
+            <p class="shop-main-p">Choose a brand, series, and storage, then tap "Buy Now" on any phone model to pick your EMI plan.</p>
 
             <!-- 1. Choose Brand Section -->
             <div class="shop-section-wrapper">
@@ -242,22 +242,40 @@
                 </div>
             </div>
 
-            <!-- 2. Select Series Section -->
-            <div class="shop-section-wrapper">
-                <span class="section-shop-label">2. Select Series</span>
-                <div class="series-dropdown-container">
-                    <select class="shop-select-custom" onchange="filterSeries(this.value)">
-                        <option value="all">Select Series</option>
-                        @foreach($series as $s)
-                        <option value="{{ $s->id }}" {{ $seriesId == $s->id ? 'selected' : '' }}>{{ $s->name }}</option>
-                        @endforeach
-                    </select>
+            <div class="row">
+                <div class="col-md-6">
+                    <!-- 2. Select Series Section -->
+                    <div class="shop-section-wrapper">
+                        <span class="section-shop-label">2. Select Series</span>
+                        <div class="series-dropdown-container">
+                            <select class="shop-select-custom" onchange="filterSeries(this.value)">
+                                <option value="all">Select Series</option>
+                                @foreach($series as $s)
+                                <option value="{{ $s->id }}" {{ $seriesId == $s->id ? 'selected' : '' }}>{{ $s->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <!-- 3. Select Storage Section -->
+                    <div class="shop-section-wrapper">
+                        <span class="section-shop-label">3. Select Storage</span>
+                        <div class="storage-dropdown-container">
+                            <select class="shop-select-custom" onchange="filterStorage(this.value)">
+                                <option value="all">Select Storage</option>
+                                @foreach($storages as $st)
+                                <option value="{{ $st->id }}" {{ $storageId == $st->id ? 'selected' : '' }}>{{ $st->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- 3. Model Listing Section -->
-            <div class="shop-section-wrapper">
-                <span class="section-shop-label">3. Select Model & Buy Now</span>
+            <!-- 4. Model Listing Section -->
+            <div class="shop-section-wrapper mt-4">
+                <span class="section-shop-label">4. Select Model & Buy Now</span>
                 <div class="mobile-list-group">
                     @foreach($mobiles as $mobile)
                     <div class="mobile-row-card">
@@ -288,12 +306,19 @@
             const url = new URL(window.location.href);
             url.searchParams.set('brand', brandId);
             url.searchParams.delete('series');
+            url.searchParams.delete('storage');
             window.location.href = url.toString();
         }
         function filterSeries(seriesId) {
             const url = new URL(window.location.href);
             if (seriesId === 'all') url.searchParams.delete('series');
             else url.searchParams.set('series', seriesId);
+            window.location.href = url.toString();
+        }
+        function filterStorage(storageId) {
+            const url = new URL(window.location.href);
+            if (storageId === 'all') url.searchParams.delete('storage');
+            else url.searchParams.set('storage', storageId);
             window.location.href = url.toString();
         }
     </script>

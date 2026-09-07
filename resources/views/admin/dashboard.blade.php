@@ -305,7 +305,7 @@
         <nav class="nav flex-column">
             <a class="nav-link active" onclick="showSection('orders')"><i class="fas fa-shopping-cart"></i> Orders</a>
             <a class="nav-link" onclick="showSection('refunds')"><i class="fas fa-undo"></i> Refund Requests</a>
-            <a class="nav-link" onclick="showSection('brands')"><i class="fas fa-tags"></i> Brands & Series</a>
+            <a class="nav-link" onclick="showSection('brands')"><i class="fas fa-tags"></i> Brands, Series & Storage</a>
             <a class="nav-link" onclick="showSection('mobiles')"><i class="fas fa-mobile-alt"></i> Mobiles</a>
             <a class="nav-link" onclick="showSection('settings')"><i class="fas fa-cog"></i> Website Settings</a>
             <a class="nav-link" onclick="showSection('security')"><i class="fas fa-lock"></i> Security</a>
@@ -331,7 +331,7 @@
         <div class="custom-tabs">
             <div class="custom-tab-item active" id="tab-orders" onclick="showSection('orders')">Orders</div>
             <div class="custom-tab-item" id="tab-refunds" onclick="showSection('refunds')">Refund Requests</div>
-            <div class="custom-tab-item" id="tab-brands" onclick="showSection('brands')">Brands & Series</div>
+            <div class="custom-tab-item" id="tab-brands" onclick="showSection('brands')">Brands, Series & Storage</div>
             <div class="custom-tab-item" id="tab-mobiles" onclick="showSection('mobiles')">Mobiles</div>
             <div class="custom-tab-item" id="tab-settings" onclick="showSection('settings')">Settings</div>
             <div class="custom-tab-item" id="tab-security" onclick="showSection('security')">Security</div>
@@ -413,10 +413,10 @@
             </div>
         </section>
 
-        <!-- Section: Brands & Series -->
+        <!-- Section: Brands & Series & Storage -->
         <section id="brandsSection" class="dashboard-section d-none">
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="admin-card">
                         <h5 class="section-title">Add New Brand</h5>
                         <form id="addBrandForm" enctype="multipart/form-data">
@@ -427,7 +427,7 @@
                         </form>
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="admin-card">
                         <h5 class="section-title">Add New Series</h5>
                         <form id="addSeriesForm">
@@ -443,10 +443,20 @@
                         </form>
                     </div>
                 </div>
+                <div class="col-md-4">
+                    <div class="admin-card">
+                        <h5 class="section-title">Add New Storage</h5>
+                        <form id="addStorageForm">
+                            @csrf
+                            <div class="mb-3"><input type="text" name="name" class="form-control" placeholder="Storage Name (e.g. 128GB)" required></div>
+                            <button type="submit" class="btn-primary-custom w-100">Add Storage</button>
+                        </form>
+                    </div>
+                </div>
             </div>
 
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="admin-card">
                         <h5 class="section-title">Manage Brands</h5>
                         <table class="table-custom">
@@ -463,7 +473,7 @@
                         </table>
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="admin-card">
                         <h5 class="section-title">Manage Series</h5>
                         <table class="table-custom">
@@ -480,6 +490,22 @@
                         </table>
                     </div>
                 </div>
+                <div class="col-md-4">
+                    <div class="admin-card">
+                        <h5 class="section-title">Manage Storage</h5>
+                        <table class="table-custom">
+                            <thead><tr><th>Name</th><th>Action</th></tr></thead>
+                            <tbody>
+                                @foreach($storages as $st)
+                                <tr>
+                                    <td>{{ $st->name }}</td>
+                                    <td><button class="btn btn-sm btn-danger" onclick="deleteStorage({{ $st->id }})"><i class="fas fa-trash"></i></button></td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -490,21 +516,28 @@
                 <form id="addMobileForm" enctype="multipart/form-data">
                     @csrf
                     <div class="row g-3">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label">Brand</label>
                             <select name="brand_id" id="brand_select" class="form-control" required onchange="updateSeriesDropdown()">
                                 <option value="">Select Brand</option>
                                 @foreach($brands as $brand) <option value="{{ $brand->id }}">{{ $brand->name }}</option> @endforeach
                             </select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label">Series</label>
                             <select name="series_id" id="series_select" class="form-control">
                                 <option value="">Select Series</option>
                                 <!-- Dynamic options -->
                             </select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <label class="form-label">Storage</label>
+                            <select name="storage_id" class="form-control">
+                                <option value="">Select Storage</option>
+                                @foreach($storages as $st) <option value="{{ $st->id }}">{{ $st->name }}</option> @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label">Model Name</label>
                             <input type="text" name="name" class="form-control" placeholder="Model Name" required>
                         </div>
@@ -530,22 +563,25 @@
             </div>
             <div class="admin-card">
                 <h5 class="section-title">Mobile Inventory</h5>
-                <table class="table-custom">
-                    <thead><tr><th>Image</th><th>Name</th><th>Brand</th><th>Series</th><th>Price</th><th>Colors</th><th>Action</th></tr></thead>
-                    <tbody>
-                        @foreach($mobiles as $mobile)
-                        <tr>
-                            <td><img src="{{ $mobile->image_url }}" class="preview-img-small"></td>
-                            <td>{{ $mobile->name }}</td>
-                            <td>{{ $mobile->brand_name }}</td>
-                            <td>{{ $mobile->series_name ?? '-' }}</td>
-                            <td>{{ $mobile->price }}</td>
-                            <td>{{ $mobile->colors ?? 'N/A' }}</td>
-                            <td><button class="btn btn-sm btn-danger" onclick="deleteMobile({{ $mobile->id }})"><i class="fas fa-trash"></i></button></td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table-custom">
+                        <thead><tr><th>Image</th><th>Name</th><th>Brand</th><th>Series</th><th>Storage</th><th>Price</th><th>Colors</th><th>Action</th></tr></thead>
+                        <tbody>
+                            @foreach($mobiles as $mobile)
+                            <tr>
+                                <td><img src="{{ $mobile->image_url }}" class="preview-img-small"></td>
+                                <td>{{ $mobile->name }}</td>
+                                <td>{{ $mobile->brand_name }}</td>
+                                <td>{{ $mobile->series_name ?? '-' }}</td>
+                                <td>{{ $mobile->storage_name ?? '-' }}</td>
+                                <td>{{ $mobile->price }}</td>
+                                <td>{{ $mobile->colors ?? 'N/A' }}</td>
+                                <td><button class="btn btn-sm btn-danger" onclick="deleteMobile({{ $mobile->id }})"><i class="fas fa-trash"></i></button></td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
@@ -582,13 +618,9 @@
                 </div>
 
                 <div class="admin-card">
-                    <h5 class="section-title">Play Store Information (Optional)</h5>
+                    <h5 class="section-title">General Settings</h5>
                     <div class="row g-3">
-                        <div class="col-md-6"><label class="form-label">App Name</label><input type="text" name="app_name" class="form-control" value="{{ $settings->app_name }}"></div>
-                        <div class="col-md-6"><label class="form-label">Developer</label><input type="text" name="developer" class="form-control" value="{{ $settings->developer }}"></div>
-                        <div class="col-md-4"><label class="form-label">Category</label><input type="text" name="category" class="form-control" value="{{ $settings->category }}"></div>
-                        <div class="col-md-4"><label class="form-label">Rating</label><input type="text" name="rating_score" class="form-control" value="{{ $settings->rating_score }}"></div>
-                        <div class="col-md-4"><label class="form-label">Downloads</label><input type="text" name="downloads_count" class="form-control" value="{{ $settings->downloads_count }}"></div>
+                        <div class="col-md-6"><label class="form-label">App/Website Name</label><input type="text" name="app_name" class="form-control" value="{{ $settings->app_name }}"></div>
                     </div>
                     <button type="submit" class="btn-primary-custom mt-4 w-100">Save All Settings</button>
                 </div>
@@ -718,6 +750,19 @@
         async function deleteSeries(id) {
             if (confirm("Delete this series?")) {
                 const res = await fetch(`/admin/series/delete/${id}`, { method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'} });
+                if (res.ok) location.reload();
+            }
+        }
+
+        document.getElementById('addStorageForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const res = await fetch("{{ route('admin.storages.add') }}", { method: 'POST', body: new FormData(e.target) });
+            if (res.ok) location.reload();
+        };
+
+        async function deleteStorage(id) {
+            if (confirm("Delete this storage?")) {
+                const res = await fetch(`/admin/storages/delete/${id}`, { method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'} });
                 if (res.ok) location.reload();
             }
         }

@@ -194,22 +194,41 @@
                     </select>
                 </div>
 
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label><i class="fas fa-layer-group me-2 text-primary"></i> 2. Select Series</label>
+                            <select id="series_filter" class="form-select-alfa" disabled onchange="applyFilters()">
+                                <option value="all">All Series</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label><i class="fas fa-hdd me-2 text-primary"></i> 3. Select Storage</label>
+                            <select id="storage_filter" class="form-select-alfa" disabled onchange="applyFilters()">
+                                <option value="all">All Storages</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-group">
-                    <label><i class="fas fa-mobile-alt me-2 text-primary"></i> 2. Select Model</label>
-                    <select id="mobile_id" class="form-select-alfa" disabled onchange="updateDetails()">
+                    <label><i class="fas fa-mobile-alt me-2 text-primary"></i> 4. Select Model</label>
+                    <select id="mobile_id" class="form-select-alfa" disabled onchange="updateColorOptions()">
                         <option value="">Choose Model</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label><i class="fas fa-palette me-2 text-primary"></i> 3. Select Color</label>
+                    <label><i class="fas fa-palette me-2 text-primary"></i> 5. Select Color</label>
                     <select id="color" class="form-select-alfa" disabled>
                         <option value="">Choose Color</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label><i class="fas fa-calendar-check me-2 text-primary"></i> 4. Select EMI Tenure</label>
+                    <label><i class="fas fa-calendar-check me-2 text-primary"></i> 6. Select EMI Tenure</label>
                     <select id="tenure" class="form-select-alfa">
                         <option value="3">3 Months Plan (0% Markup)</option>
                         <option value="6">6 Months Plan (0% Markup)</option>
@@ -243,6 +262,14 @@
                         <span class="res-val" id="res_model">-</span>
                     </div>
                     <div class="res-row">
+                        <span class="res-lbl">Series</span>
+                        <span class="res-val" id="res_series">-</span>
+                    </div>
+                    <div class="res-row">
+                        <span class="res-lbl">Storage</span>
+                        <span class="res-val" id="res_storage">-</span>
+                    </div>
+                    <div class="res-row">
                         <span class="res-lbl">Color</span>
                         <span class="res-val" id="res_color">-</span>
                     </div>
@@ -267,7 +294,7 @@
                         Prices are inclusive of all taxes.
                     </p>
 
-                    <a href="{{ route('shop') }}" class="btn-book-special">
+                    <a id="btn_book" href="{{ route('shop') }}" class="btn-book-special">
                         BOOK THIS MOBILE <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
@@ -280,9 +307,16 @@
 
         async function loadModels(brandId) {
             const modelSelect = document.getElementById('mobile_id');
+            const seriesFilter = document.getElementById('series_filter');
+            const storageFilter = document.getElementById('storage_filter');
             const colorSelect = document.getElementById('color');
+
             modelSelect.innerHTML = '<option value="">Loading...</option>';
             modelSelect.disabled = true;
+            seriesFilter.innerHTML = '<option value="all">All Series</option>';
+            seriesFilter.disabled = true;
+            storageFilter.innerHTML = '<option value="all">All Storages</option>';
+            storageFilter.disabled = true;
             colorSelect.innerHTML = '<option value="">Choose Color</option>';
             colorSelect.disabled = true;
 
@@ -295,18 +329,61 @@
                 const response = await fetch(`/get-models/${brandId}`);
                 mobileData = await response.json();
 
-                modelSelect.innerHTML = '<option value="">Choose Model</option>';
-                mobileData.forEach(mobile => {
-                    modelSelect.innerHTML += `<option value="${mobile.id}">${mobile.name}</option>`;
+                // Populate Series
+                const uniqueSeries = [];
+                const seriesMap = new Map();
+                mobileData.forEach(m => {
+                    if (m.series_id && !seriesMap.has(m.series_id)) {
+                        seriesMap.set(m.series_id, m.series_name);
+                        uniqueSeries.push({id: m.series_id, name: m.series_name});
+                    }
                 });
-                modelSelect.disabled = false;
+                uniqueSeries.forEach(s => {
+                    seriesFilter.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+                });
+                if (uniqueSeries.length > 0) seriesFilter.disabled = false;
+
+                // Populate Storages
+                const uniqueStorages = [...new Set(mobileData.map(m => m.storage_name).filter(s => s))];
+                uniqueStorages.forEach(s => {
+                    storageFilter.innerHTML += `<option value="${s}">${s}</option>`;
+                });
+                if (uniqueStorages.length > 0) storageFilter.disabled = false;
+
+                applyFilters();
             } catch (error) {
                 console.error('Error fetching models:', error);
                 modelSelect.innerHTML = '<option value="">Error loading</option>';
             }
         }
 
-        function updateDetails() {
+        function applyFilters() {
+            const seriesVal = document.getElementById('series_filter').value;
+            const storageVal = document.getElementById('storage_filter').value;
+            const modelSelect = document.getElementById('mobile_id');
+
+            modelSelect.innerHTML = '<option value="">Choose Model</option>';
+
+            const filtered = mobileData.filter(m => {
+                const matchSeries = seriesVal === 'all' || m.series_id == seriesVal;
+                const matchStorage = storageVal === 'all' || m.storage_name === storageVal;
+                return matchSeries && matchStorage;
+            });
+
+            filtered.forEach(mobile => {
+                let displayName = mobile.name;
+                // Add storage hint if not filtering by storage
+                if (storageVal === 'all' && mobile.storage_name) {
+                    displayName += ` (${mobile.storage_name})`;
+                }
+                modelSelect.innerHTML += `<option value="${mobile.id}">${displayName}</option>`;
+            });
+
+            modelSelect.disabled = false;
+            updateColorOptions();
+        }
+
+        function updateColorOptions() {
             const mobileId = document.getElementById('mobile_id').value;
             const colorSelect = document.getElementById('color');
             const selectedMobile = mobileData.find(m => m.id == mobileId);
@@ -344,11 +421,16 @@
 
             // Populate Result
             document.getElementById('res_model').innerText = selectedMobile.name;
+            document.getElementById('res_series').innerText = selectedMobile.series_name || 'N/A';
+            document.getElementById('res_storage').innerText = selectedMobile.storage_name || 'Standard';
             document.getElementById('res_color').innerText = color;
             document.getElementById('res_total').innerText = 'Rs. ' + price.toLocaleString();
             document.getElementById('res_tenure').innerText = tenure + ' Months';
             document.getElementById('res_description').innerText = selectedMobile.specs || 'Standard high-performance device with official warranty.';
             document.getElementById('res_emi').innerText = 'Rs. ' + emi.toLocaleString();
+
+            // Update Book Now link
+            document.getElementById('btn_book').href = "{{ route('plan') }}?id=" + selectedMobile.id;
 
             if(selectedMobile.image_url) {
                 document.getElementById('res_image').src = selectedMobile.image_url;

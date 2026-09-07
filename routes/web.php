@@ -42,6 +42,10 @@ Route::middleware(['admin.auth'])->group(function () {
     Route::post('/admin/series/add', [AdminController::class, 'addSeries'])->name('admin.series.add');
     Route::post('/admin/series/delete/{id}', [AdminController::class, 'deleteSeries'])->name('admin.series.delete');
 
+    // Storage Management
+    Route::post('/admin/storages/add', [AdminController::class, 'addStorage'])->name('admin.storages.add');
+    Route::post('/admin/storages/delete/{id}', [AdminController::class, 'deleteStorage'])->name('admin.storages.delete');
+
     // Mobile Management
     Route::post('/admin/mobiles/add', [AdminController::class, 'addMobile'])->name('admin.mobiles.add');
     Route::post('/admin/mobiles/delete/{id}', [AdminController::class, 'deleteMobile'])->name('admin.mobiles.delete');

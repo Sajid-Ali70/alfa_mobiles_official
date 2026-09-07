@@ -251,6 +251,7 @@
     @php
         $availableColors = array_map('trim', explode(',', $mobile->colors ?? 'Black,Silver,Blue'));
         $price = (int)$mobile->price;
+        $storage = $mobile->storage_name ?? 'Standard';
     @endphp
 
     <div class="mobile-wrapper">
@@ -287,8 +288,10 @@
             <form id="planForm" action="{{ route('customer_info') }}" method="GET">
                 <input type="hidden" name="mobile_id" value="{{ $mobile->id }}">
                 <input type="hidden" name="color" id="selectedColor" value="{{ $availableColors[0] ?? 'Black' }}">
+                <input type="hidden" name="storage" value="{{ $storage }}">
                 <input type="hidden" name="tenure" id="selectedTenure" value="12 Months">
                 <input type="hidden" name="emi" id="selectedEmi" value="Rs. {{ number_format($price / 12) }}">
+                <input type="hidden" name="total" value="Rs. {{ number_format($price) }}">
 
                 <!-- Select Color -->
                 <div class="plan-section">
@@ -305,11 +308,11 @@
 
                 <!-- Select Storage -->
                 <div class="plan-section">
-                    <span class="section-shop-label">Select Storage</span>
+                    <span class="section-shop-label">Storage Option</span>
                     <div class="options-flex">
                         <div class="pill-option active">
                             <div class="dot-color" style="background-color: #e31e24;"></div>
-                            <span>Standard Storage</span>
+                            <span>{{ $storage }} Storage</span>
                         </div>
                     </div>
                 </div>

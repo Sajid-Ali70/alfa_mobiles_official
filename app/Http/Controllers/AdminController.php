@@ -61,12 +61,25 @@ class AdminController extends Controller
             ->select('series.*', 'brands.name as brand_name')
             ->get();
 
-        $mobiles = DB::table('mobiles')
+        // Safety check for storages table
+        $storages = [];
+        try {
+            $storages = DB::table('storages')->get();
+        } catch (\Exception $e) {}
+
+        $mobilesQuery = DB::table('mobiles')
             ->join('brands', 'mobiles.brand_id', '=', 'brands.id')
-            ->leftJoin('series', 'mobiles.series_id', '=', 'series.id')
-            ->select('mobiles.*', 'brands.name as brand_name', 'series.name as series_name')
-            ->orderBy('mobiles.id', 'desc')
-            ->get();
+            ->leftJoin('series', 'mobiles.series_id', '=', 'series.id');
+
+        // Try to join storages if column exists
+        try {
+            $mobilesQuery->leftJoin('storages', 'mobiles.storage_id', '=', 'storages.id')
+                ->select('mobiles.*', 'brands.name as brand_name', 'series.name as series_name', 'storages.name as storage_name');
+        } catch (\Exception $e) {
+            $mobilesQuery->select('mobiles.*', 'brands.name as brand_name', 'series.name as series_name');
+        }
+
+        $mobiles = $mobilesQuery->orderBy('mobiles.id', 'desc')->get();
 
         $orders = DB::table('orders')->orderBy('id', 'desc')->get();
 
@@ -76,15 +89,14 @@ class AdminController extends Controller
             $refunds = DB::table('refund_requests')->orderBy('id', 'desc')->get();
         } catch (\Exception $e) {}
 
-        return view('admin.dashboard', compact('settings', 'brands', 'series', 'mobiles', 'orders', 'refunds'));
+        return view('admin.dashboard', compact('settings', 'brands', 'series', 'storages', 'mobiles', 'orders', 'refunds'));
     }
 
     public function updateSettings(Request $request)
     {
         $data = $request->only([
             'app_name', 'contact_number', 'contact_email',
-            'developer', 'category', 'tags', 'rating_score',
-            'reviews_count', 'downloads_count', 'content_rating',
+            'tags', 'reviews_count', 'content_rating',
             'updated_date', 'description', 'release_notes'
         ]);
 
@@ -150,6 +162,24 @@ class AdminController extends Controller
         return response()->json(['message' => 'Series deleted']);
     }
 
+    // Storage Management
+    public function addStorage(Request $request)
+    {
+        $request->validate(['name' => 'required']);
+        DB::table('storages')->insert([
+            'name' => $request->name,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+        return response()->json(['message' => 'Storage added']);
+    }
+
+    public function deleteStorage($id)
+    {
+        DB::table('storages')->where('id', $id)->delete();
+        return response()->json(['message' => 'Storage deleted']);
+    }
+
     public function addMobile(Request $request)
     {
         $request->validate([
@@ -178,6 +208,7 @@ class AdminController extends Controller
             DB::table('mobiles')->insert([
                 'brand_id' => $request->brand_id,
                 'series_id' => $request->series_id ?: null,
+                'storage_id' => $request->storage_id ?: null,
                 'name' => $request->name,
                 'price' => $request->price,
                 'specs' => $request->specs,
@@ -188,7 +219,7 @@ class AdminController extends Controller
             ]);
             return response()->json(['message' => 'Mobile added']);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Database error: Ensure you have executed the ALTER TABLE query to add the "colors" column. Detail: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Database error: Ensure you have executed the SQL to create the "storages" table and add the "storage_id" column to "mobiles". Detail: ' . $e->getMessage()], 500);
         }
     }
 

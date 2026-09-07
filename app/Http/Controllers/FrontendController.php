@@ -19,8 +19,15 @@ class FrontendController extends Controller
         $settings = DB::table('app_settings')->where('id', 1)->first();
         $brands = DB::table('brands')->get();
 
+        // Safety check for storages table
+        $storages = [];
+        try {
+            $storages = DB::table('storages')->get();
+        } catch (\Exception $e) {}
+
         $brandId = $request->query('brand');
         $seriesId = $request->query('series');
+        $storageId = $request->query('storage');
 
         $query = DB::table('mobiles');
 
@@ -30,6 +37,10 @@ class FrontendController extends Controller
 
         if ($seriesId && $seriesId !== 'all') {
             $query->where('series_id', $seriesId);
+        }
+
+        if ($storageId && $storageId !== 'all') {
+            $query->where('storage_id', $storageId);
         }
 
         $mobiles = $query->get();
@@ -47,13 +58,24 @@ class FrontendController extends Controller
             $seriesName = $selectedSeries ? $selectedSeries->name : 'All Series';
         }
 
-        return view('frontend.shop', compact('settings', 'brands', 'mobiles', 'series', 'brandId', 'seriesId', 'seriesName'));
+        return view('frontend.shop', compact('settings', 'brands', 'mobiles', 'series', 'storages', 'brandId', 'seriesId', 'storageId', 'seriesName'));
     }
 
     public function plan(Request $request)
     {
         $id = $request->query('id');
-        $mobile = DB::table('mobiles')->where('id', $id)->first();
+
+        $mobileQuery = DB::table('mobiles')->where('mobiles.id', $id);
+
+        // Try to join storages if column exists
+        try {
+            $mobile = $mobileQuery->leftJoin('storages', 'mobiles.storage_id', '=', 'storages.id')
+                ->select('mobiles.*', 'storages.name as storage_name')
+                ->first();
+        } catch (\Exception $e) {
+            $mobile = $mobileQuery->first();
+        }
+
         if (!$mobile) return redirect()->route('shop');
 
         $settings = DB::table('app_settings')->where('id', 1)->first();
@@ -65,6 +87,7 @@ class FrontendController extends Controller
     {
         $settings = DB::table('app_settings')->where('id', 1)->first();
         Session::put('order_color', $request->color);
+        Session::put('order_storage', $request->storage);
         Session::put('order_tenure', $request->tenure);
         Session::put('order_emi', $request->emi);
         Session::put('order_total', $request->total);
@@ -107,6 +130,7 @@ class FrontendController extends Controller
             'proof_image' => $proofPath,
             'mobile_id' => $mobileId,
             'color' => Session::get('order_color'),
+            'storage' => Session::get('order_storage'),
             'tenure' => Session::get('order_tenure'),
             'monthly_emi' => Session::get('order_emi'),
             'total_price' => Session::get('order_total'),
@@ -115,7 +139,7 @@ class FrontendController extends Controller
             'updated_at' => now(),
         ]);
 
-        Session::forget(['order_mobile_id', 'order_color', 'order_tenure', 'order_emi', 'order_total', 'order_customer']);
+        Session::forget(['order_mobile_id', 'order_color', 'order_storage', 'order_tenure', 'order_emi', 'order_total', 'order_customer']);
 
         return response()->json(['success' => true, 'order_number' => $orderNumber]);
     }
@@ -205,7 +229,12 @@ class FrontendController extends Controller
 
     public function getModels($brandId)
     {
-        $mobiles = DB::table('mobiles')->where('brand_id', $brandId)->get();
+        $mobiles = DB::table('mobiles')
+            ->leftJoin('storages', 'mobiles.storage_id', '=', 'storages.id')
+            ->leftJoin('series', 'mobiles.series_id', '=', 'series.id')
+            ->where('mobiles.brand_id', $brandId)
+            ->select('mobiles.*', 'storages.name as storage_name', 'series.name as series_name', 'series.id as series_id')
+            ->get();
         return response()->json($mobiles);
     }
 }
