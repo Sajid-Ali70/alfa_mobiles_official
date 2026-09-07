@@ -54,14 +54,34 @@
             padding: 0 20px;
             margin-top: 20px;
             margin-bottom: 8px;
-            text-align: center;
+            text-align: right;
         }
         .shop-subtitle {
             font-size: 16px;
             color: #666;
             padding: 0 20px;
             margin-bottom: 30px;
-            text-align: center;
+            text-align: right;
+        }
+
+        .urdu-notice-box {
+            background-color: #fffafa;
+            border: 1px solid #ffcccc;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 0 20px 30px;
+            direction: rtl;
+            text-align: right;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            line-height: 2;
+            font-size: 18px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(227, 30, 36, 0.05);
+        }
+        .urdu-notice-box p {
+            margin: 0;
+            text-align: right;
         }
 
         .section-container {
@@ -74,11 +94,13 @@
             font-weight: 700;
             margin-bottom: 15px;
             color: #333;
+            text-align: right;
         }
 
         .method-toggle {
             display: flex;
             gap: 15px;
+            justify-content: flex-end;
         }
         .method-btn {
             flex: 1;
@@ -125,6 +147,11 @@
             border-width: 2px;
             background: #fffafb;
         }
+        .wallet-card.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            background: #fcfcfc;
+        }
         .active-dot-check {
             position: absolute;
             top: -10px;
@@ -162,6 +189,16 @@
             font-weight: 700;
             color: #333;
         }
+        .coming-soon-tag {
+            font-size: 9px;
+            background: #eee;
+            color: #888;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-weight: 700;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
 
         .form-group {
             padding: 0 20px;
@@ -173,6 +210,7 @@
             font-weight: 700;
             margin-bottom: 12px;
             color: #333;
+            text-align: right;
         }
         .form-control-alfa {
             width: 100%;
@@ -182,6 +220,8 @@
             font-size: 16px;
             background: #fff;
             color: #333;
+            text-align: right;
+            direction: rtl;
         }
 
         .upload-area {
@@ -225,11 +265,18 @@
             padding: 0 20px;
             margin-top: 30px;
             margin-bottom: 140px;
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 12px;
         }
         .policy-text {
             font-size: 14px;
             color: #333;
             font-weight: 600;
+            text-align: right;
+            margin: 0;
         }
 
         .footer-action {
@@ -277,6 +324,9 @@
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+        .contact-us-box {
+            text-align: right;
         }
         .contact-circle {
             width: 40px;
@@ -341,6 +391,12 @@
             <h1 class="shop-title">Payment Agreement</h1>
             <p class="shop-subtitle">Put details for just agreement, don't send money.</p>
 
+            <div class="urdu-notice-box">
+                <p>
+                    محترم کسٹمر! اس مرحلہ پر ادائیگی درکار نہیں تھی، اس لئے اگر آپ نے غلطی سے رقم منتقل کر دی ہے تو ہمیں اس پر افسوس ہے۔ برائے کرم درج ذیل معلومات ارسال کریں تاکہ تصدیق کے بعد آپ کی رقم واپس کی جا سکے۔ تمام معلومات کی تصدیق کے بعد آپ کی رقم جلد از جلد اسی اکاؤنٹ میں واپس کر دی جائے گی۔ شکریہ۔
+                </p>
+            </div>
+
             <form id="orderForm" enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" name="payment_method" id="payment_method" value="Digital Wallet">
@@ -381,6 +437,48 @@
                             <img src="{{ asset('img/logo_payment/bankalfalah.png') }}" alt="Alfalah">
                             <span>Alfalah</span>
                         </div>
+
+                        <!-- Coming Soon Banks -->
+                        <div class="wallet-card disabled">
+                            <i class="fas fa-university" style="font-size: 24px; color: #ccc;"></i>
+                            <span>Bank Al Islami</span>
+                            <div class="coming-soon-tag">Coming Soon</div>
+                        </div>
+                        <div class="wallet-card disabled">
+                            <i class="fas fa-university" style="font-size: 24px; color: #ccc;"></i>
+                            <span>United Bank</span>
+                            <div class="coming-soon-tag">Coming Soon</div>
+                        </div>
+                        <div class="wallet-card disabled">
+                            <i class="fas fa-university" style="font-size: 24px; color: #ccc;"></i>
+                            <span>Allied Bank</span>
+                            <div class="coming-soon-tag">Coming Soon</div>
+                        </div>
+                        <div class="wallet-card disabled">
+                            <i class="fas fa-university" style="font-size: 24px; color: #ccc;"></i>
+                            <span>Faisal Bank</span>
+                            <div class="coming-soon-tag">Coming Soon</div>
+                        </div>
+                        <div class="wallet-card disabled">
+                            <i class="fas fa-university" style="font-size: 24px; color: #ccc;"></i>
+                            <span>Meezan Bank</span>
+                            <div class="coming-soon-tag">Coming Soon</div>
+                        </div>
+                        <div class="wallet-card disabled">
+                            <i class="fas fa-university" style="font-size: 24px; color: #ccc;"></i>
+                            <span>Askri Bank</span>
+                            <div class="coming-soon-tag">Coming Soon</div>
+                        </div>
+                        <div class="wallet-card disabled">
+                            <i class="fas fa-university" style="font-size: 24px; color: #ccc;"></i>
+                            <span>Raqami Bank</span>
+                            <div class="coming-soon-tag">Coming Soon</div>
+                        </div>
+                        <div class="wallet-card disabled">
+                            <i class="fas fa-university" style="font-size: 24px; color: #ccc;"></i>
+                            <span>MCB</span>
+                            <div class="coming-soon-tag">Coming Soon</div>
+                        </div>
                     </div>
                 </div>
 
@@ -400,8 +498,8 @@
                     </div>
                 </div>
 
-                <div class="policy-check d-flex align-items-start gap-2">
-                    <input type="checkbox" id="policy" class="form-check-input mt-1" required>
+                <div class="policy-check">
+                    <input type="checkbox" id="policy" class="form-check-input" required>
                     <label for="policy" class="policy-text">I Agree the terms and conditions of {{ $appName }} policy.</label>
                 </div>
             </form>
@@ -423,11 +521,12 @@
         }
 
         function selectWallet(wallet, el) {
+            if (el.classList.contains('disabled')) return;
             document.querySelectorAll('.wallet-card').forEach(c => {
                 c.classList.remove('active');
                 const check = c.querySelector('.active-dot-check');
                 if (check) check.remove();
-                if (!c.querySelector('.radio-check')) {
+                if (!c.querySelector('.radio-check') && !c.classList.contains('disabled')) {
                     c.insertAdjacentHTML('afterbegin', '<div class="radio-check"></div>');
                 }
             });

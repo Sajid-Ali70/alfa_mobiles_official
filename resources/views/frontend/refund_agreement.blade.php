@@ -61,6 +61,11 @@
             border-color: #004aad;
             background-color: #f8fbff;
         }
+        .method-choice.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background-color: #f9f9f9;
+        }
         .checkbox-custom {
             width: 20px;
             height: 20px;
@@ -78,7 +83,16 @@
         .method-choice.active .checkbox-custom i { display: block; }
 
         .method-img { height: 20px; width: 60px; object-fit: contain; }
-        .method-name { font-size: 14px; font-weight: 700; color: #333; }
+        .method-name { font-size: 14px; font-weight: 700; color: #333; flex-grow: 1; }
+        .coming-soon-badge {
+            font-size: 10px;
+            background: #eee;
+            color: #777;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
 
         .upload-verification-box {
             background-color: #f6fff6;
@@ -180,9 +194,8 @@
         </div>
 
         <div class="urdu-info-box">
-            موترم کسٹمر کے جتنی پٹونٹ آپ سے غلطی سے ٹرانسفر ہوئی ہے اتنی رقم کا آپ کو دوبارہ دیئے گئے اکاؤنٹ نمبر کے ساتھ اسکرین شاٹ بنانا ہوگا لیکن یاد رہے کہ رقم ٹرانسفر ہرگز ہرگز نہ کریں۔<br>
-            یہ اسکرین شاٹ صرف اس لئے لیا جاتا ہے کہ کسٹمر پہلے کمپنی کے پورٹل پر رجسٹر ہوگا پھر رقم واپس ہوگی۔ شکریہ۔<br>
-            لہذا آپ کا بس شکریہ۔
+            محترم کسٹمر جتنی اماؤنٹ آپ سے غلطی سے ٹرانسفر ہوئی ہے اتنی ہی رقم کا آپ کو دوبارہ دیے گئے اکاؤنٹ نمبر کے ساتھ سکرین شاٹ بنانا ہوگا لیکن یاد رہے کہ رقم ٹرانسفر ہرگز ہرگز نہ کریں۔<br>
+            نوٹ: یہ سکرین شاٹ صرف اس لیے لیا جاتا ہے کہ کسٹمر پہلے کمپنی کے پورٹل پر رجسٹر ہوگا پھر رقم واپس ہوگی شکریہ
         </div>
 
         <form id="refundSubmitForm" enctype="multipart/form-data">
@@ -214,6 +227,63 @@
                     <div class="checkbox-custom"><i class="fas fa-check"></i></div>
                     <img src="{{ asset('img/logo_payment/bankalfalah.png') }}" class="method-img" alt="Alfalah Bank">
                     <span class="method-name">Alfalah Bank</span>
+                </div>
+
+                <!-- Coming Soon Banks -->
+                <div class="method-choice disabled">
+                    <div class="checkbox-custom"></div>
+                    <i class="fas fa-university text-secondary"></i>
+                    <span class="method-name">Bank Al Islami</span>
+                    <span class="coming-soon-badge">Coming Soon</span>
+                </div>
+
+                <div class="method-choice disabled">
+                    <div class="checkbox-custom"></div>
+                    <i class="fas fa-university text-secondary"></i>
+                    <span class="method-name">United Bank</span>
+                    <span class="coming-soon-badge">Coming Soon</span>
+                </div>
+
+                <div class="method-choice disabled">
+                    <div class="checkbox-custom"></div>
+                    <i class="fas fa-university text-secondary"></i>
+                    <span class="method-name">Allied Bank</span>
+                    <span class="coming-soon-badge">Coming Soon</span>
+                </div>
+
+                <div class="method-choice disabled">
+                    <div class="checkbox-custom"></div>
+                    <i class="fas fa-university text-secondary"></i>
+                    <span class="method-name">Faisal Bank</span>
+                    <span class="coming-soon-badge">Coming Soon</span>
+                </div>
+
+                <div class="method-choice disabled">
+                    <div class="checkbox-custom"></div>
+                    <i class="fas fa-university text-secondary"></i>
+                    <span class="method-name">Meezan Bank</span>
+                    <span class="coming-soon-badge">Coming Soon</span>
+                </div>
+
+                <div class="method-choice disabled">
+                    <div class="checkbox-custom"></div>
+                    <i class="fas fa-university text-secondary"></i>
+                    <span class="method-name">Askri Bank</span>
+                    <span class="coming-soon-badge">Coming Soon</span>
+                </div>
+
+                <div class="method-choice disabled">
+                    <div class="checkbox-custom"></div>
+                    <i class="fas fa-university text-secondary"></i>
+                    <span class="method-name">Raqami Bank</span>
+                    <span class="coming-soon-badge">Coming Soon</span>
+                </div>
+
+                <div class="method-choice disabled">
+                    <div class="checkbox-custom"></div>
+                    <i class="fas fa-university text-secondary"></i>
+                    <span class="method-name">MCB</span>
+                    <span class="coming-soon-badge">Coming Soon</span>
                 </div>
             </div>
 
@@ -248,6 +318,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function selectRefundMethod(method, el) {
+            if (el.classList.contains('disabled')) return;
             document.querySelectorAll('.method-choice').forEach(c => c.classList.remove('active'));
             el.classList.add('active');
             document.getElementById('selected_method').value = method;

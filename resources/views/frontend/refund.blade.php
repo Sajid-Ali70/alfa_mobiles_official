@@ -27,7 +27,7 @@
         }
         .urdu-text {
             direction: rtl;
-            text-align: center;
+            text-align: right;
             flex-grow: 1;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: #333;
@@ -156,7 +156,7 @@
             <div class="urdu-text">
                 <h3>محترم کسٹمر!</h3>
                 <p>
-                    اس مرتبہ پر ادائیگی درکار نہیں تھی،<br>
+                    اس مرحلہ پر ادائیگی درکار نہیں تھی،<br>
                     اس لئے اگر آپ نے غلطی سے رقم منتقل کر دی ہے تو<br>
                     ہمیں اس پر افسوس ہے۔<br>
                     برائے کرم درج ذیل معلومات ارسال کریں تاکہ<br>
