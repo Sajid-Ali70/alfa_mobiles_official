@@ -321,7 +321,7 @@
                 <div class="plan-section">
                     <span class="section-shop-label">Choose EMI Tenure (0% Markup)</span>
                     <div class="tenure-grid-shop">
-                        @foreach([12, 24, 36, 48, 60] as $months)
+                        @foreach([12, 18, 24, 30, 36, 42, 48, 54, 60] as $months)
                         <div class="tenure-card-shop {{ $months == 12 ? 'active' : '' }}" onclick="updateTenure('{{ $months }} Months', '{{ number_format($price / $months) }}', this)">
                             <span class="t-months">{{ $months }} Months</span>
                             <span class="t-emi">Rs. {{ number_format($price / $months) }}/mo</span>

@@ -230,11 +230,15 @@
                 <div class="form-group">
                     <label><i class="fas fa-calendar-check me-2 text-primary"></i> 6. Select EMI Tenure</label>
                     <select id="tenure" class="form-select-alfa">
-                        <option value="3">3 Months Plan (0% Markup)</option>
-                        <option value="6">6 Months Plan (0% Markup)</option>
                         <option value="12">12 Months Plan</option>
                         <option value="18">18 Months Plan</option>
                         <option value="24">24 Months Plan</option>
+                        <option value="30">30 Months Plan</option>
+                        <option value="36">36 Months Plan</option>
+                        <option value="42">42 Months Plan</option>
+                        <option value="48">48 Months Plan</option>
+                        <option value="54">54 Months Plan</option>
+                        <option value="60">60 Months Plan</option>
                     </select>
                 </div>
 
@@ -311,7 +315,7 @@
             const storageFilter = document.getElementById('storage_filter');
             const colorSelect = document.getElementById('color');
 
-            modelSelect.innerHTML = '<option value="">Loading...</option>';
+            modelSelect.innerHTML = '<option value="">Choose Model</option>';
             modelSelect.disabled = true;
             seriesFilter.innerHTML = '<option value="all">All Series</option>';
             seriesFilter.disabled = true;
@@ -321,7 +325,6 @@
             colorSelect.disabled = true;
 
             if (!brandId) {
-                modelSelect.innerHTML = '<option value="">Choose Model</option>';
                 return;
             }
 

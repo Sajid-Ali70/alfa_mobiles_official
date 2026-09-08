@@ -46,6 +46,11 @@
                 <span class="btn-text">Refund Payment</span>
                 <i class="fas fa-chevron-right chevron-home"></i>
             </a>
+            <a href="{{ route('track') }}" class="action-card-home bg-dark">
+                <div class="action-icon-home"><i class="fas fa-truck-moving"></i></div>
+                <span class="btn-text">Track Your Order</span>
+                <i class="fas fa-chevron-right chevron-home"></i>
+            </a>
         </div>
 
         <!-- Partners -->

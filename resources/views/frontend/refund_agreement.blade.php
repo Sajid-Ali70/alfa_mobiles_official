@@ -174,6 +174,16 @@
             justify-content: center; z-index: 9999; color: white;
             backdrop-filter: blur(3px);
         }
+
+        @media (max-width: 480px) {
+            .btn-track-main, .contact-label-main {
+                display: none !important;
+            }
+            .contact-box-header {
+                border: none !important;
+                padding: 0 !important;
+            }
+        }
     </style>
 </head>
 <body>

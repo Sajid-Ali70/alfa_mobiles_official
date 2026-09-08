@@ -285,13 +285,13 @@
                 </div>
 
                 <div class="form-group">
-                    <label>CNIC *</label>
-                    <input type="text" name="cnic" class="form-control-alfa" placeholder="XXXXX-XXXXXXX-X" required>
+                    <label>CNIC * (13 digits)</label>
+                    <input type="text" name="cnic" class="form-control-alfa" placeholder="e.g. 4210112345678" required maxlength="13" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                 </div>
 
                 <div class="form-group">
-                    <label>Mobile Number * (WhatsApp active)</label>
-                    <input type="text" name="mobile_number" class="form-control-alfa" placeholder="xxxxx-xxxxxxx" required>
+                    <label>Mobile Number * (11 digits)</label>
+                    <input type="text" name="mobile_number" class="form-control-alfa" placeholder="e.g. 03001234567" required maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                 </div>
 
                 <div class="form-group">

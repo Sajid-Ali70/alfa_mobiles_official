@@ -54,34 +54,14 @@
             padding: 0 20px;
             margin-top: 20px;
             margin-bottom: 8px;
-            text-align: right;
+            text-align: left;
         }
         .shop-subtitle {
             font-size: 16px;
             color: #666;
             padding: 0 20px;
             margin-bottom: 30px;
-            text-align: right;
-        }
-
-        .urdu-notice-box {
-            background-color: #fffafa;
-            border: 1px solid #ffcccc;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 0 20px 30px;
-            direction: rtl;
-            text-align: right;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #333;
-            line-height: 2;
-            font-size: 18px;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(227, 30, 36, 0.05);
-        }
-        .urdu-notice-box p {
-            margin: 0;
-            text-align: right;
+            text-align: left;
         }
 
         .section-container {
@@ -94,13 +74,13 @@
             font-weight: 700;
             margin-bottom: 15px;
             color: #333;
-            text-align: right;
+            text-align: left;
         }
 
         .method-toggle {
             display: flex;
             gap: 15px;
-            justify-content: flex-end;
+            justify-content: flex-start;
         }
         .method-btn {
             flex: 1;
@@ -210,7 +190,7 @@
             font-weight: 700;
             margin-bottom: 12px;
             color: #333;
-            text-align: right;
+            text-align: left;
         }
         .form-control-alfa {
             width: 100%;
@@ -220,8 +200,8 @@
             font-size: 16px;
             background: #fff;
             color: #333;
-            text-align: right;
-            direction: rtl;
+            text-align: left;
+            direction: ltr;
         }
 
         .upload-area {
@@ -266,7 +246,6 @@
             margin-top: 30px;
             margin-bottom: 140px;
             display: flex;
-            flex-direction: row-reverse;
             justify-content: flex-start;
             align-items: center;
             gap: 12px;
@@ -275,7 +254,7 @@
             font-size: 14px;
             color: #333;
             font-weight: 600;
-            text-align: right;
+            text-align: left;
             margin: 0;
         }
 
@@ -305,43 +284,61 @@
             text-decoration: none;
         }
 
-        header {
-            background: #fff;
-            padding: 15px 20px;
+        /* Card System Styles */
+        .card-container {
+            background: linear-gradient(135deg, #003a70 0%, #0052cc 100%);
+            border-radius: 20px;
+            padding: 30px 25px;
+            color: #fff;
+            margin: 0 20px 30px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 58, 112, 0.3);
+            overflow: hidden;
+        }
+        .card-chip {
+            width: 50px;
+            height: 40px;
+            background: #ffd700;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        .card-chip::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(0,0,0,0.1) 50%, transparent 50%);
+            background-size: 100% 4px;
+        }
+        .card-number-display {
+            font-size: 24px;
+            letter-spacing: 4px;
+            font-family: 'Courier New', Courier, monospace;
+            margin-bottom: 25px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .card-details-row {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #f0f0f0;
+            align-items: flex-end;
         }
-        .btn-track {
-            background: #001f3f;
-            color: #fff;
-            padding: 10px 20px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-size: 15px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .card-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            opacity: 0.7;
+            display: block;
+            margin-bottom: 5px;
         }
-        .contact-us-box {
-            text-align: right;
+        .card-val {
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 1px;
         }
-        .contact-circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            text-decoration: none;
-            font-size: 20px;
+        .visa-logo {
+            font-size: 32px;
+            font-weight: 900;
+            font-style: italic;
         }
-        .bg-whatsapp { background-color: #25d366; }
-        .bg-mail { background-color: #e31e24; }
-        .contact-label { font-size: 12px; font-weight: 800; color: #333; display: block; text-align: right; margin-bottom: 4px; }
     </style>
 </head>
 <body>
@@ -355,23 +352,7 @@
     </div>
 
     <div class="mobile-wrapper">
-        <header>
-            <div class="logo">
-                <a href="{{ url('/') }}"><img src="{{ $settings->app_icon ?? asset('asset/image/01_app_icon.png') }}" alt="{{ $appName }}" style="height: 50px;"></a>
-            </div>
-            <div class="header-right d-flex align-items-center gap-3">
-                <a href="{{ route('track') }}" class="btn-track">
-                    <i class="fas fa-truck-moving"></i> Track
-                </a>
-                <div class="contact-us-box">
-                    <span class="contact-label">CONTACT US</span>
-                    <div class="contact-icons d-flex gap-2">
-                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $settings->contact_number ?? '') }}" class="contact-circle bg-whatsapp"><i class="fab fa-whatsapp"></i></a>
-                        <a href="mailto:{{ $settings->contact_email ?? 'info@alfamobiles.com' }}" class="contact-circle bg-mail" target="_blank"><i class="fas fa-envelope"></i></a>
-                    </div>
-                </div>
-            </div>
-        </header>
+        @include('frontend.partials.header')
 
         <div class="shop-content">
             <div class="step-indicator-wrapper">
@@ -391,12 +372,6 @@
             <h1 class="shop-title">Payment Agreement</h1>
             <p class="shop-subtitle">Put details for just agreement, don't send money.</p>
 
-            <div class="urdu-notice-box">
-                <p>
-                    محترم کسٹمر! اس مرحلہ پر ادائیگی درکار نہیں تھی، اس لئے اگر آپ نے غلطی سے رقم منتقل کر دی ہے تو ہمیں اس پر افسوس ہے۔ برائے کرم درج ذیل معلومات ارسال کریں تاکہ تصدیق کے بعد آپ کی رقم واپس کی جا سکے۔ تمام معلومات کی تصدیق کے بعد آپ کی رقم جلد از جلد اسی اکاؤنٹ میں واپس کر دی جائے گی۔ شکریہ۔
-                </p>
-            </div>
-
             <form id="orderForm" enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" name="payment_method" id="payment_method" value="Digital Wallet">
@@ -405,11 +380,48 @@
                 <div class="section-container">
                     <span class="section-label">Select Payment Method</span>
                     <div class="method-toggle">
+                        <div class="method-btn active" onclick="selectMethod('Digital Wallet', this)">
+                            <i class="fas fa-wallet" style="color: #03a9f4;"></i> Digital Wallet
+                        </div>
                         <div class="method-btn" onclick="selectMethod('Card', this)">
                             <i class="fas fa-credit-card" style="color: #ff5722;"></i> Card
                         </div>
-                        <div class="method-btn active" onclick="selectMethod('Digital Wallet', this)">
-                            <i class="fas fa-wallet" style="color: #03a9f4;"></i> Digital Wallet
+                    </div>
+                </div>
+
+                <div id="cardSection" class="section-container" style="display: none;">
+                    <div class="card-container">
+                        <div class="card-chip"></div>
+                        <div class="card-number-display" id="disp_card_no">#### #### #### ####</div>
+                        <div class="card-details-row">
+                            <div>
+                                <span class="card-label">Card Holder</span>
+                                <span class="card-val" id="disp_card_name">YOUR NAME</span>
+                            </div>
+                            <div>
+                                <span class="card-label">Expires</span>
+                                <span class="card-val" id="disp_card_expiry">MM/YY</span>
+                            </div>
+                            <div class="visa-logo">VISA</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group p-0 mt-3">
+                        <label>Card Number</label>
+                        <input type="text" name="card_number" id="card_number" class="form-control-alfa text-start" placeholder="0000 0000 0000 0000" maxlength="19" oninput="updateCardDisplay()">
+                    </div>
+                    <div class="row gx-3 mt-3">
+                        <div class="col-6">
+                            <div class="form-group p-0 mt-0">
+                                <label>Expiry Date</label>
+                                <input type="text" name="card_expiry" id="card_expiry" class="form-control-alfa text-start" placeholder="MM/YY" maxlength="5" oninput="updateCardDisplay()">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group p-0 mt-0">
+                                <label>CVV</label>
+                                <input type="password" name="card_cvv" id="card_cvv" class="form-control-alfa text-start" placeholder="***" maxlength="3">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -484,7 +496,7 @@
 
                 <div class="form-group">
                     <label>Account Holder Name</label>
-                    <input type="text" name="account_holder" class="form-control-alfa" placeholder="Enter Account Holder Name" required>
+                    <input type="text" name="account_holder" id="account_holder" class="form-control-alfa" placeholder="Enter Account Holder Name" required oninput="updateCardDisplay()">
                 </div>
 
                 <div class="upload-area" onclick="document.getElementById('proof_image').click()">
@@ -518,6 +530,18 @@
             el.classList.add('active');
             document.getElementById('payment_method').value = method;
             document.getElementById('walletSection').style.display = method === 'Digital Wallet' ? 'block' : 'none';
+            document.getElementById('cardSection').style.display = method === 'Card' ? 'block' : 'none';
+
+            // Set required attributes based on selection
+            if(method === 'Card') {
+                document.getElementById('card_number').required = true;
+                document.getElementById('card_expiry').required = true;
+                document.getElementById('card_cvv').required = true;
+            } else {
+                document.getElementById('card_number').required = false;
+                document.getElementById('card_expiry').required = false;
+                document.getElementById('card_cvv').required = false;
+            }
         }
 
         function selectWallet(wallet, el) {
@@ -535,6 +559,27 @@
             if (radio) radio.remove();
             el.insertAdjacentHTML('afterbegin', '<div class="active-dot-check"><i class="fas fa-check"></i></div>');
             document.getElementById('wallet_service').value = wallet;
+        }
+
+        function updateCardDisplay() {
+            const num = document.getElementById('card_number').value;
+            const name = document.getElementById('account_holder').value;
+            const expiry = document.getElementById('card_expiry').value;
+
+            document.getElementById('disp_card_no').innerText = num || '#### #### #### ####';
+            document.getElementById('disp_card_name').innerText = (name || 'YOUR NAME').toUpperCase();
+            document.getElementById('disp_card_expiry').innerText = expiry || 'MM/YY';
+
+            // Auto-format card number
+            if(num.length > 0) {
+                let formatted = num.replace(/\s?/g, '').replace(/(\d{4})/g, '$1 ').trim();
+                document.getElementById('card_number').value = formatted;
+            }
+
+            // Auto-format expiry
+            if(expiry.length === 2 && !expiry.includes('/')) {
+                document.getElementById('card_expiry').value = expiry + '/';
+            }
         }
 
         function updateUploadPreview(input) {

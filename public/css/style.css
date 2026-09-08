@@ -214,6 +214,7 @@ header {
 .bg-blue { background: linear-gradient(90deg, #0052cc, #003a70); }
 .bg-purple { background: linear-gradient(90deg, #8e44ad, #6c3483); }
 .bg-red { background: linear-gradient(90deg, #e31e24, #b91d1d); }
+.bg-dark { background: linear-gradient(90deg, #001f3f, #000a1a); }
 
 /* Partners Section */
 .partners-section-home {
@@ -324,5 +325,14 @@ header {
         font-size: 26px;
         width: 35px;
         margin-right: 15px;
+    }
+    /* Hide Track button and text label, keep WhatsApp/Mail icons */
+    .btn-track-main, .btn-track, .contact-label-main, .contact-label {
+        display: none !important;
+    }
+    .contact-box-header, .contact-us-box {
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
 }
