@@ -194,41 +194,29 @@
                     </select>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label><i class="fas fa-layer-group me-2 text-primary"></i> 2. Select Series</label>
-                            <select id="series_filter" class="form-select-alfa" disabled onchange="applyFilters()">
-                                <option value="all">All Series</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label><i class="fas fa-hdd me-2 text-primary"></i> 3. Select Storage</label>
-                            <select id="storage_filter" class="form-select-alfa" disabled onchange="applyFilters()">
-                                <option value="all">All Storages</option>
-                            </select>
-                        </div>
-                    </div>
+                <div class="form-group">
+                    <label><i class="fas fa-layer-group me-2 text-primary"></i> 2. Select Series</label>
+                    <select id="series_filter" class="form-select-alfa" disabled onchange="applyFilters()">
+                        <option value="all">All Series</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
-                    <label><i class="fas fa-mobile-alt me-2 text-primary"></i> 4. Select Model</label>
+                    <label><i class="fas fa-mobile-alt me-2 text-primary"></i> 3. Select Model & Storage</label>
                     <select id="mobile_id" class="form-select-alfa" disabled onchange="updateColorOptions()">
                         <option value="">Choose Model</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label><i class="fas fa-palette me-2 text-primary"></i> 5. Select Color</label>
+                    <label><i class="fas fa-palette me-2 text-primary"></i> 4. Select Color</label>
                     <select id="color" class="form-select-alfa" disabled>
                         <option value="">Choose Color</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label><i class="fas fa-calendar-check me-2 text-primary"></i> 6. Select EMI Tenure</label>
+                    <label><i class="fas fa-calendar-check me-2 text-primary"></i> 5. Select EMI Tenure</label>
                     <select id="tenure" class="form-select-alfa">
                         <option value="12">12 Months Plan</option>
                         <option value="18">18 Months Plan</option>
@@ -312,15 +300,12 @@
         async function loadModels(brandId) {
             const modelSelect = document.getElementById('mobile_id');
             const seriesFilter = document.getElementById('series_filter');
-            const storageFilter = document.getElementById('storage_filter');
             const colorSelect = document.getElementById('color');
 
             modelSelect.innerHTML = '<option value="">Choose Model</option>';
             modelSelect.disabled = true;
             seriesFilter.innerHTML = '<option value="all">All Series</option>';
             seriesFilter.disabled = true;
-            storageFilter.innerHTML = '<option value="all">All Storages</option>';
-            storageFilter.disabled = true;
             colorSelect.innerHTML = '<option value="">Choose Color</option>';
             colorSelect.disabled = true;
 
@@ -346,13 +331,6 @@
                 });
                 if (uniqueSeries.length > 0) seriesFilter.disabled = false;
 
-                // Populate Storages
-                const uniqueStorages = [...new Set(mobileData.map(m => m.storage_name).filter(s => s))];
-                uniqueStorages.forEach(s => {
-                    storageFilter.innerHTML += `<option value="${s}">${s}</option>`;
-                });
-                if (uniqueStorages.length > 0) storageFilter.disabled = false;
-
                 applyFilters();
             } catch (error) {
                 console.error('Error fetching models:', error);
@@ -362,21 +340,18 @@
 
         function applyFilters() {
             const seriesVal = document.getElementById('series_filter').value;
-            const storageVal = document.getElementById('storage_filter').value;
             const modelSelect = document.getElementById('mobile_id');
 
             modelSelect.innerHTML = '<option value="">Choose Model</option>';
 
             const filtered = mobileData.filter(m => {
                 const matchSeries = seriesVal === 'all' || m.series_id == seriesVal;
-                const matchStorage = storageVal === 'all' || m.storage_name === storageVal;
-                return matchSeries && matchStorage;
+                return matchSeries;
             });
 
             filtered.forEach(mobile => {
                 let displayName = mobile.name;
-                // Add storage hint if not filtering by storage
-                if (storageVal === 'all' && mobile.storage_name) {
+                if (mobile.storage_name) {
                     displayName += ` (${mobile.storage_name})`;
                 }
                 modelSelect.innerHTML += `<option value="${mobile.id}">${displayName}</option>`;

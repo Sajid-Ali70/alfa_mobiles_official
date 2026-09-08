@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <style>
-        /* Scoped styles to match the screenshot exactly */
         .shop-page-container {
             background: #fff;
             padding: 30px 20px 60px;
@@ -18,7 +17,6 @@
             flex-direction: column;
         }
 
-        /* Top Progress Bar & Back Navigation */
         .shop-step-header {
             display: flex;
             align-items: center;
@@ -61,7 +59,6 @@
             white-space: nowrap;
         }
 
-        /* Headlines */
         .shop-main-h {
             font-size: 32px;
             font-weight: 900;
@@ -84,44 +81,7 @@
             margin-bottom: 20px;
         }
 
-        /* Brand Grid - 3 Column Layout */
-        .brand-grid-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 45px;
-        }
-        .brand-card-box {
-            background: #fff;
-            border: 1px solid #eee;
-            border-radius: 15px;
-            padding: 20px 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-        }
-        .brand-card-box.active {
-            border: 2px solid #e31e24;
-        }
-        .brand-card-box img {
-            height: 45px;
-            max-width: 80%;
-            object-fit: contain;
-        }
-        .brand-card-box span {
-            font-size: 14px;
-            font-weight: 700;
-            color: #555;
-            text-align: center;
-        }
-
-        /* Series & Storage Select Picker */
-        .series-dropdown-container, .storage-dropdown-container {
+        .brand-dropdown-container, .series-dropdown-container, .model-dropdown-container {
             margin-bottom: 25px;
         }
         .shop-select-custom {
@@ -136,83 +96,32 @@
             appearance: none;
         }
 
-        /* Product List Card (Horizontal) */
-        .mobile-list-group {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .mobile-row-card {
-            background: #fff;
-            border: 1px solid #f5f5f5;
-            border-radius: 20px;
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.02);
-        }
-        .mobile-img-thumb {
-            width: 70px;
-            height: 70px;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .mobile-img-thumb img {
+        .btn-buy-now-large {
+            display: block;
             width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-        .mobile-details-info {
-            flex-grow: 1;
-        }
-        .mobile-name-h {
-            font-size: 18px;
-            font-weight: 900;
-            color: #000;
-            margin-bottom: 2px;
-        }
-        .mobile-price-h {
-            font-size: 18px;
-            font-weight: 900;
-            color: #e31e24;
-            margin-bottom: 2px;
-        }
-        .mobile-meta-h {
-            font-size: 13px;
-            color: #999;
-            font-weight: 700;
-        }
-        .btn-buy-red-pill {
             background-color: #e31e24;
             color: #fff !important;
-            border-radius: 25px;
-            padding: 10px 25px;
-            font-size: 15px;
+            padding: 18px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 20px;
             font-weight: 800;
             text-decoration: none;
-            white-space: nowrap;
+            margin-top: 35px;
             border: none;
+            box-shadow: 0 4px 15px rgba(227, 30, 36, 0.2);
+            transition: all 0.2s;
         }
-
-        @media (max-width: 480px) {
-            .brand-grid-container { gap: 10px; }
-            .brand-card-box { padding: 12px 2px; }
-            .mobile-row-card { padding: 12px; gap: 12px; }
-            .mobile-img-thumb { width: 45px; height: 45px; }
-            .btn-buy-red-pill { padding: 7px 14px; font-size: 11px; }
+        .btn-buy-now-large:active {
+            transform: scale(0.98);
         }
     </style>
 </head>
 <body>
     <div class="mobile-wrapper">
-        <!-- Reusable Header -->
         @include('frontend.partials.header')
 
         <div class="shop-page-container">
-            <!-- Step Navigation Indicator -->
             <div class="shop-step-header">
                 <a href="{{ url('/') }}" class="back-circle-nav"><i class="fas fa-arrow-left"></i></a>
                 <div class="step-dots-flex">
@@ -227,84 +136,61 @@
             </div>
 
             <h1 class="shop-main-h">Select Your Mobile</h1>
-            <p class="shop-main-p">Choose a brand, series, and storage, then tap "Buy Now" on any phone model to pick your EMI plan.</p>
+            <p class="shop-main-p">Choose a brand, series, and model, then tap "Buy Now" to pick your EMI plan.</p>
 
             <!-- 1. Choose Brand Section -->
             <div class="shop-section-wrapper">
                 <span class="section-shop-label">1. Choose Brand</span>
-                <div class="brand-grid-container">
-                    @foreach($brands as $brand)
-                    <div class="brand-card-box {{ $brandId == $brand->id ? 'active' : '' }}" onclick="filterBrand({{ $brand->id }})">
-                        <img src="{{ $brand->logo_url ?? asset('img/brands/'.strtolower($brand->name).'.png') }}" alt="{{ $brand->name }}" onerror="this.src='https://placehold.co/100x100?text={{ $brand->name }}'">
-                        <span>{{ $brand->name }}</span>
-                    </div>
-                    @endforeach
+                <div class="brand-dropdown-container">
+                    <select class="shop-select-custom" onchange="filterBrand(this.value)">
+                        <option value="all">Select Brand</option>
+                        @foreach($brands as $brand)
+                        <option value="{{ $brand->id }}" {{ $brandId == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <!-- 2. Select Series Section -->
-                    <div class="shop-section-wrapper">
-                        <span class="section-shop-label">2. Select Series</span>
-                        <div class="series-dropdown-container">
-                            <select class="shop-select-custom" onchange="filterSeries(this.value)">
-                                <option value="all">Select Series</option>
-                                @foreach($series as $s)
-                                <option value="{{ $s->id }}" {{ $seriesId == $s->id ? 'selected' : '' }}>{{ $s->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <!-- 3. Select Storage Section -->
-                    <div class="shop-section-wrapper">
-                        <span class="section-shop-label">3. Select Storage</span>
-                        <div class="storage-dropdown-container">
-                            <select class="shop-select-custom" onchange="filterStorage(this.value)">
-                                <option value="all">Select Storage</option>
-                                @foreach($storages as $st)
-                                <option value="{{ $st->id }}" {{ $storageId == $st->id ? 'selected' : '' }}>{{ $st->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
+            <!-- 2. Select Series Section -->
+            <div class="shop-section-wrapper">
+                <span class="section-shop-label">2. Select Series</span>
+                <div class="series-dropdown-container">
+                    <select class="shop-select-custom" onchange="filterSeries(this.value)">
+                        <option value="all">Select Series</option>
+                        @foreach($series as $s)
+                        <option value="{{ $s->id }}" {{ $seriesId == $s->id ? 'selected' : '' }}>{{ $s->name }}</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
 
-            <!-- 4. Model Listing Section -->
-            <div class="shop-section-wrapper mt-4">
-                <span class="section-shop-label">4. Select Model & Buy Now</span>
-                <div class="mobile-list-group">
-                    @foreach($mobiles as $mobile)
-                    <div class="mobile-row-card">
-                        <div class="mobile-img-thumb">
-                            <img src="{{ $mobile->image_url ?? asset('img/mobile-icon.png') }}" alt="{{ $mobile->name }}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/0/191.png'">
-                        </div>
-                        <div class="mobile-details-info">
-                            <div class="mobile-name-h">{{ $mobile->name }}</div>
-                            <div class="mobile-price-h">Rs. {{ number_format($mobile->price) }}</div>
-                            <div class="mobile-meta-h">{{ $mobile->specs ?? 'Official Warranty' }}</div>
-                        </div>
-                        <a href="{{ route('plan', ['id' => $mobile->id]) }}" class="btn-buy-red-pill">Buy Now</a>
-                    </div>
-                    @endforeach
-
-                    @if($mobiles->isEmpty())
-                        <div class="text-center py-5">
-                            <p class="text-muted" style="font-size: 14px;">No models found for your selection.</p>
-                        </div>
-                    @endif
+            <!-- 3. Select Model Section -->
+            <div class="shop-section-wrapper">
+                <span class="section-shop-label">3. Select Model</span>
+                <div class="model-dropdown-container">
+                    <select id="mobileSelect" class="shop-select-custom">
+                        <option value="all">Select Model ({{ count($mobiles) }} available)</option>
+                        @foreach($mobiles as $mobile)
+                        <option value="{{ $mobile->id }}">{{ $mobile->name }} ({{ $mobile->storage_name ?? 'Standard' }})</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
+
+            <button type="button" class="btn-buy-now-large" onclick="redirectToPlan()">
+                BUY NOW <i class="fas fa-arrow-right ms-2"></i>
+            </button>
         </div>
     </div>
 
     <script>
         function filterBrand(brandId) {
             const url = new URL(window.location.href);
-            url.searchParams.set('brand', brandId);
+            if (brandId === 'all') {
+                url.searchParams.delete('brand');
+            } else {
+                url.searchParams.set('brand', brandId);
+            }
             url.searchParams.delete('series');
             url.searchParams.delete('storage');
             window.location.href = url.toString();
@@ -315,11 +201,13 @@
             else url.searchParams.set('series', seriesId);
             window.location.href = url.toString();
         }
-        function filterStorage(storageId) {
-            const url = new URL(window.location.href);
-            if (storageId === 'all') url.searchParams.delete('storage');
-            else url.searchParams.set('storage', storageId);
-            window.location.href = url.toString();
+        function redirectToPlan() {
+            const mobileId = document.getElementById('mobileSelect').value;
+            if (mobileId === 'all') {
+                alert('Please select a mobile model first.');
+                return;
+            }
+            window.location.href = "{{ route('plan') }}?id=" + mobileId;
         }
     </script>
 </body>

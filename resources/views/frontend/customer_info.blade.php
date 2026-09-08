@@ -59,21 +59,21 @@
 
         .form-group {
             padding: 0 20px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
         .form-group label {
             display: block;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             color: #333;
         }
         .form-control-alfa {
             width: 100%;
-            padding: 15px 20px;
+            padding: 12px 18px;
             border: 1px solid #ddd;
             border-radius: 12px;
-            font-size: 16px;
+            font-size: 15px;
             background: #fff;
             color: #333;
         }
@@ -87,28 +87,28 @@
 
         .section-container {
             padding: 0 20px;
-            margin-top: 35px;
+            margin-top: 30px;
         }
         .section-label {
             display: block;
             font-size: 16px;
             font-weight: 700;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             color: #333;
         }
 
         .choice-box-list {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
         }
         .choice-box {
             border: 1px solid #eee;
-            border-radius: 15px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 15px;
             display: flex;
             align-items: flex-start;
-            gap: 15px;
+            gap: 12px;
             cursor: pointer;
             position: relative;
             background: #fff;
@@ -116,14 +116,15 @@
         }
         .choice-box.active {
             border-color: #e31e24;
+            background: #fffcfc;
         }
         .radio-circle {
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             border: 2px solid #ddd;
             border-radius: 50%;
             flex-shrink: 0;
-            margin-top: 3px;
+            margin-top: 2px;
             position: relative;
             display: flex;
             align-items: center;
@@ -134,8 +135,8 @@
         }
         .choice-box.active .radio-circle::after {
             content: '';
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             background: #e31e24;
             border-radius: 50%;
         }
@@ -146,34 +147,34 @@
             flex: 1;
         }
         .choice-title {
-            font-size: 17px;
+            font-size: 15px;
             font-weight: 700;
             color: #333;
         }
         .choice-desc {
-            font-size: 14px;
+            font-size: 13px;
             color: #777;
-            margin-top: 4px;
+            margin-top: 2px;
             line-height: 1.4;
         }
 
         .note-box {
-            margin: 35px 20px 140px;
+            margin: 30px 20px 140px;
             background: #fff9e6;
             border: 1px solid #ffeeba;
             border-radius: 12px;
-            padding: 20px;
+            padding: 15px;
             display: flex;
-            gap: 15px;
+            gap: 12px;
             align-items: flex-start;
         }
         .note-box i {
             color: #856404;
-            font-size: 20px;
-            margin-top: 3px;
+            font-size: 18px;
+            margin-top: 2px;
         }
         .note-text {
-            font-size: 15px;
+            font-size: 14px;
             color: #856404;
             line-height: 1.5;
         }
@@ -185,7 +186,7 @@
             transform: translateX(-50%);
             width: 100%;
             max-width: 900px;
-            padding: 25px 20px;
+            padding: 20px;
             background: #fff;
             border-top: 1px solid #eee;
             z-index: 1000;
@@ -194,68 +195,21 @@
             width: 100%;
             background: #e31e24;
             color: #fff;
-            padding: 18px;
+            padding: 16px;
             border-radius: 35px;
             font-weight: 700;
-            font-size: 18px;
+            font-size: 17px;
             text-align: center;
             border: none;
             display: block;
         }
-
-        header {
-            background: #fff;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .btn-track {
-            background: #001f3f;
-            color: #fff;
-            padding: 10px 20px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-size: 15px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .contact-circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            text-decoration: none;
-            font-size: 20px;
-        }
-        .bg-whatsapp { background-color: #25d366; }
-        .bg-mail { background-color: #e31e24; }
     </style>
 </head>
 <body>
     @php $appName = $settings->app_name ?? 'Alfa Mobiles'; @endphp
 
     <div class="mobile-wrapper">
-        <header>
-            <div class="logo">
-                <a href="{{ url('/') }}"><img src="{{ $settings->app_icon ?? asset('asset/image/01_app_icon.png') }}" alt="{{ $appName }}" style="height: 50px;"></a>
-            </div>
-            <div class="header-right d-flex align-items-center gap-3">
-                <a href="{{ route('track') }}" class="btn-track">
-                    <i class="fas fa-truck-moving"></i> Track
-                </a>
-                <div class="contact-icons d-flex gap-2">
-                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $settings->contact_number ?? '') }}" class="contact-circle bg-whatsapp"><i class="fab fa-whatsapp"></i></a>
-                    <a href="mailto:{{ $settings->contact_email ?? 'info@alfamobiles.com' }}" class="contact-circle bg-mail" target="_blank"><i class="fas fa-envelope"></i></a>
-                </div>
-            </div>
-        </header>
+        @include('frontend.partials.header')
 
         <div class="shop-content">
             <div class="step-indicator-wrapper">
@@ -305,10 +259,10 @@
                         <div class="choice-box active" onclick="selectChoice(this, 'selectedDelivery', 'Open Parcel via TCS Rider (Recommended)')">
                             <div class="radio-circle"></div>
                             <div class="d-flex gap-3 w-100">
-                                <i class="fas fa-box-open text-danger" style="font-size: 24px; margin-top: 4px;"></i>
+                                <i class="fas fa-box-open text-danger" style="font-size: 20px; margin-top: 2px;"></i>
                                 <div class="choice-text-wrap">
                                     <span class="choice-title">Open Parcel via TCS Rider (Recommended)</span>
-                                    <span class="choice-desc">Open parcel and verify phone condition in front of TCS rider before completing payment.</span>
+                                    <span class="choice-desc">Open parcel and verify phone condition in front of TCS rider.</span>
                                 </div>
                             </div>
                         </div>
@@ -316,7 +270,7 @@
                             <div class="radio-circle"></div>
                             <div class="choice-text-wrap">
                                 <span class="choice-title">Standard Courier Delivery</span>
-                                <span class="choice-desc">Direct sealed package delivery via TCS standard dispatch.</span>
+                                <span class="choice-desc">Direct sealed package delivery via TCS dispatch.</span>
                             </div>
                         </div>
                     </div>
@@ -328,7 +282,7 @@
                         <div class="choice-box" onclick="selectChoice(this, 'selectedMethodGroup', 'Card')">
                             <div class="radio-circle"></div>
                             <div class="d-flex gap-3 w-100">
-                                <i class="fas fa-credit-card" style="font-size: 24px; margin-top: 4px; color: #ff5722;"></i>
+                                <i class="fas fa-credit-card" style="font-size: 20px; margin-top: 2px; color: #ff5722;"></i>
                                 <div class="choice-text-wrap">
                                     <span class="choice-title">Card (0% EMI)</span>
                                     <span class="choice-desc">Visa / Mastercard bank installment support.</span>
@@ -338,7 +292,7 @@
                         <div class="choice-box active" onclick="selectChoice(this, 'selectedMethodGroup', 'Digital Wallet')">
                             <div class="radio-circle"></div>
                             <div class="d-flex gap-3 w-100">
-                                <i class="fas fa-wallet" style="font-size: 24px; margin-top: 4px; color: #03a9f4;"></i>
+                                <i class="fas fa-wallet" style="font-size: 20px; margin-top: 2px; color: #03a9f4;"></i>
                                 <div class="choice-text-wrap">
                                     <span class="choice-title">Digital Wallet (Easypaisa / Upaisa / Alfalah)</span>
                                     <span class="choice-desc">Instant digital wallet verification.</span>
@@ -348,10 +302,10 @@
                         <div class="choice-box" onclick="selectChoice(this, 'selectedMethodGroup', 'Cash on Delivery')">
                             <div class="radio-circle"></div>
                             <div class="d-flex gap-3 w-100">
-                                <i class="fas fa-money-bill-wave" style="font-size: 24px; margin-top: 4px; color: #4caf50;"></i>
+                                <i class="fas fa-money-bill-wave" style="font-size: 20px; margin-top: 2px; color: #4caf50;"></i>
                                 <div class="choice-text-wrap">
                                     <span class="choice-title">Full Payment via Cash on Delivery</span>
-                                    <span class="choice-desc">Pay full cash to TCS rider after opening parcel.</span>
+                                    <span class="choice-desc">Pay full cash after opening parcel.</span>
                                 </div>
                             </div>
                         </div>
@@ -361,7 +315,7 @@
                 <div class="note-box">
                     <i class="fas fa-shield-alt"></i>
                     <div class="note-text">
-                        <span class="fw-bold">No Advance Payment Required:</span> Your parcel is packed and dispatched under official guarantee. Payment/verification happens when the rider brings your package.
+                        <span class="fw-bold">No Advance Payment Required:</span> Your parcel is packed and dispatched under official guarantee.
                     </div>
                 </div>
             </form>

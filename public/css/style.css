@@ -228,26 +228,26 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 15px;
-    gap: 10px;
+    padding: 12px 10px;
+    gap: 8px;
 }
 
 .partner-logo-box, .partner-box-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     flex: 1;
 }
 
 .partner-logo-box img, .partner-box-item img {
-    height: 35px;
+    height: 22px;
     max-width: 100%;
     object-fit: contain;
 }
 
 .partner-logo-box span, .partner-box-item span {
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 700;
     text-transform: uppercase;
     color: #555;

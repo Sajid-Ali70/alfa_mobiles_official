@@ -6,7 +6,7 @@
     </div>
     <div class="header-right d-flex align-items-center gap-2 gap-md-3">
         <a href="{{ route('track') }}" class="btn-track-main d-none d-md-flex">
-            <i class="fas fa-truck"></i> <span>Track</span>
+            <i class="fas fa-truck-moving"></i> <span>Track</span>
         </a>
         <div class="contact-box-header">
             <span class="contact-label-main d-none d-md-block">CONTACT US</span>

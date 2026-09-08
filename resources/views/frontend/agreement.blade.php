@@ -15,24 +15,24 @@
             justify-content: center; z-index: 9999; color: #fff;
         }
         .step-indicator-wrapper {
-            padding: 20px 20px 10px;
+            padding: 10px 20px 0px;
         }
         .back-btn {
             color: #003a70;
-            font-size: 22px;
+            font-size: 18px;
             text-decoration: none;
         }
         .progress-line-container {
             display: flex;
-            gap: 6px;
+            gap: 4px;
             flex-grow: 1;
-            margin: 0 20px;
+            margin: 0 12px;
         }
         .progress-line-container .line {
-            height: 6px;
+            height: 4px;
             flex-grow: 1;
             background: #e0e0e0;
-            border-radius: 3px;
+            border-radius: 2px;
         }
         .progress-line-container .line.green {
             background: #28a745;
@@ -41,163 +41,177 @@
             background: #e31e24;
         }
         .step-counter-text {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 700;
             color: #e31e24;
             white-space: nowrap;
         }
 
         .shop-title {
-            font-size: 28px;
+            font-size: 20px;
             font-weight: 800;
             color: #1a1a1a;
             padding: 0 20px;
-            margin-top: 20px;
-            margin-bottom: 8px;
+            margin-top: 10px;
+            margin-bottom: 4px;
             text-align: left;
         }
         .shop-subtitle {
-            font-size: 16px;
+            font-size: 13px;
             color: #666;
             padding: 0 20px;
-            margin-bottom: 30px;
+            margin-bottom: 15px;
             text-align: left;
+        }
+
+        .urdu-info-box {
+            background-color: #fffafa;
+            border: 1px solid #ffcccc;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 0 20px 15px;
+            direction: rtl;
+            text-align: right;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            line-height: 1.4;
+            font-size: 11px;
+            font-weight: 600;
         }
 
         .section-container {
             padding: 0 20px;
-            margin-top: 30px;
+            margin-top: 12px;
         }
         .section-label {
             display: block;
-            font-size: 16px;
+            font-size: 13px;
             font-weight: 700;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
             color: #333;
             text-align: left;
         }
 
         .method-toggle {
             display: flex;
-            gap: 15px;
+            gap: 8px;
             justify-content: flex-start;
         }
         .method-btn {
             flex: 1;
-            padding: 15px;
+            padding: 6px;
             border: 1px solid #ddd;
-            border-radius: 12px;
+            border-radius: 8px;
             background: #fff;
             text-align: center;
-            font-size: 16px;
+            font-size: 12px;
             font-weight: 700;
             color: #333;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 6px;
         }
         .method-btn.active {
             border-color: #004aad;
             color: #004aad;
-            border-width: 2px;
+            border-width: 1.5px;
         }
 
         .wallet-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 8px;
         }
         .wallet-card {
             border: 1px solid #eee;
-            border-radius: 15px;
-            padding: 25px 15px;
+            border-radius: 8px;
+            padding: 8px 4px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 12px;
+            gap: 4px;
             cursor: pointer;
             position: relative;
             background: #fff;
         }
         .wallet-card.active {
             border-color: #c00000;
-            border-width: 2px;
+            border-width: 1.5px;
             background: #fffafb;
         }
         .wallet-card.disabled {
-            opacity: 0.7;
+            opacity: 0.6;
             cursor: not-allowed;
             background: #fcfcfc;
         }
         .active-dot-check {
             position: absolute;
-            top: -10px;
+            top: -5px;
             right: 50%;
             transform: translateX(50%);
-            width: 24px;
-            height: 24px;
+            width: 16px;
+            height: 16px;
             background: #c00000;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #fff;
-            font-size: 12px;
+            font-size: 8px;
             z-index: 2;
         }
         .wallet-card .radio-check {
-            width: 20px;
-            height: 20px;
+            width: 12px;
+            height: 12px;
             border: 1px solid #ddd;
             border-radius: 50%;
-            margin-bottom: 5px;
         }
         .wallet-card.active .radio-check {
             display: none;
         }
 
         .wallet-card img {
-            height: 40px;
+            height: 18px;
             max-width: 100%;
             object-fit: contain;
         }
         .wallet-card span {
-            font-size: 15px;
+            font-size: 10px;
             font-weight: 700;
             color: #333;
         }
         .coming-soon-tag {
-            font-size: 9px;
+            font-size: 6px;
             background: #eee;
             color: #888;
-            padding: 2px 5px;
-            border-radius: 4px;
+            padding: 1px 2px;
+            border-radius: 2px;
             font-weight: 700;
-            margin-top: 5px;
+            margin-top: 1px;
             text-transform: uppercase;
         }
 
         .form-group {
             padding: 0 20px;
-            margin-top: 35px;
+            margin-top: 12px;
         }
         .form-group label {
             display: block;
-            font-size: 16px;
+            font-size: 12px;
             font-weight: 700;
-            margin-bottom: 12px;
+            margin-bottom: 4px;
             color: #333;
             text-align: left;
         }
         .form-control-alfa {
             width: 100%;
-            padding: 15px 20px;
+            padding: 6px 12px;
             border: 1px solid #ddd;
-            border-radius: 12px;
-            font-size: 16px;
+            border-radius: 8px;
+            font-size: 12px;
             background: #fff;
             color: #333;
             text-align: left;
@@ -205,53 +219,53 @@
         }
 
         .upload-area {
-            margin: 35px 20px;
-            border: 2px dashed #e31e24;
-            border-radius: 20px;
-            padding: 45px 25px;
+            margin: 15px 20px;
+            border: 1.5px dashed #e31e24;
+            border-radius: 10px;
+            padding: 15px 10px;
             text-align: center;
             background: #fffafb;
             cursor: pointer;
         }
         .upload-icon-circle {
-            width: 60px;
-            height: 60px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             background: #e1f5fe;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
+            margin: 0 auto 6px;
             color: #03a9f4;
-            font-size: 30px;
+            font-size: 16px;
         }
         .upload-title {
             display: block;
-            font-size: 18px;
+            font-size: 12px;
             font-weight: 800;
             color: #c00000;
-            margin-bottom: 10px;
+            margin-bottom: 2px;
         }
         .upload-subtitle {
             display: block;
-            font-size: 14px;
+            font-size: 10px;
             color: #999;
-            line-height: 1.4;
-            max-width: 350px;
+            line-height: 1.2;
+            max-width: 220px;
             margin: 0 auto;
         }
 
         .policy-check {
             padding: 0 20px;
-            margin-top: 30px;
-            margin-bottom: 140px;
+            margin-top: 12px;
+            margin-bottom: 90px;
             display: flex;
             justify-content: flex-start;
             align-items: center;
-            gap: 12px;
+            gap: 6px;
         }
         .policy-text {
-            font-size: 14px;
+            font-size: 10px;
             color: #333;
             font-weight: 600;
             text-align: left;
@@ -265,7 +279,7 @@
             transform: translateX(-50%);
             width: 100%;
             max-width: 900px;
-            padding: 25px 20px;
+            padding: 10px 20px;
             background: #fff;
             border-top: 1px solid #eee;
             z-index: 1000;
@@ -274,10 +288,10 @@
             width: 100%;
             background: #3f51b5;
             color: #fff;
-            padding: 18px;
+            padding: 10px;
             border-radius: 35px;
             font-weight: 700;
-            font-size: 18px;
+            font-size: 14px;
             text-align: center;
             border: none;
             display: block;
@@ -287,20 +301,20 @@
         /* Card System Styles */
         .card-container {
             background: linear-gradient(135deg, #003a70 0%, #0052cc 100%);
-            border-radius: 20px;
-            padding: 30px 25px;
+            border-radius: 8px;
+            padding: 10px 8px;
             color: #fff;
-            margin: 0 20px 30px;
+            margin: 0 20px 12px;
             position: relative;
-            box-shadow: 0 10px 30px rgba(0, 58, 112, 0.3);
+            box-shadow: 0 4px 10px rgba(0, 58, 112, 0.2);
             overflow: hidden;
         }
         .card-chip {
-            width: 50px;
-            height: 40px;
+            width: 25px;
+            height: 20px;
             background: #ffd700;
-            border-radius: 8px;
-            margin-bottom: 30px;
+            border-radius: 3px;
+            margin-bottom: 10px;
             position: relative;
         }
         .card-chip::after {
@@ -308,14 +322,14 @@
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(rgba(0,0,0,0.1) 50%, transparent 50%);
-            background-size: 100% 4px;
+            background-size: 100% 1.5px;
         }
         .card-number-display {
-            font-size: 24px;
-            letter-spacing: 4px;
+            font-size: 12px;
+            letter-spacing: 1.5px;
             font-family: 'Courier New', Courier, monospace;
-            margin-bottom: 25px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
         .card-details-row {
             display: flex;
@@ -323,19 +337,19 @@
             align-items: flex-end;
         }
         .card-label {
-            font-size: 10px;
+            font-size: 6px;
             text-transform: uppercase;
             opacity: 0.7;
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 2px;
         }
         .card-val {
-            font-size: 16px;
+            font-size: 9px;
             font-weight: 600;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
         .visa-logo {
-            font-size: 32px;
+            font-size: 16px;
             font-weight: 900;
             font-style: italic;
         }
@@ -372,6 +386,14 @@
             <h1 class="shop-title">Payment Agreement</h1>
             <p class="shop-subtitle">Put details for just agreement, don't send money.</p>
 
+            <div class="urdu-info-box">
+                محترم کسٹمر،<br>
+                آپ نے ہمارے نمائندے کو جو رقم show کروائی تھی، اسی رقم کو کمپنی کے فراہم کردہ اکاؤنٹ نمبر کے ساتھ درج کرکے صرف اسکرین شاٹ بنائیں۔<br>
+                <span style="color: #e31e24;">⚠️ رقم ہرگز ٹرانسفر نہ کریں۔</span><br>
+                اسکرین شاٹ بنا کر یہاں اٹیچ کریں اور ہمارے نمائندے کو بھیج دیں۔<br>
+                شکریہ
+            </div>
+
             <form id="orderForm" enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" name="payment_method" id="payment_method" value="Digital Wallet">
@@ -406,11 +428,11 @@
                         </div>
                     </div>
 
-                    <div class="form-group p-0 mt-3">
+                    <div class="form-group p-0 mt-1">
                         <label>Card Number</label>
                         <input type="text" name="card_number" id="card_number" class="form-control-alfa text-start" placeholder="0000 0000 0000 0000" maxlength="19" oninput="updateCardDisplay()">
                     </div>
-                    <div class="row gx-3 mt-3">
+                    <div class="row gx-3 mt-1">
                         <div class="col-6">
                             <div class="form-group p-0 mt-0">
                                 <label>Expiry Date</label>
@@ -452,42 +474,42 @@
 
                         <!-- Coming Soon Banks -->
                         <div class="wallet-card disabled">
-                            <i class="fas fa-university" style="font-size: 24px; color: #ccc;"></i>
+                            <i class="fas fa-university" style="font-size: 14px; color: #ccc;"></i>
                             <span>Bank Al Islami</span>
                             <div class="coming-soon-tag">Coming Soon</div>
                         </div>
                         <div class="wallet-card disabled">
-                            <i class="fas fa-university" style="font-size: 24px; color: #ccc;"></i>
+                            <i class="fas fa-university" style="font-size: 14px; color: #ccc;"></i>
                             <span>United Bank</span>
                             <div class="coming-soon-tag">Coming Soon</div>
                         </div>
                         <div class="wallet-card disabled">
-                            <i class="fas fa-university" style="font-size: 24px; color: #ccc;"></i>
+                            <i class="fas fa-university" style="font-size: 14px; color: #ccc;"></i>
                             <span>Allied Bank</span>
                             <div class="coming-soon-tag">Coming Soon</div>
                         </div>
                         <div class="wallet-card disabled">
-                            <i class="fas fa-university" style="font-size: 24px; color: #ccc;"></i>
+                            <i class="fas fa-university" style="font-size: 14px; color: #ccc;"></i>
                             <span>Faisal Bank</span>
                             <div class="coming-soon-tag">Coming Soon</div>
                         </div>
                         <div class="wallet-card disabled">
-                            <i class="fas fa-university" style="font-size: 24px; color: #ccc;"></i>
+                            <i class="fas fa-university" style="font-size: 14px; color: #ccc;"></i>
                             <span>Meezan Bank</span>
                             <div class="coming-soon-tag">Coming Soon</div>
                         </div>
                         <div class="wallet-card disabled">
-                            <i class="fas fa-university" style="font-size: 24px; color: #ccc;"></i>
+                            <i class="fas fa-university" style="font-size: 14px; color: #ccc;"></i>
                             <span>Askri Bank</span>
                             <div class="coming-soon-tag">Coming Soon</div>
                         </div>
                         <div class="wallet-card disabled">
-                            <i class="fas fa-university" style="font-size: 24px; color: #ccc;"></i>
+                            <i class="fas fa-university" style="font-size: 14px; color: #ccc;"></i>
                             <span>Raqami Bank</span>
                             <div class="coming-soon-tag">Coming Soon</div>
                         </div>
                         <div class="wallet-card disabled">
-                            <i class="fas fa-university" style="font-size: 24px; color: #ccc;"></i>
+                            <i class="fas fa-university" style="font-size: 14px; color: #ccc;"></i>
                             <span>MCB</span>
                             <div class="coming-soon-tag">Coming Soon</div>
                         </div>

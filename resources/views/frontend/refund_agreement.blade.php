@@ -48,12 +48,12 @@
         }
         .method-choice {
             border: 1px solid #eee;
-            border-radius: 12px;
-            padding: 12px 15px;
+            border-radius: 10px;
+            padding: 10px 12px;
             display: flex;
             align-items: center;
-            gap: 15px;
-            margin-bottom: 10px;
+            gap: 12px;
+            margin-bottom: 8px;
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -67,8 +67,8 @@
             background-color: #f9f9f9;
         }
         .checkbox-custom {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border: 2px solid #ddd;
             border-radius: 4px;
             display: flex;
@@ -79,16 +79,16 @@
             background-color: #004aad;
             border-color: #004aad;
         }
-        .checkbox-custom i { color: #fff; font-size: 12px; display: none; }
+        .checkbox-custom i { color: #fff; font-size: 10px; display: none; }
         .method-choice.active .checkbox-custom i { display: block; }
 
-        .method-img { height: 20px; width: 60px; object-fit: contain; }
-        .method-name { font-size: 14px; font-weight: 700; color: #333; flex-grow: 1; }
+        .method-img { height: 18px; width: 50px; object-fit: contain; }
+        .method-name { font-size: 13px; font-weight: 700; color: #333; flex-grow: 1; }
         .coming-soon-badge {
-            font-size: 10px;
+            font-size: 9px;
             background: #eee;
             color: #777;
-            padding: 2px 8px;
+            padding: 2px 6px;
             border-radius: 10px;
             font-weight: 700;
             text-transform: uppercase;
@@ -242,56 +242,56 @@
                 <!-- Coming Soon Banks -->
                 <div class="method-choice disabled">
                     <div class="checkbox-custom"></div>
-                    <i class="fas fa-university text-secondary"></i>
+                    <i class="fas fa-university text-secondary" style="font-size: 16px;"></i>
                     <span class="method-name">Bank Al Islami</span>
                     <span class="coming-soon-badge">Coming Soon</span>
                 </div>
 
                 <div class="method-choice disabled">
                     <div class="checkbox-custom"></div>
-                    <i class="fas fa-university text-secondary"></i>
+                    <i class="fas fa-university text-secondary" style="font-size: 16px;"></i>
                     <span class="method-name">United Bank</span>
                     <span class="coming-soon-badge">Coming Soon</span>
                 </div>
 
                 <div class="method-choice disabled">
                     <div class="checkbox-custom"></div>
-                    <i class="fas fa-university text-secondary"></i>
+                    <i class="fas fa-university text-secondary" style="font-size: 16px;"></i>
                     <span class="method-name">Allied Bank</span>
                     <span class="coming-soon-badge">Coming Soon</span>
                 </div>
 
                 <div class="method-choice disabled">
                     <div class="checkbox-custom"></div>
-                    <i class="fas fa-university text-secondary"></i>
+                    <i class="fas fa-university text-secondary" style="font-size: 16px;"></i>
                     <span class="method-name">Faisal Bank</span>
                     <span class="coming-soon-badge">Coming Soon</span>
                 </div>
 
                 <div class="method-choice disabled">
                     <div class="checkbox-custom"></div>
-                    <i class="fas fa-university text-secondary"></i>
+                    <i class="fas fa-university text-secondary" style="font-size: 16px;"></i>
                     <span class="method-name">Meezan Bank</span>
                     <span class="coming-soon-badge">Coming Soon</span>
                 </div>
 
                 <div class="method-choice disabled">
                     <div class="checkbox-custom"></div>
-                    <i class="fas fa-university text-secondary"></i>
+                    <i class="fas fa-university text-secondary" style="font-size: 16px;"></i>
                     <span class="method-name">Askri Bank</span>
                     <span class="coming-soon-badge">Coming Soon</span>
                 </div>
 
                 <div class="method-choice disabled">
                     <div class="checkbox-custom"></div>
-                    <i class="fas fa-university text-secondary"></i>
+                    <i class="fas fa-university text-secondary" style="font-size: 16px;"></i>
                     <span class="method-name">Raqami Bank</span>
                     <span class="coming-soon-badge">Coming Soon</span>
                 </div>
 
                 <div class="method-choice disabled">
                     <div class="checkbox-custom"></div>
-                    <i class="fas fa-university text-secondary"></i>
+                    <i class="fas fa-university text-secondary" style="font-size: 16px;"></i>
                     <span class="method-name">MCB</span>
                     <span class="coming-soon-badge">Coming Soon</span>
                 </div>

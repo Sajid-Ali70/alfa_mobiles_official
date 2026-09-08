@@ -59,7 +59,7 @@ class FrontendController extends Controller
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
             }
         } catch (\Exception $e) {
-            // Silently fail if schema patching fails (e.g. table already exists or lock issues)
+            // Silently fail if schema patching fails
             \Log::error("Database patching failed: " . $e->getMessage());
         }
     }
@@ -87,15 +87,21 @@ class FrontendController extends Controller
         $query = DB::table('mobiles');
 
         if ($brandId) {
-            $query->where('brand_id', $brandId);
+            $query->where('mobiles.brand_id', $brandId);
         }
 
         if ($seriesId && $seriesId !== 'all') {
-            $query->where('series_id', $seriesId);
+            $query->where('mobiles.series_id', $seriesId);
         }
 
         if ($storageId && $storageId !== 'all' && Schema::hasColumn('mobiles', 'storage_id')) {
-            $query->where('storage_id', $storageId);
+            $query->where('mobiles.storage_id', $storageId);
+        }
+
+        // Join storage to get storage name for display in dropdowns/lists
+        if (Schema::hasTable('storages') && Schema::hasColumn('mobiles', 'storage_id')) {
+            $query->leftJoin('storages', 'mobiles.storage_id', '=', 'storages.id')
+                  ->select('mobiles.*', 'storages.name as storage_name');
         }
 
         $mobiles = $query->get();
