@@ -237,6 +237,25 @@
             width: fit-content;
         }
 
+        .btn-secondary-custom {
+            background: #30363d;
+            color: white;
+            border: 1px solid #484f58;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: fit-content;
+            text-decoration: none;
+        }
+        .btn-secondary-custom:hover {
+            background: #484f58;
+            color: white;
+        }
+
         .btn-danger-custom {
             background: #dc3545;
             color: white;
@@ -512,7 +531,21 @@
         <!-- Section: Mobiles -->
         <section id="mobilesSection" class="dashboard-section d-none">
             <div class="admin-card">
-                <h5 class="section-title">Add New Mobile</h5>
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                    <h5 class="section-title mb-0">Add New Mobile</h5>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <select id="download_brand_id" class="form-control form-control-sm" style="width: 150px;">
+                            <option value="">Select Brand</option>
+                            @foreach($brands as $brand) <option value="{{ $brand->id }}">{{ $brand->name }}</option> @endforeach
+                        </select>
+                        {{-- <button onclick="downloadMobileList('excel')" class="btn btn-sm btn-outline-info">
+                            <i class="fas fa-file-excel me-1"></i> Excel (CSV)
+                        </button> --}}
+                        <button onclick="downloadMobileList('pdf')" class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-file-pdf me-1"></i> PDF
+                        </button>
+                    </div>
+                </div>
                 <form id="addMobileForm" enctype="multipart/form-data">
                     @csrf
                     <div class="row g-3">
@@ -685,6 +718,19 @@
                 const reader = new FileReader();
                 reader.onload = e => document.getElementById(previewId).src = e.target.result;
                 reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function downloadMobileList(format) {
+            const brandId = document.getElementById('download_brand_id').value;
+            if (!brandId) {
+                alert("Please select a brand first");
+                return;
+            }
+            if (format === 'excel') {
+                window.location.href = `{{ route('admin.mobiles.download') }}?brand_id=${brandId}`;
+            } else if (format === 'pdf') {
+                window.open(`{{ route('admin.mobiles.pdf') }}?brand_id=${brandId}`, '_blank');
             }
         }
 

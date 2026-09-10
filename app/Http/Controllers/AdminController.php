@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Response;
 
 class AdminController extends Controller
 {
@@ -227,6 +228,49 @@ class AdminController extends Controller
     {
         DB::table('mobiles')->where('id', $id)->delete();
         return response()->json(['message' => 'Mobile deleted']);
+    }
+
+    public function downloadMobileList(Request $request)
+    {
+        $brandId = $request->brand_id;
+        $brand = DB::table('brands')->where('id', $brandId)->first();
+
+        if (!$brand) {
+            return back()->with('error', 'Brand not found');
+        }
+
+        $mobiles = DB::table('mobiles')
+            ->where('brand_id', $brandId)
+            ->select('name', 'price')
+            ->get();
+
+        $filename = $brand->name . "_Mobiles.csv";
+
+        return Response::streamDownload(function () use ($mobiles) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['Mobile Name', 'Price']);
+            foreach ($mobiles as $mobile) {
+                fputcsv($file, [$mobile->name, $mobile->price]);
+            }
+            fclose($file);
+        }, $filename);
+    }
+
+    public function printMobileList(Request $request)
+    {
+        $brandId = $request->brand_id;
+        $brand = DB::table('brands')->where('id', $brandId)->first();
+
+        if (!$brand) {
+            return back()->with('error', 'Brand not found');
+        }
+
+        $mobiles = DB::table('mobiles')
+            ->where('brand_id', $brandId)
+            ->select('name', 'price')
+            ->get();
+
+        return view('admin.mobiles_pdf', compact('brand', 'mobiles'));
     }
 
     public function updateOrderStatus(Request $request)
