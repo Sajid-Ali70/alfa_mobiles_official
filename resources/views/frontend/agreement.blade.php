@@ -94,29 +94,35 @@
 
         .method-toggle {
             display: flex;
-            gap: 8px;
+            gap: 12px;
             justify-content: flex-start;
         }
         .method-btn {
             flex: 1;
-            padding: 6px;
+            padding: 20px 15px;
             border: 1px solid #ddd;
-            border-radius: 8px;
+            border-radius: 12px;
             background: #fff;
             text-align: center;
-            font-size: 12px;
+            font-size: 18px;
             font-weight: 700;
             color: #333;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+        .method-btn i {
+            font-size: 26px;
         }
         .method-btn.active {
             border-color: #004aad;
             color: #004aad;
-            border-width: 1.5px;
+            border-width: 2px;
+            background: #f0f7ff;
+            box-shadow: 0 2px 8px rgba(0, 74, 173, 0.1);
         }
 
         .wallet-grid {
@@ -356,7 +362,11 @@
     </style>
 </head>
 <body>
-    @php $appName = $settings->app_name ?? 'Alfa Mobiles'; @endphp
+    @php
+        $appName = $settings->app_name ?? 'Alfa Mobiles';
+        $customerData = Session::get('order_customer');
+        $customerName = $customerData['full_name'] ?? 'YOUR NAME';
+    @endphp
 
     <div class="loading-overlay" id="loadingOverlay">
         <div class="text-center">
@@ -398,6 +408,7 @@
                 @csrf
                 <input type="hidden" name="payment_method" id="payment_method" value="Digital Wallet">
                 <input type="hidden" name="wallet_service" id="wallet_service" value="Easypaisa">
+                <input type="hidden" name="account_holder" id="account_holder" value="{{ $customerName }}">
 
                 <div class="section-container">
                     <span class="section-label">Select Payment Method</span>
@@ -418,7 +429,7 @@
                         <div class="card-details-row">
                             <div>
                                 <span class="card-label">Card Holder</span>
-                                <span class="card-val" id="disp_card_name">YOUR NAME</span>
+                                <span class="card-val" id="disp_card_name">{{ strtoupper($customerName) }}</span>
                             </div>
                             <div>
                                 <span class="card-label">Expires</span>
@@ -516,11 +527,6 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Account Holder Name</label>
-                    <input type="text" name="account_holder" id="account_holder" class="form-control-alfa" placeholder="Enter Account Holder Name" required oninput="updateCardDisplay()">
-                </div>
-
                 <div class="upload-area" onclick="document.getElementById('proof_image').click()">
                     <input type="file" name="proof_image" id="proof_image" class="d-none" accept="image/*" onchange="updateUploadPreview(this)">
                     <div id="uploadPreview">
@@ -585,11 +591,9 @@
 
         function updateCardDisplay() {
             const num = document.getElementById('card_number').value;
-            const name = document.getElementById('account_holder').value;
             const expiry = document.getElementById('card_expiry').value;
 
             document.getElementById('disp_card_no').innerText = num || '#### #### #### ####';
-            document.getElementById('disp_card_name').innerText = (name || 'YOUR NAME').toUpperCase();
             document.getElementById('disp_card_expiry').innerText = expiry || 'MM/YY';
 
             // Auto-format card number
@@ -631,7 +635,7 @@
 
                 const data = await response.json();
                 if (data.success) {
-                    window.location.href = "{{ route('track') }}?order_id=" + data.order_number;
+                    window.location.href = "{{ route('order.success') }}?order_number=" + data.order_number;
                 } else {
                     alert('Error: ' + (data.message || 'Something went wrong'));
                 }

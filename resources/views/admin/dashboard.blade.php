@@ -299,9 +299,26 @@
             border-radius: 20px;
             font-size: 0.75rem;
             font-weight: 600;
+            white-space: nowrap;
         }
         .badge-pending { background: rgba(255, 193, 7, 0.1); color: #ffc107; border: 1px solid #ffc107; }
         .badge-completed { background: rgba(40, 167, 69, 0.1); color: #28a745; border: 1px solid #28a745; }
+        .badge-status.badge-delivered { background: rgba(13, 202, 240, 0.1); color: #0dcaf0; border: 1px solid #0dcaf0; }
+        .badge-status.badge-cancelled { background: rgba(220, 53, 69, 0.1); color: #dc3545; border: 1px solid #dc3545; }
+
+        .status-select-sm {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+            background: #0d1117;
+            border: 1px solid var(--border-color);
+            color: white;
+            border-radius: 6px;
+            outline: none;
+            cursor: pointer;
+        }
+        .status-select-sm:focus {
+            border-color: var(--accent-blue);
+        }
 
         .d-none { display: none !important; }
 
@@ -367,7 +384,7 @@
                                 <th>Order #</th>
                                 <th>Customer</th>
                                 <th>Mobile</th>
-                                <th>Status</th>
+                                <th>Status Update</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -376,12 +393,23 @@
                             <tr>
                                 <td>{{ $order->order_number }}</td>
                                 <td>{{ $order->full_name }}<br><small class="text-secondary">{{ $order->mobile_number }}</small></td>
-                                <td>{{ $order->mobile_id }} (EMI: {{ $order->monthly_emi }})</td>
-                                <td><span class="badge-status badge-{{ strtolower($order->status) }}">{{ $order->status }}</span></td>
+                                <td>{{ $order->mobile_id }}<br><small class="text-info">EMI: {{ $order->monthly_emi }}</small></td>
+                                <td>
+                                    <select class="status-select-sm" onchange="updateOrderStatus({{ $order->id }}, this.value, event)">
+                                        <option value="Waiting for Approval" {{ $order->status == 'Waiting for Approval' || $order->status == 'Pending' ? 'selected' : '' }}>1. Waiting for Approval</option>
+                                        <option value="Initial Verification" {{ $order->status == 'Initial Verification' ? 'selected' : '' }}>2. Initial Verification</option>
+                                        <option value="Verification Completed" {{ $order->status == 'Verification Completed' ? 'selected' : '' }}>3. Verification Completed</option>
+                                        <option value="Order Approved" {{ $order->status == 'Order Approved' || $order->status == 'Approved' ? 'selected' : '' }}>4. Order Approved</option>
+                                        <option value="Mobile Dispatched" {{ $order->status == 'Mobile Dispatched' ? 'selected' : '' }}>5. Mobile Dispatched</option>
+                                        <option value="Parcel in Transit" {{ $order->status == 'Parcel in Transit' ? 'selected' : '' }}>6. Parcel in Transit</option>
+                                        <option value="Parcel Delivered" {{ $order->status == 'Parcel Delivered' || $order->status == 'Delivered' || $order->status == 'Completed' ? 'selected' : '' }}>7. Parcel Delivered</option>
+                                        <option value="First Installment Due" {{ $order->status == 'First Installment Due' ? 'selected' : '' }}>8. First Installment Due</option>
+                                        <option value="Cancelled" {{ $order->status == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                    </select>
+                                </td>
                                 <td>
                                     <div class="d-flex gap-2">
                                         <button class="btn btn-sm btn-info" onclick="viewOrder({{ json_encode($order) }})"><i class="fas fa-eye"></i></button>
-                                        <button class="btn btn-sm btn-success" onclick="updateOrderStatus({{ $order->id }}, 'Completed')"><i class="fas fa-check"></i></button>
                                         <button class="btn btn-sm btn-danger" onclick="deleteOrder({{ $order->id }})"><i class="fas fa-trash"></i></button>
                                     </div>
                                 </td>
@@ -834,13 +862,22 @@
             }
         }
 
-        async function updateOrderStatus(id, status) {
+        async function updateOrderStatus(id, status, event) {
+            const select = event.target;
             const res = await fetch("{{ route('admin.orders.update_status') }}", {
                 method: 'POST',
                 headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json'},
                 body: JSON.stringify({ id, status })
             });
-            if (res.ok) location.reload();
+            if (res.ok) {
+                // Flash effect to show it was updated
+                select.style.borderColor = '#28a745';
+                select.style.backgroundColor = 'rgba(40, 167, 69, 0.1)';
+                setTimeout(() => {
+                    select.style.borderColor = '';
+                    select.style.backgroundColor = '';
+                }, 1000);
+            }
         }
 
         async function deleteOrder(id) {

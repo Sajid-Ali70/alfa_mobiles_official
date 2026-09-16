@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Status - {{ $settings->app_name ?? 'Alfa Mobiles' }}</title>
+    <title>Order Placed Successfully - {{ $settings->app_name ?? 'Alfa Mobiles' }}</title>
     <link rel="icon" type="image/png" href="{{ $settings->app_icon ?? asset('asset/image/01_app_icon.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <style>
         .success-wrapper {
@@ -15,32 +14,19 @@
             text-align: center;
             background: #fff;
         }
-        .status-header-box {
-            margin-bottom: 30px;
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #28a745;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 20px;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
         }
-        .status-badge-large {
-            display: inline-block;
-            padding: 8px 24px;
-            border-radius: 30px;
-            font-weight: 800;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-
-        /* Status Colors */
-        .badge-waiting.for.approval, .badge-pending { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-        .badge-initial.verification { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
-        .badge-verification.completed { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
-        .badge-order.approved, .badge-approved { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-        .badge-mobile.dispatched { background: #fef9c3; color: #854d0e; border: 1px solid #fef08a; }
-        .badge-parcel.in.transit { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
-        .badge-parcel.delivered, .badge-delivered, .badge-completed { background: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
-        .badge-first.installment.due { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-        .badge-cancelled { background: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
-
         .success-title {
             font-size: 26px;
             font-weight: 800;
@@ -52,6 +38,9 @@
             color: #666;
             line-height: 1.5;
             margin-bottom: 30px;
+        }
+        .success-subtitle strong {
+            color: #333;
         }
 
         .order-id-box {
@@ -195,11 +184,6 @@
             border-color: #e31e24;
             color: #fff;
         }
-        .timeline-item.completed .timeline-dot {
-            background: #28a745;
-            border-color: #28a745;
-            color: #fff;
-        }
         .timeline-content h4 {
             font-size: 15px;
             font-weight: 800;
@@ -244,37 +228,21 @@
     </style>
 </head>
 <body>
-    @php
-        $status = $order->status;
-        $statusSlug = strtolower(str_replace(' ', '.', $status));
-
-        // Define completion states based on the 8 statuses
-        $step1_completed = in_array($status, ['Verification Completed', 'Order Approved', 'Mobile Dispatched', 'Parcel in Transit', 'Parcel Delivered', 'First Installment Due', 'Delivered', 'Completed']);
-        $step1_active = in_array($status, ['Waiting for Approval', 'Initial Verification', 'Pending']);
-
-        $step2_completed = in_array($status, ['Parcel Delivered', 'First Installment Due', 'Delivered', 'Completed']);
-        $step2_active = in_array($status, ['Order Approved', 'Mobile Dispatched', 'Parcel in Transit', 'Approved']);
-
-        $step3_completed = in_array($status, ['Parcel Delivered', 'First Installment Due', 'Delivered', 'Completed']);
-        $step3_active = in_array($status, ['Parcel Delivered', 'First Installment Due']);
-    @endphp
-
     <div class="mobile-wrapper">
         @include('frontend.partials.header')
 
         <div class="success-wrapper">
-            <div class="status-header-box" data-aos="fade-down">
-                <span class="status-badge-large badge-{{ $statusSlug }}">
-                    {{ $status }}
-                </span>
-                <h1 class="success-title">Order Status Details</h1>
-                <p class="success-subtitle">
-                    Tracking information for <strong>{{ $order->full_name }}</strong>.
-                </p>
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
             </div>
 
-            <div class="order-id-box" data-aos="zoom-in" data-aos-delay="100">
-                <span class="order-id-label">Official Order ID</span>
+            <h1 class="success-title">Order Placed Successfully!</h1>
+            <p class="success-subtitle">
+                Thank you, <strong>{{ $order->full_name }}</strong>. Your installment request is registered.
+            </p>
+
+            <div class="order-id-box">
+                <span class="order-id-label">Your Official Order ID</span>
                 <div class="order-id-value">
                     <span id="orderIdText">{{ $order->order_number }}</span>
                     <button class="btn-copy" onclick="copyOrderId()">
@@ -283,17 +251,11 @@
                 </div>
             </div>
 
-            <div class="summary-card" data-aos="fade-up" data-aos-delay="200">
+            <div class="summary-card">
                 <div class="product-info">
-                    @if($mobile && $mobile->image_url)
-                        <img src="{{ asset($mobile->image_url) }}" class="product-img" alt="{{ $mobile->name }}">
-                    @else
-                        <div class="product-img d-flex align-items-center justify-content-center bg-light rounded">
-                            <i class="fas fa-mobile-alt text-secondary"></i>
-                        </div>
-                    @endif
+                    <img src="{{ asset($mobile->image_url) }}" class="product-img" alt="{{ $mobile->name }}">
                     <div>
-                        <h3 class="product-name">{{ $mobile->name ?? 'Mobile Device' }} {{ $order->storage }}</h3>
+                        <h3 class="product-name">{{ $mobile->name }} {{ $order->storage }}</h3>
                         <span class="product-meta">Standard Storage • {{ $order->color }}</span>
                     </div>
                 </div>
@@ -305,7 +267,7 @@
                     </div>
                     <div class="info-item">
                         <label>Monthly EMI:</label>
-                        <span class="text-green">{{ $order->monthly_emi }}</span>
+                        <span class="text-green">Rs. {{ number_format(str_replace(',', '', str_replace('Rs. ', '', $order->monthly_emi))) }} / mo</span>
                     </div>
                     <div class="info-item">
                         <label>Delivery Option:</label>
@@ -319,65 +281,34 @@
             </div>
 
             <div class="timeline-section">
-                <h3 class="timeline-title" data-aos="fade-up">Order Processing Timeline</h3>
+                <h3 class="timeline-title">Order Processing Timeline</h3>
                 <div class="timeline">
-                    <!-- Step 1: Verification -->
-                    <div class="timeline-item {{ $step1_completed ? 'completed' : ($step1_active ? 'active' : '') }}" data-aos="fade-left" data-aos-delay="100">
+                    <div class="timeline-item active">
                         <div class="timeline-dot">1</div>
                         <div class="timeline-content">
-                            <h4>Verification Phase</h4>
-                            <p>
-                                @if($status == 'Waiting for Approval' || $status == 'Pending')
-                                    Waiting for agent to pick your request (~5 min)
-                                @elseif($status == 'Initial Verification')
-                                    Our agent is currently verifying your details.
-                                @else
-                                    Verification process completed successfully.
-                                @endif
-                            </p>
+                            <h4>Waiting for Approval (~5 min)</h4>
+                            <p>Our verification agent checks customer address and payment choices.</p>
                         </div>
                     </div>
-
-                    <!-- Step 2: Processing & Transit -->
-                    <div class="timeline-item {{ $step2_completed ? 'completed' : ($step2_active ? 'active' : '') }}" data-aos="fade-left" data-aos-delay="200">
+                    <div class="timeline-item">
                         <div class="timeline-dot">2</div>
                         <div class="timeline-content">
-                            <h4>Order Dispatch & Transit</h4>
-                            <p>
-                                @if($status == 'Order Approved' || $status == 'Approved')
-                                    Your order is approved and sent to warehouse.
-                                @elseif($status == 'Mobile Dispatched')
-                                    Handed over to TCS Courier. Tracking ID sent via SMS.
-                                @elseif($status == 'Parcel in Transit')
-                                    Parcel is on its way to your city.
-                                @else
-                                    Order dispatch phase completed.
-                                @endif
-                            </p>
+                            <h4>Order Placed (~10 min after approval)</h4>
+                            <p>Parcel dispatched via TCS Courier with SMS & WhatsApp tracking code.</p>
                         </div>
                     </div>
-
-                    <!-- Step 3: Delivery -->
-                    <div class="timeline-item {{ $step3_completed ? 'completed' : ($step3_active ? 'active' : '') }}" data-aos="fade-left" data-aos-delay="300">
+                    <div class="timeline-item">
                         <div class="timeline-dot">3</div>
                         <div class="timeline-content">
-                            <h4>Delivery & Handover</h4>
-                            <p>
-                                @if($status == 'Parcel Delivered' || $status == 'Delivered' || $status == 'Completed')
-                                    Delivered! Thank you for choosing {{ $settings->app_name ?? 'Alfa Mobiles' }}.
-                                @elseif($status == 'First Installment Due')
-                                    Delivered. Your first installment is now active.
-                                @else
-                                    Open parcel and verify condition in front of TCS rider.
-                                @endif
-                            </p>
+                            <h4>Delivered & Verified</h4>
+                            <p>Open parcel, verify original device condition, complete payment.</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="footer-support" data-aos="fade-up">
-                <h4 class="support-title">Need help with your order?</h4>
+            <div class="footer-support">
+                <h4 class="support-title">Have questions about your order?</h4>
                 <div class="support-links">
                     <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $settings->contact_number ?? '') }}" class="support-link whatsapp">
                         <i class="fab fa-whatsapp"></i> WhatsApp Support
@@ -388,23 +319,13 @@
                 </div>
             </div>
 
-            <div data-aos="fade-up" data-aos-delay="100">
-                <a href="{{ url('/') }}" class="btn btn-outline-secondary w-100 py-3 rounded-pill fw-bold mb-5">
-                    Back to Home
-                </a>
-            </div>
+            <a href="{{ url('/') }}" class="btn btn-outline-secondary w-100 py-3 rounded-pill fw-bold mb-5">
+                Back to Home
+            </a>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        AOS.init({
-            duration: 800,
-            once: false,
-            mirror: true
-        });
-
         function copyOrderId() {
             const text = document.getElementById('orderIdText').innerText;
             navigator.clipboard.writeText(text).then(() => {

@@ -221,12 +221,26 @@ class FrontendController extends Controller
 
             DB::table('orders')->insert($insertData);
 
-            Session::forget(['order_mobile_id', 'order_color', 'order_storage', 'order_tenure', 'order_emi', 'order_total', 'order_customer']);
+            // Keep session for success page if needed or clear it after
+            // Session::forget(['order_mobile_id', 'order_color', 'order_storage', 'order_tenure', 'order_emi', 'order_total', 'order_customer']);
 
             return response()->json(['success' => true, 'order_number' => $orderNumber]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Database error: ' . $e->getMessage()], 500);
         }
+    }
+
+    public function orderSuccess(Request $request)
+    {
+        $orderNumber = $request->query('order_number');
+        $order = DB::table('orders')->where('order_number', $orderNumber)->first();
+
+        if (!$order) return redirect()->route('shop');
+
+        $mobile = DB::table('mobiles')->where('id', $order->mobile_id)->first();
+        $settings = DB::table('app_settings')->where('id', 1)->first();
+
+        return view('frontend.order_success', compact('settings', 'order', 'mobile'));
     }
 
     public function track()
@@ -249,8 +263,10 @@ class FrontendController extends Controller
         $order = $query->first();
         if (!$order) return back()->with('error', 'Order not found');
 
+        $mobile = DB::table('mobiles')->where('id', $order->mobile_id)->first();
         $settings = DB::table('app_settings')->where('id', 1)->first();
-        return view('frontend.track_result', compact('settings', 'order'));
+
+        return view('frontend.track_result', compact('settings', 'order', 'mobile'));
     }
 
     public function refund()

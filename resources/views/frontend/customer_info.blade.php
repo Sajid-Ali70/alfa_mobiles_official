@@ -244,7 +244,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Mobile Number * (11 digits)</label>
+                    <label>Mobile Number (WhatsApp Active) *</label>
                     <input type="text" name="mobile_number" class="form-control-alfa" placeholder="e.g. 03001234567" required maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                 </div>
 
@@ -256,7 +256,7 @@
                 <div class="section-container">
                     <span class="section-label">Delivery Type</span>
                     <div class="choice-box-list">
-                        <div class="choice-box active" onclick="selectChoice(this, 'selectedDelivery', 'Open Parcel via TCS Rider (Recommended)')">
+                        <div class="choice-box active">
                             <div class="radio-circle"></div>
                             <div class="d-flex gap-3 w-100">
                                 <i class="fas fa-box-open text-danger" style="font-size: 20px; margin-top: 2px;"></i>
@@ -264,13 +264,6 @@
                                     <span class="choice-title">Open Parcel via TCS Rider (Recommended)</span>
                                     <span class="choice-desc">Open parcel and verify phone condition in front of TCS rider.</span>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="choice-box" onclick="selectChoice(this, 'selectedDelivery', 'Standard Courier Delivery')">
-                            <div class="radio-circle"></div>
-                            <div class="choice-text-wrap">
-                                <span class="choice-title">Standard Courier Delivery</span>
-                                <span class="choice-desc">Direct sealed package delivery via TCS dispatch.</span>
                             </div>
                         </div>
                     </div>

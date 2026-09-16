@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Installment Calculator - {{ $settings->app_name ?? 'Alfa Mobiles' }}</title>
+    <title>Available stock - {{ $settings->app_name ?? 'Alfa Mobiles' }}</title>
     <link rel="icon" type="image/png" href="{{ $settings->app_icon ?? asset('asset/image/01_app_icon.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -139,24 +139,6 @@
             font-weight: 600;
         }
 
-        .btn-book-special {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            padding: 20px;
-            background-color: #e31e24;
-            color: white !important;
-            text-decoration: none !important;
-            border-radius: 15px;
-            font-size: 22px;
-            font-weight: 800;
-            gap: 12px;
-            transition: transform 0.2s;
-            margin-top: 30px;
-        }
-        .btn-book-special:active { transform: scale(0.98); }
-
         .product-preview-img {
             width: 160px;
             height: 160px;
@@ -170,6 +152,23 @@
             color: #003a70;
             text-decoration: none;
         }
+
+        .instruction-box {
+            background: #fff5f5;
+            border: 2px dashed #e31e24;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            text-align: center;
+        }
+        .instruction-text {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 1.6;
+            color: #333;
+            direction: rtl;
+        }
     </style>
 </head>
 <body>
@@ -180,7 +179,7 @@
         <div class="calc-content">
             <div class="d-flex align-items-center mb-5">
                 <a href="{{ url('/') }}" class="back-btn me-4"><i class="fas fa-arrow-left"></i></a>
-                <h1 class="shop-title mb-0" style="font-size: 32px;">Installment Calculator</h1>
+                <h1 class="shop-title mb-0" style="font-size: 32px;">Available stock</h1>
             </div>
 
             <div class="calculator-form">
@@ -286,9 +285,9 @@
                         Prices are inclusive of all taxes.
                     </p>
 
-                    <a id="btn_book" href="{{ route('shop') }}" class="btn-book-special">
-                        BOOK THIS MOBILE <i class="fas fa-arrow-right"></i>
-                    </a>
+                    <div class="instruction-box">
+                        <p class="instruction-text">اگر آپ موبائل لینا چاہتے ہیں تو اسکا اسکرین شاٹ ہماری الفا ایجنٹ کو بھیجیں کے موبائل بک کرواسکتے ہیں...</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -406,9 +405,6 @@
             document.getElementById('res_tenure').innerText = tenure + ' Months';
             document.getElementById('res_description').innerText = selectedMobile.specs || 'Standard high-performance device with official warranty.';
             document.getElementById('res_emi').innerText = 'Rs. ' + emi.toLocaleString();
-
-            // Update Book Now link
-            document.getElementById('btn_book').href = "{{ route('plan') }}?id=" + selectedMobile.id;
 
             if(selectedMobile.image_url) {
                 document.getElementById('res_image').src = selectedMobile.image_url;

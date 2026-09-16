@@ -17,6 +17,7 @@ Route::post('/refund/submit', [FrontendController::class, 'submitRefund'])->name
 Route::get('/refund/success', [FrontendController::class, 'refundSuccess'])->name('refund.success');
 Route::post('/track/status', [FrontendController::class, 'checkStatus'])->name('track.status');
 Route::post('/order/submit', [FrontendController::class, 'submitOrder'])->name('order.submit');
+Route::get('/order/success', [FrontendController::class, 'orderSuccess'])->name('order.success');
 
 // Calculator Route
 Route::get('/calculator', [FrontendController::class, 'calculator'])->name('calculator');
