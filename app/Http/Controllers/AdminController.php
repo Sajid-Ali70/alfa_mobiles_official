@@ -52,7 +52,9 @@ class AdminController extends Controller
                 'app_icon' => '',
                 'banner_url' => '',
                 'contact_number' => '',
-                'contact_email' => 'info@alfamobiles.com'
+                'contact_email' => 'info@alfamobiles.com',
+                'telegram_token' => '',
+                'telegram_chat_id' => ''
             ];
         }
 
@@ -98,7 +100,8 @@ class AdminController extends Controller
         $data = $request->only([
             'app_name', 'contact_number', 'contact_email',
             'tags', 'reviews_count', 'content_rating',
-            'updated_date', 'description', 'release_notes'
+            'updated_date', 'description', 'release_notes',
+            'telegram_token', 'telegram_chat_id'
         ]);
 
         if ($request->hasFile('app_icon_file')) {
