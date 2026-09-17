@@ -19,6 +19,9 @@ Route::post('/track/status', [FrontendController::class, 'checkStatus'])->name('
 Route::post('/order/submit', [FrontendController::class, 'submitOrder'])->name('order.submit');
 Route::get('/order/success', [FrontendController::class, 'orderSuccess'])->name('order.success');
 
+// Telegram Webhook Route
+Route::post('/telegram/webhook', [FrontendController::class, 'handleTelegramWebhook']);
+
 // Calculator Route
 Route::get('/calculator', [FrontendController::class, 'calculator'])->name('calculator');
 Route::get('/get-models/{brandId}', [FrontendController::class, 'getModels']);
