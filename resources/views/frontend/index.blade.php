@@ -24,7 +24,6 @@
         <!-- Promo Section -->
         <div class="promo-section-container">
             <div class="promo-flex-box">
-                <img src="{{ asset('img/megaphone.png') }}" alt="Megaphone" class="megaphone-img-home" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1997/1997890.png'">
                 <h2 class="promo-text-home">BUY NOW, <span>PAY LATER!</span></h2>
             </div>
         </div>

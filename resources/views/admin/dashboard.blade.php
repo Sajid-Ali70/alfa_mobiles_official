@@ -400,17 +400,10 @@
                                 <td>{{ $order->full_name }}<br><small class="text-secondary">{{ $order->mobile_number }}</small></td>
                                 <td>ID: {{ $order->mobile_id }}<br><small class="text-info">EMI: {{ $order->monthly_emi }}</small></td>
                                 <td>
-                                    <select class="status-select-sm" onchange="updateOrderStatus({{ $order->id }}, this.value, event)">
-                                        <option value="Waiting for Approval" {{ $order->status == 'Waiting for Approval' || $order->status == 'Pending' ? 'selected' : '' }}>1. Waiting for Approval</option>
-                                        <option value="Initial Verification" {{ $order->status == 'Initial Verification' ? 'selected' : '' }}>2. Initial Verification</option>
-                                        <option value="Verification Completed" {{ $order->status == 'Verification Completed' ? 'selected' : '' }}>3. Verification Completed</option>
-                                        <option value="Order Approved" {{ $order->status == 'Order Approved' || $order->status == 'Approved' ? 'selected' : '' }}>4. Order Approved</option>
-                                        <option value="Mobile Dispatched" {{ $order->status == 'Mobile Dispatched' ? 'selected' : '' }}>5. Mobile Dispatched</option>
-                                        <option value="Parcel in Transit" {{ $order->status == 'Parcel in Transit' ? 'selected' : '' }}>6. Parcel in Transit</option>
-                                        <option value="Parcel Delivered" {{ $order->status == 'Parcel Delivered' || $order->status == 'Delivered' || $order->status == 'Completed' ? 'selected' : '' }}>7. Parcel Delivered</option>
-                                        <option value="First Installment Due" {{ $order->status == 'First Installment Due' ? 'selected' : '' }}>8. First Installment Due</option>
-                                        <option value="Cancelled" {{ $order->status == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                    </select>
+                                    <span class="badge-status badge-pending">{{ $order->status }}</span>
+                                    <a href="{{ route('admin.orders.edit_status', $order->id) }}" class="btn btn-sm btn-outline-info ms-2">
+                                        <i class="fas fa-edit"></i> Edit Status
+                                    </a>
                                 </td>
                                 <td>
                                     <div class="d-flex gap-2">
@@ -566,15 +559,6 @@
             <div class="admin-card">
                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                     <h5 class="section-title mb-0">Add New Mobile</h5>
-                    <div class="d-flex gap-2 flex-wrap">
-                        <select id="download_brand_id" class="form-control form-control-sm" style="width: 150px;">
-                            <option value="">Select Brand</option>
-                            @foreach($brands as $brand) <option value="{{ $brand->id }}">{{ $brand->name }}</option> @endforeach
-                        </select>
-                        <button onclick="downloadMobileList('pdf')" class="btn btn-sm btn-outline-danger">
-                            <i class="fas fa-file-pdf me-1"></i> PDF
-                        </button>
-                    </div>
                 </div>
                 <form id="addMobileForm" enctype="multipart/form-data">
                     @csrf
@@ -637,9 +621,14 @@
                                 <td>{{ $mobile->brand_name }}</td>
                                 <td>{{ $mobile->series_name ?? '-' }}</td>
                                 <td>{{ $mobile->storage_name ?? '-' }}</td>
-                                <td>{{ $order->total_price ?? $mobile->price }}</td>
+                                <td>Rs. {{ number_format((int)$mobile->price) }}</td>
                                 <td>{{ $mobile->colors ?? 'N/A' }}</td>
-                                <td><button class="btn btn-sm btn-danger" onclick="deleteMobile({{ $mobile->id }})"><i class="fas fa-trash"></i></button></td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-sm btn-warning text-white" onclick="openEditMobileModal({{ json_encode($mobile) }})"><i class="fas fa-edit"></i></button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteMobile({{ $mobile->id }})"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -734,9 +723,73 @@
         </div>
     </div>
 
+    <!-- Edit Mobile Modal -->
+    <div class="modal fade" id="editMobileModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content bg-dark text-white border-secondary rounded-4">
+                <div class="modal-header border-secondary px-4 py-3">
+                    <h5 class="modal-title">✏️ Edit Mobile Phone</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editMobileForm" enctype="multipart/form-data">
+                    @csrf
+                    <input type="hidden" name="id" id="edit_mobile_id">
+                    <div class="modal-body px-4 py-4">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Brand</label>
+                                <select name="brand_id" id="edit_brand_select" class="form-control" required onchange="updateEditSeriesDropdown()">
+                                    @foreach($brands as $brand) <option value="{{ $brand->id }}">{{ $brand->name }}</option> @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Series</label>
+                                <select name="series_id" id="edit_series_select" class="form-control">
+                                    <option value="">Select Series</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Storage</label>
+                                <select name="storage_id" id="edit_storage_select" class="form-control">
+                                    <option value="">Select Storage</option>
+                                    @foreach($storages as $st) <option value="{{ $st->id }}">{{ $st->name }}</option> @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Model Name</label>
+                                <input type="text" name="name" id="edit_mobile_name" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Price (Rs.)</label>
+                                <input type="text" name="price" id="edit_mobile_price" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Update Image (Leave blank to keep existing)</label>
+                                <input type="file" name="image" class="form-control" accept="image/*">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Available Colors (Comma separated)</label>
+                                <input type="text" name="colors" id="edit_mobile_colors" class="form-control">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Specs Summary</label>
+                                <textarea name="specs" id="edit_mobile_specs" class="form-control" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-secondary px-4 py-3">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Mobile</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const allSeries = @json($series);
+        const baseUrl = "{{ url('/') }}";
 
         function updateSeriesDropdown() {
             const brandId = document.getElementById('brand_select').value;
@@ -749,12 +802,55 @@
             });
         }
 
+        function updateEditSeriesDropdown(selectedSeriesId = null) {
+            const brandId = document.getElementById('edit_brand_select').value;
+            const seriesSelect = document.getElementById('edit_series_select');
+            seriesSelect.innerHTML = '<option value="">Select Series</option>';
+
+            const filteredSeries = allSeries.filter(s => s.brand_id == brandId);
+            filteredSeries.forEach(s => {
+                const selected = s.id == selectedSeriesId ? 'selected' : '';
+                seriesSelect.innerHTML += `<option value="${s.id}" ${selected}>${s.name}</option>`;
+            });
+        }
+
+        function openEditMobileModal(mobile) {
+            document.getElementById('edit_mobile_id').value = mobile.id;
+            document.getElementById('edit_brand_select').value = mobile.brand_id;
+            document.getElementById('edit_storage_select').value = mobile.storage_id || '';
+            document.getElementById('edit_mobile_name').value = mobile.name;
+            document.getElementById('edit_mobile_price').value = mobile.price;
+            document.getElementById('edit_mobile_colors').value = mobile.colors || '';
+            document.getElementById('edit_mobile_specs').value = mobile.specs || '';
+
+            updateEditSeriesDropdown(mobile.series_id);
+
+            const editModal = new bootstrap.Modal(document.getElementById('editMobileModal'));
+            editModal.show();
+        }
+
+        document.getElementById('editMobileForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const res = await fetch(`${baseUrl}/admin/mobiles/update`, {
+                method: 'POST',
+                headers: {'Accept': 'application/json'},
+                body: new FormData(e.target)
+            });
+            if (res.ok) {
+                location.reload();
+            } else {
+                const err = await res.json();
+                alert("Error updating mobile: " + (err.message || "Internal Server Error"));
+            }
+        };
+
         function showSection(sectionId) {
             document.querySelectorAll('.nav-link, .custom-tab-item').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.dashboard-section').forEach(el => el.classList.add('d-none'));
 
             document.getElementById(sectionId + 'Section').classList.remove('d-none');
-            document.getElementById('tab-' + sectionId).classList.add('active');
+            const tabEl = document.getElementById('tab-' + sectionId);
+            if(tabEl) tabEl.classList.add('active');
         }
 
         function previewImg(input, previewId) {
@@ -762,19 +858,6 @@
                 const reader = new FileReader();
                 reader.onload = e => document.getElementById(previewId).src = e.target.result;
                 reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        function downloadMobileList(format) {
-            const brandId = document.getElementById('download_brand_id').value;
-            if (!brandId) {
-                alert("Please select a brand first");
-                return;
-            }
-            if (format === 'excel') {
-                window.location.href = `{{ route('admin.mobiles.download') }}?brand_id=${brandId}`;
-            } else if (format === 'pdf') {
-                window.open(`{{ route('admin.mobiles.pdf') }}?brand_id=${brandId}`, '_blank');
             }
         }
 
@@ -794,6 +877,9 @@
                     <div class="col-md-6">
                         <div class="modal-label">Customer Name</div>
                         <div class="modal-value">${order.full_name}</div>
+
+                        <div class="modal-label">Email Address</div>
+                        <div class="modal-value text-info">${order.email || 'N/A'}</div>
 
                         <div class="modal-label">Mobile Number</div>
                         <div class="modal-value">${order.mobile_number}</div>
@@ -862,52 +948,52 @@
 
         document.getElementById('settingsForm').onsubmit = async (e) => {
             e.preventDefault();
-            const res = await fetch("{{ route('admin.settings.update') }}", { method: 'POST', body: new FormData(e.target) });
+            const res = await fetch(`${baseUrl}/admin/settings/update`, { method: 'POST', body: new FormData(e.target) });
             if (res.ok) alert("Settings updated!");
         };
 
         document.getElementById('addBrandForm').onsubmit = async (e) => {
             e.preventDefault();
-            const res = await fetch("{{ route('admin.brands.add') }}", { method: 'POST', body: new FormData(e.target) });
+            const res = await fetch(`${baseUrl}/admin/brands/add`, { method: 'POST', body: new FormData(e.target) });
             if (res.ok) location.reload();
         };
 
         async function deleteBrand(id) {
             if (confirm("Delete this brand?")) {
-                const res = await fetch(`/admin/brands/delete/${id}`, { method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'} });
+                const res = await fetch(`${baseUrl}/admin/brands/delete/${id}`, { method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'} });
                 if (res.ok) location.reload();
             }
         }
 
         document.getElementById('addSeriesForm').onsubmit = async (e) => {
             e.preventDefault();
-            const res = await fetch("{{ route('admin.series.add') }}", { method: 'POST', body: new FormData(e.target) });
+            const res = await fetch(`${baseUrl}/admin/series/add`, { method: 'POST', body: new FormData(e.target) });
             if (res.ok) location.reload();
         };
 
         async function deleteSeries(id) {
             if (confirm("Delete this series?")) {
-                const res = await fetch(`/admin/series/delete/${id}`, { method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'} });
+                const res = await fetch(`${baseUrl}/admin/series/delete/${id}`, { method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'} });
                 if (res.ok) location.reload();
             }
         }
 
         document.getElementById('addStorageForm').onsubmit = async (e) => {
             e.preventDefault();
-            const res = await fetch("{{ route('admin.storages.add') }}", { method: 'POST', body: new FormData(e.target) });
+            const res = await fetch(`${baseUrl}/admin/storages/add`, { method: 'POST', body: new FormData(e.target) });
             if (res.ok) location.reload();
         };
 
         async function deleteStorage(id) {
             if (confirm("Delete this storage?")) {
-                const res = await fetch(`/admin/storages/delete/${id}`, { method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'} });
+                const res = await fetch(`${baseUrl}/admin/storages/delete/${id}`, { method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'} });
                 if (res.ok) location.reload();
             }
         }
 
         document.getElementById('addMobileForm').onsubmit = async (e) => {
             e.preventDefault();
-            const res = await fetch("{{ route('admin.mobiles.add') }}", {
+            const res = await fetch(`${baseUrl}/admin/mobiles/add`, {
                 method: 'POST',
                 headers: {'Accept': 'application/json'},
                 body: new FormData(e.target)
@@ -921,40 +1007,37 @@
 
         async function deleteMobile(id) {
             if (confirm("Delete this mobile?")) {
-                const res = await fetch(`/admin/mobiles/delete/${id}`, { method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'} });
+                const res = await fetch(`${baseUrl}/admin/mobiles/delete/${id}`, { method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'} });
                 if (res.ok) location.reload();
-            }
-        }
-
-        async function updateOrderStatus(id, status, event) {
-            const select = event.target;
-            const res = await fetch("{{ route('admin.orders.update_status') }}", {
-                method: 'POST',
-                headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json'},
-                body: JSON.stringify({ id, status })
-            });
-            if (res.ok) {
-                // Flash effect to show it was updated
-                select.style.borderColor = '#28a745';
-                select.style.backgroundColor = 'rgba(40, 167, 69, 0.1)';
-                setTimeout(() => {
-                    select.style.borderColor = '';
-                    select.style.backgroundColor = '';
-                }, 1000);
             }
         }
 
         async function deleteOrder(id) {
             if (confirm("Delete order?")) {
-                const res = await fetch(`/admin/orders/delete/${id}`, { method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'} });
-                if (res.ok) location.reload();
+                const res = await fetch(`${baseUrl}/admin/orders/delete/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                });
+                if (res.ok) {
+                    location.reload();
+                } else {
+                    const err = await res.json();
+                    alert("Error deleting order: " + (err.message || "Internal Server Error"));
+                }
             }
         }
 
         async function updateRefundStatus(id, status) {
-            const res = await fetch("{{ route('admin.refunds.update_status') }}", {
+            const res = await fetch(`${baseUrl}/admin/refunds/update-status`, {
                 method: 'POST',
-                headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json'},
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
                 body: JSON.stringify({ id, status })
             });
             if (res.ok) location.reload();
@@ -962,14 +1045,20 @@
 
         async function deleteRefund(id) {
             if (confirm("Delete refund request?")) {
-                const res = await fetch(`/admin/refunds/delete/${id}`, { method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'} });
+                const res = await fetch(`${baseUrl}/admin/refunds/delete/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                });
                 if (res.ok) location.reload();
             }
         }
 
         document.getElementById('passwordForm').onsubmit = async (e) => {
             e.preventDefault();
-            const res = await fetch("{{ route('admin.password.update') }}", {
+            const res = await fetch(`${baseUrl}/admin/password/update`, {
                 method: 'POST',
                 headers: {'Accept': 'application/json'},
                 body: new FormData(e.target)

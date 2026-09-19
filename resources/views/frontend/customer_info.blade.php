@@ -231,11 +231,16 @@
 
             <form id="customerForm" action="{{ route('agreement') }}" method="GET">
                 <input type="hidden" name="delivery_type" id="selectedDelivery" value="Open Parcel via TCS Rider (Recommended)">
-                <input type="hidden" name="payment_method_group" id="selectedMethodGroup" value="Digital Wallet">
+                <input type="hidden" name="payment_method_group" id="selectedMethodGroup" value="Installment">
 
                 <div class="form-group">
                     <label>Full Name *</label>
                     <input type="text" name="full_name" class="form-control-alfa" placeholder="e.g. Muhammad Ali Shah" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Email * (For Receive Updates)</label>
+                    <input type="email" name="email" class="form-control-alfa" placeholder="e.g. ali@example.com" required>
                 </div>
 
                 <div class="form-group">
@@ -272,23 +277,13 @@
                 <div class="section-container">
                     <span class="section-label">Payment Method</span>
                     <div class="choice-box-list">
-                        <div class="choice-box" onclick="selectChoice(this, 'selectedMethodGroup', 'Card')">
+                        <div class="choice-box active" onclick="selectChoice(this, 'selectedMethodGroup', 'Installment')">
                             <div class="radio-circle"></div>
                             <div class="d-flex gap-3 w-100">
-                                <i class="fas fa-credit-card" style="font-size: 20px; margin-top: 2px; color: #ff5722;"></i>
+                                <i class="fas fa-credit-card" style="font-size: 20px; margin-top: 2px; color: #004aad;"></i>
                                 <div class="choice-text-wrap">
-                                    <span class="choice-title">Card (0% EMI)</span>
-                                    <span class="choice-desc">Visa / Mastercard bank installment support.</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="choice-box active" onclick="selectChoice(this, 'selectedMethodGroup', 'Digital Wallet')">
-                            <div class="radio-circle"></div>
-                            <div class="d-flex gap-3 w-100">
-                                <i class="fas fa-wallet" style="font-size: 20px; margin-top: 2px; color: #03a9f4;"></i>
-                                <div class="choice-text-wrap">
-                                    <span class="choice-title">Digital Wallet (Easypaisa / Upaisa / Alfalah)</span>
-                                    <span class="choice-desc">Instant digital wallet verification.</span>
+                                    <span class="choice-title">Installment Via Card or Digital wallet</span>
+                                    <span class="choice-desc">Secure installment verification for bank cards or mobile wallets.</span>
                                 </div>
                             </div>
                         </div>

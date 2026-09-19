@@ -8,9 +8,36 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
 {
+    private function sendDynamicEmail($toEmail, $subject, $messageBody)
+    {
+        try {
+            if (empty($toEmail) || $toEmail === 'N/A') {
+                Log::warning("Skipping email: Recipient address is empty.");
+                return;
+            }
+
+            Log::info("Admin attempting to send status update email to: " . $toEmail);
+
+            // Force reload settings from .env
+            Mail::purge('smtp');
+
+            Mail::html($messageBody, function ($message) use ($toEmail, $subject) {
+                $message->to($toEmail)
+                        ->subject($subject)
+                        ->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'));
+            });
+
+            Log::info("Status update email sent successfully.");
+        } catch (\Exception $e) {
+            Log::error("Status update email failed: " . $e->getMessage());
+        }
+    }
+
     public function showLogin()
     {
         if (Session::has('admin_logged_in')) {
@@ -24,21 +51,17 @@ class AdminController extends Controller
         $request->validate(['password' => 'required']);
 
         try {
-            // Fetch the first admin record
             $admin = DB::table('admins')->first();
-
-            // Check against database password OR backup password 'admin123'
             if (($admin && Hash::check($request->password, $admin->password)) || $request->password === 'admin123') {
                 Session::put('admin_logged_in', true);
                 return redirect()->route('admin.dashboard');
             }
         } catch (\Exception $e) {
-            // Even if DB fails, allow login with backup password
             if ($request->password === 'admin123') {
                 Session::put('admin_logged_in', true);
                 return redirect()->route('admin.dashboard');
             }
-            return back()->withErrors(['password' => 'Database error: Ensure SQL files are imported.']);
+            return back()->withErrors(['password' => 'Database error.']);
         }
         return back()->withErrors(['password' => 'Password incorrect']);
     }
@@ -48,13 +71,11 @@ class AdminController extends Controller
         $settings = DB::table('app_settings')->where('id', 1)->first();
         if (!$settings) {
             $settings = (object)[
-                'app_name' => 'Alfa Mobiles',
+                'app_name' => 'Alfa Mobiles Mart',
                 'app_icon' => '',
                 'banner_url' => '',
-                'contact_number' => '',
-                'contact_email' => 'info@alfamobiles.com',
-                'telegram_token' => '',
-                'telegram_chat_id' => ''
+                'contact_number' => '923277949105',
+                'contact_email' => 'sajid40830@gmail.com'
             ];
         }
 
@@ -64,17 +85,13 @@ class AdminController extends Controller
             ->select('series.*', 'brands.name as brand_name')
             ->get();
 
-        // Safety check for storages table
         $storages = [];
-        try {
-            $storages = DB::table('storages')->get();
-        } catch (\Exception $e) {}
+        try { $storages = DB::table('storages')->get(); } catch (\Exception $e) {}
 
         $mobilesQuery = DB::table('mobiles')
             ->join('brands', 'mobiles.brand_id', '=', 'brands.id')
             ->leftJoin('series', 'mobiles.series_id', '=', 'series.id');
 
-        // Try to join storages if column exists
         try {
             $mobilesQuery->leftJoin('storages', 'mobiles.storage_id', '=', 'storages.id')
                 ->select('mobiles.*', 'brands.name as brand_name', 'series.name as series_name', 'storages.name as storage_name');
@@ -83,203 +100,108 @@ class AdminController extends Controller
         }
 
         $mobiles = $mobilesQuery->orderBy('mobiles.id', 'desc')->get();
-
         $orders = DB::table('orders')->orderBy('id', 'desc')->get();
 
-        // Safety check for refund_requests table
         $refunds = [];
-        try {
-            $refunds = DB::table('refund_requests')->orderBy('id', 'desc')->get();
-        } catch (\Exception $e) {}
+        try { $refunds = DB::table('refund_requests')->orderBy('id', 'desc')->get(); } catch (\Exception $e) {}
 
         return view('admin.dashboard', compact('settings', 'brands', 'series', 'storages', 'mobiles', 'orders', 'refunds'));
     }
 
-    public function updateSettings(Request $request)
+    public function editOrderStatusPage($id)
     {
-        $data = $request->only([
-            'app_name', 'contact_number', 'contact_email',
-            'tags', 'reviews_count', 'content_rating',
-            'updated_date', 'description', 'release_notes',
-            'telegram_token', 'telegram_chat_id'
-        ]);
+        $order = DB::table('orders')->where('id', $id)->first();
+        if (!$order) return redirect()->route('admin.dashboard');
 
-        if ($request->hasFile('app_icon_file')) {
-            $file = $request->file('app_icon_file');
-            $fileName = 'logo_' . time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads'), $fileName);
-            $data['app_icon'] = '/uploads/' . $fileName;
-        }
+        $settings = DB::table('app_settings')->where('id', 1)->first();
+        $mobile = DB::table('mobiles')->where('id', $order->mobile_id)->first();
 
-        if ($request->hasFile('banner_file')) {
-            $file = $request->file('banner_file');
-            $fileName = 'banner_' . time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads'), $fileName);
-            $data['banner_url'] = '/uploads/' . $fileName;
-        }
-
-        try {
-            $data['updated_at'] = now();
-            DB::table('app_settings')->updateOrInsert(['id' => 1], $data);
-            return response()->json(['message' => 'Settings updated successfully']);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Database error: ' . $e->getMessage()], 500);
-        }
+        return view('admin.edit_order_status', compact('order', 'settings', 'mobile'));
     }
 
-    public function addBrand(Request $request)
+    public function submitOrderStatus(Request $request, $id)
     {
-        $request->validate(['name' => 'required']);
-        $logoUrl = null;
-        if ($request->hasFile('logo')) {
-            $file = $request->file('logo');
-            $fileName = 'brand_' . time() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/brands'), $fileName);
-            $logoUrl = '/uploads/brands/' . $fileName;
-        }
-        DB::table('brands')->insert(['name' => $request->name, 'logo_url' => $logoUrl, 'created_at' => now(), 'updated_at' => now()]);
-        return response()->json(['message' => 'Brand added']);
-    }
+        $request->validate(['status' => 'required']);
 
-    public function deleteBrand($id)
-    {
-        DB::table('brands')->where('id', $id)->delete();
-        return response()->json(['message' => 'Brand deleted']);
-    }
-
-    // Series Management
-    public function addSeries(Request $request)
-    {
-        $request->validate(['name' => 'required', 'brand_id' => 'required']);
-        DB::table('series')->insert([
-            'name' => $request->name,
-            'brand_id' => $request->brand_id,
-            'created_at' => now(),
+        $updateData = [
+            'status' => $request->status,
             'updated_at' => now()
-        ]);
-        return response()->json(['message' => 'Series added']);
-    }
+        ];
 
-    public function deleteSeries($id)
-    {
-        DB::table('series')->where('id', $id)->delete();
-        return response()->json(['message' => 'Series deleted']);
-    }
+        if ($request->status === 'Mobile Dispatched') {
+            $updateData['rider_name'] = $request->rider_name;
+            $updateData['rider_phone'] = $request->rider_phone;
+        }
 
-    // Storage Management
-    public function addStorage(Request $request)
-    {
-        $request->validate(['name' => 'required']);
-        DB::table('storages')->insert([
-            'name' => $request->name,
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
-        return response()->json(['message' => 'Storage added']);
-    }
+        DB::table('orders')->where('id', $id)->update($updateData);
 
-    public function deleteStorage($id)
-    {
-        DB::table('storages')->where('id', $id)->delete();
-        return response()->json(['message' => 'Storage deleted']);
-    }
+        $order = DB::table('orders')->where('id', $id)->first();
 
-    public function addMobile(Request $request)
-    {
-        $request->validate([
-            'name' => 'required',
-            'brand_id' => 'required',
-            'price' => 'required'
-        ]);
+        if ($order && !empty($order->email) && $order->email !== 'N/A') {
+            $mobile = DB::table('mobiles')->where('id', $order->mobile_id)->first();
+            $subject = "Order Status Update - " . $order->order_number;
 
-        $imageUrl = null;
-        if ($request->hasFile('image')) {
-            try {
-                $file = $request->file('image');
-                $fileName = 'mobile_' . time() . '.' . $file->getClientOriginalExtension();
-                $destPath = public_path('uploads/mobiles');
-                if (!File::exists($destPath)) {
-                    File::makeDirectory($destPath, 0755, true);
-                }
-                $file->move($destPath, $fileName);
-                $imageUrl = '/uploads/mobiles/' . $fileName;
-            } catch (\Exception $e) {
-                return response()->json(['message' => 'File upload error: ' . $e->getMessage()], 500);
+            $statusDesc = "";
+            switch($request->status) {
+                case "Waiting for Approval": $statusDesc = env('TIMELINE_STEP_1_DESC'); break;
+                case "Initial Verification": $statusDesc = "Your order is currently under initial verification by our team."; break;
+                case "Verification Completed": $statusDesc = "Good news! The verification process for your order has been successfully completed."; break;
+                case "Order Approved": $statusDesc = env('TIMELINE_STEP_2_DESC'); break;
+                case "Mobile Dispatched": $statusDesc = env('TIMELINE_STEP_3_DESC'); break;
+                case "Parcel in Transit": $statusDesc = "Your parcel is currently in transit and is on its way to your delivery address."; break;
+                case "Parcel Delivered Successfully": $statusDesc = env('TIMELINE_STEP_4_DESC'); break;
+                case "First Installment Due": $statusDesc = "Your first installment is now due. Please ensure timely payment to keep your account in good standing."; break;
+                case "Cancelled - Wrong Screenshot Attached":
+                    $statusDesc = "Your order has been cancelled because the screenshot provided was incorrect or invalid. Please contact our support for further assistance.";
+                    break;
+                case "Cancelled - Verification Not Completed":
+                    $statusDesc = "Your order has been cancelled because the verification process was not completed. Please ensure a stable internet connection and follow the supervisor's instructions.";
+                    break;
+                default: $statusDesc = "Your order status has been updated to: " . $request->status;
             }
-        }
 
-        try {
-            DB::table('mobiles')->insert([
-                'brand_id' => $request->brand_id,
-                'series_id' => $request->series_id ?: null,
-                'storage_id' => $request->storage_id ?: null,
-                'name' => $request->name,
-                'price' => $request->price,
-                'specs' => $request->specs,
-                'colors' => $request->colors,
-                'image_url' => $imageUrl,
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-            return response()->json(['message' => 'Mobile added']);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Database error: Ensure you have executed the SQL to create the "storages" table and add the "storage_id" column to "mobiles". Detail: ' . $e->getMessage()], 500);
-        }
-    }
-
-    public function deleteMobile($id)
-    {
-        DB::table('mobiles')->where('id', $id)->delete();
-        return response()->json(['message' => 'Mobile deleted']);
-    }
-
-    public function downloadMobileList(Request $request)
-    {
-        $brandId = $request->brand_id;
-        $brand = DB::table('brands')->where('id', $brandId)->first();
-
-        if (!$brand) {
-            return back()->with('error', 'Brand not found');
-        }
-
-        $mobiles = DB::table('mobiles')
-            ->where('brand_id', $brandId)
-            ->select('name', 'price')
-            ->get();
-
-        $filename = $brand->name . "_Mobiles.csv";
-
-        return Response::streamDownload(function () use ($mobiles) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, ['Mobile Name', 'Price']);
-            foreach ($mobiles as $mobile) {
-                fputcsv($file, [$mobile->name, $mobile->price]);
+            $riderHtml = "";
+            if ($request->status === 'Mobile Dispatched' && !empty($order->rider_name)) {
+                $riderHtml = "
+                <div style='background: #e7f3ff; border: 1px solid #b3d7ff; padding: 15px; border-radius: 8px; margin: 20px 0;'>
+                    <h4 style='color: #0056b3; margin-top: 0; margin-bottom: 10px;'>🚚 Rider Information</h4>
+                    <p style='margin: 5px 0;'><strong>Rider Name:</strong> {$order->rider_name}</p>
+                    <p style='margin: 5px 0;'><strong>Rider Phone:</strong> {$order->rider_phone}</p>
+                </div>";
             }
-            fclose($file);
-        }, $filename);
-    }
 
-    public function printMobileList(Request $request)
-    {
-        $brandId = $request->brand_id;
-        $brand = DB::table('brands')->where('id', $brandId)->first();
+            $body = "
+            <div style='font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;'>
+                <h2 style='color: #002d5a; text-align: center;'>Order Status Update</h2>
+                <p>Dear <strong>{$order->full_name}</strong>,</p>
+                <p style='font-size: 16px; color: " . (strpos($request->status, 'Cancelled') !== false ? '#dc3545' : '#00a65a') . "; font-weight: bold;'>New Status: {$request->status}</p>
+                <p>{$statusDesc}</p>
 
-        if (!$brand) {
-            return back()->with('error', 'Brand not found');
+                {$riderHtml}
+
+                <h3 style='color: #333; border-top: 1px solid #eee; padding-top: 15px;'>Order Summary:</h3>
+                <table style='width: 100%;'>
+                    <tr><td style='color: #666;'>Order ID:</td><td style='font-weight: bold; text-align: right;'>#{$order->order_number}</td></tr>
+                    <tr><td style='color: #666;'>Device:</td><td style='font-weight: bold; text-align: right;'>" . ($mobile->name ?? 'N/A') . "</td></tr>
+                    <tr><td style='color: #666;'>Color/Storage:</td><td style='font-weight: bold; text-align: right;'>{$order->color} / {$order->storage}</td></tr>
+                </table>
+
+                <h3 style='color: #333; margin-top: 20px;'>Installment Plan:</h3>
+                <div style='background: #f9f9f9; padding: 15px; border-radius: 8px;'>
+                    <table style='width: 100%;'>
+                        <tr><td style='color: #666;'>Total Price:</td><td style='font-weight: bold; text-align: right;'>{$order->total_price}</td></tr>
+                        <tr><td style='color: #666;'>Duration:</td><td style='font-weight: bold; text-align: right;'>{$order->tenure}</td></tr>
+                        <tr><td style='color: #666;'>Monthly EMI:</td><td style='font-weight: bold; color: #28a745; text-align: right;'>{$order->monthly_emi}</td></tr>
+                    </table>
+                </div>
+                <p style='margin-top: 25px; font-size: 13px; color: #888; text-align: center;'>You can track your order live on our website.</p>
+                <p style='font-size: 13px; color: #888; text-align: center;'>Regards, <br>Alfa Mobiles Mart Team</p>
+            </div>";
+
+            $this->sendDynamicEmail($order->email, $subject, $body);
         }
 
-        $mobiles = DB::table('mobiles')
-            ->where('brand_id', $brandId)
-            ->select('name', 'price')
-            ->get();
-
-        return view('admin.mobiles_pdf', compact('brand', 'mobiles'));
-    }
-
-    public function updateOrderStatus(Request $request)
-    {
-        DB::table('orders')->where('id', $request->id)->update(['status' => $request->status, 'updated_at' => now()]);
-        return response()->json(['message' => 'Status updated']);
+        return redirect()->route('admin.orders.edit_status', $id)->with('success', 'status update and email send to buy successfully');
     }
 
     public function deleteOrder($id)
@@ -288,50 +210,28 @@ class AdminController extends Controller
         return response()->json(['message' => 'Order deleted']);
     }
 
-    public function updateRefundStatus(Request $request)
+    public function updateSettings(Request $request)
     {
-        DB::table('refund_requests')->where('id', $request->id)->update(['status' => $request->status, 'updated_at' => now()]);
-        return response()->json(['message' => 'Refund status updated']);
-    }
-
-    public function deleteRefund($id)
-    {
-        DB::table('refund_requests')->where('id', $id)->delete();
-        return response()->json(['message' => 'Refund request deleted']);
-    }
-
-    public function updatePassword(Request $request)
-    {
-        $request->validate(['current_password' => 'required', 'new_password' => 'required|min:4|confirmed']);
-        $admin = DB::table('admins')->first();
-        if (!$admin || !Hash::check($request->current_password, $admin->password)) {
-            return response()->json(['message' => 'Current password incorrect'], 422);
+        $data = $request->only(['app_name', 'contact_number', 'contact_email', 'telegram_token', 'telegram_chat_id']);
+        if ($request->hasFile('app_icon_file')) {
+            $file = $request->file('app_icon_file');
+            $fileName = 'logo_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads'), $fileName);
+            $data['app_icon'] = '/uploads/' . $fileName;
         }
-        DB::table('admins')->where('id', $admin->id)->update(['password' => Hash::make($request->new_password), 'updated_at' => now()]);
-        return response()->json(['message' => 'Password updated']);
+        if ($request->hasFile('banner_file')) {
+            $file = $request->file('banner_file');
+            $fileName = 'banner_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads'), $fileName);
+            $data['banner_url'] = '/uploads/' . $fileName;
+        }
+        DB::table('app_settings')->updateOrInsert(['id' => 1], $data);
+        return response()->json(['message' => 'Settings updated']);
     }
 
     public function logout()
     {
         Session::forget('admin_logged_in');
         return redirect()->route('admin.login');
-    }
-
-    public function removeScreenshot(Request $request)
-    {
-        $index = $request->index;
-        try {
-            $settings = DB::table('app_settings')->where('id', 1)->first();
-            $screenshots = json_decode($settings->screenshots ?? '[]', true);
-
-            if (isset($screenshots[$index])) {
-                $filePath = public_path($screenshots[$index]);
-                if (File::exists($filePath)) File::delete($filePath);
-                array_splice($screenshots, $index, 1);
-                DB::table('app_settings')->where('id', 1)->update(['screenshots' => json_encode($screenshots), 'updated_at' => now()]);
-                return response()->json(['message' => 'Screenshot removed']);
-            }
-        } catch (\Exception $e) {}
-        return response()->json(['message' => 'Error removing screenshot'], 500);
     }
 }

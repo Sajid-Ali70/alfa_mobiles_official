@@ -142,7 +142,7 @@ header {
 
 /* Promo Section */
 .promo-section-container {
-    padding: 30px 20px;
+    padding: 20px 10px;
     text-align: center;
 }
 
@@ -150,11 +150,6 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 15px;
-}
-
-.megaphone-img-home {
-    width: 60px;
 }
 
 .promo-text-home {
@@ -165,6 +160,7 @@ header {
     font-style: italic;
     text-transform: uppercase;
     letter-spacing: -0.5px;
+    white-space: nowrap;
 }
 
 .promo-text-home span {
@@ -317,6 +313,9 @@ header {
 }
 
 @media (max-width: 480px) {
+    .promo-text-home {
+        font-size: 5.5vw; /* Fluid font size for mobile to keep in one line */
+    }
     .action-card-home {
         font-size: 18px;
         padding: 18px 20px;

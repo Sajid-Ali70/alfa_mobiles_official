@@ -9,355 +9,271 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <style>
+        body {
+            background-color: #f8fbff;
+            color: #001f3f;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
         .loading-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.7); display: none; align-items: center;
             justify-content: center; z-index: 9999; color: #fff;
         }
-        .step-indicator-wrapper {
-            padding: 10px 20px 0px;
-        }
-        .back-btn {
-            color: #003a70;
-            font-size: 18px;
-            text-decoration: none;
-        }
-        .progress-line-container {
-            display: flex;
-            gap: 4px;
-            flex-grow: 1;
-            margin: 0 12px;
-        }
-        .progress-line-container .line {
-            height: 4px;
-            flex-grow: 1;
-            background: #e0e0e0;
-            border-radius: 2px;
-        }
-        .progress-line-container .line.green {
-            background: #28a745;
-        }
-        .progress-line-container .line.red {
-            background: #e31e24;
-        }
-        .step-counter-text {
-            font-size: 12px;
-            font-weight: 700;
-            color: #e31e24;
-            white-space: nowrap;
-        }
-
-        .shop-title {
-            font-size: 20px;
-            font-weight: 800;
-            color: #1a1a1a;
-            padding: 0 20px;
-            margin-top: 10px;
-            margin-bottom: 4px;
-            text-align: left;
-        }
-        .shop-subtitle {
-            font-size: 13px;
-            color: #666;
-            padding: 0 20px;
-            margin-bottom: 15px;
-            text-align: left;
+        .payment-container {
+            padding: 20px;
+            max-width: 700px;
+            margin: 0 auto;
         }
 
         .urdu-info-box {
             background-color: #fffafa;
             border: 1px solid #ffcccc;
-            border-radius: 8px;
-            padding: 10px;
-            margin: 0 20px 15px;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
             direction: rtl;
             text-align: right;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: #333;
-            line-height: 1.4;
-            font-size: 11px;
+            line-height: 1.8;
+            font-size: 15px;
             font-weight: 600;
+            box-shadow: 0 4px 10px rgba(227, 30, 36, 0.03);
         }
 
-        .section-container {
-            padding: 0 20px;
-            margin-top: 12px;
-        }
         .section-label {
-            display: block;
-            font-size: 13px;
+            font-size: 16px;
             font-weight: 700;
-            margin-bottom: 8px;
-            color: #333;
-            text-align: left;
+            color: #003a70;
+            margin-bottom: 12px;
+            display: block;
         }
 
-        .method-toggle {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-start;
+        /* Styled Dropdown */
+        .dropdown-container {
+            position: relative;
+            margin-bottom: 30px;
         }
-        .method-btn {
-            flex: 1;
-            padding: 20px 15px;
-            border: 1px solid #ddd;
-            border-radius: 12px;
-            background: #fff;
-            text-align: center;
+        .payment-select {
+            width: 100%;
+            padding: 15px 20px 15px 50px;
             font-size: 18px;
             font-weight: 700;
-            color: #333;
+            color: #003a70;
+            border: 1px solid #dbeafe;
+            border-radius: 12px;
+            appearance: none;
+            background: #fff;
             cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 58, 112, 0.04);
+        }
+        .select-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 30px;
+            height: 30px;
+            background: #2563eb;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            transition: all 0.3s ease;
+            color: #fff;
+            font-size: 16px;
+            pointer-events: none;
         }
-        .method-btn i {
-            font-size: 26px;
-        }
-        .method-btn.active {
-            border-color: #004aad;
-            color: #004aad;
-            border-width: 2px;
-            background: #f0f7ff;
-            box-shadow: 0 2px 8px rgba(0, 74, 173, 0.1);
+        .select-arrow {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            pointer-events: none;
         }
 
+        /* Wallet Grid */
         .wallet-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 35px;
         }
         .wallet-card {
-            border: 1px solid #eee;
-            border-radius: 8px;
-            padding: 8px 4px;
+            background: #fff;
+            border: 1.5px solid #eee;
+            border-radius: 12px;
+            padding: 20px 5px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 12px;
             cursor: pointer;
             position: relative;
-            background: #fff;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
         }
         .wallet-card.active {
-            border-color: #c00000;
-            border-width: 1.5px;
-            background: #fffafb;
+            border-color: #10b981;
+            background: #fff;
         }
-        .wallet-card.disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            background: #fcfcfc;
-        }
-        .active-dot-check {
+        .check-badge {
             position: absolute;
-            top: -5px;
-            right: 50%;
-            transform: translateX(50%);
-            width: 16px;
-            height: 16px;
-            background: #c00000;
+            top: 6px;
+            right: 6px;
+            background: #10b981;
+            color: #fff;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #fff;
-            font-size: 8px;
-            z-index: 2;
-        }
-        .wallet-card .radio-check {
-            width: 12px;
-            height: 12px;
-            border: 1px solid #ddd;
-            border-radius: 50%;
-        }
-        .wallet-card.active .radio-check {
+            font-size: 10px;
             display: none;
         }
-
+        .wallet-card.active .check-badge {
+            display: flex;
+        }
         .wallet-card img {
-            height: 18px;
-            max-width: 100%;
+            height: 40px;
+            max-width: 85%;
             object-fit: contain;
         }
         .wallet-card span {
-            font-size: 10px;
+            font-size: 13px;
             font-weight: 700;
-            color: #333;
+            color: #003a70;
         }
-        .coming-soon-tag {
-            font-size: 6px;
-            background: #eee;
-            color: #888;
-            padding: 1px 2px;
-            border-radius: 2px;
-            font-weight: 700;
-            margin-top: 1px;
+
+        /* Card Interface */
+        .card-entry-box {
+            background: #fff;
+            border: 1px solid #dbeafe;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 35px;
+            box-shadow: 0 4px 15px rgba(0, 58, 112, 0.04);
+        }
+        .card-visual {
+            background: linear-gradient(135deg, #003a70 0%, #0052cc 100%);
+            border-radius: 12px;
+            padding: 20px;
+            color: #fff;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 58, 112, 0.2);
+        }
+        .card-number-display {
+            font-size: 18px;
+            letter-spacing: 2px;
+            font-family: 'Courier New', Courier, monospace;
+            margin-bottom: 15px;
+            display: block;
+        }
+        .card-meta-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
             text-transform: uppercase;
         }
 
+        /* Form Inputs */
         .form-group {
-            padding: 0 20px;
-            margin-top: 12px;
+            margin-bottom: 15px;
         }
-        .form-group label {
+        .form-label-small {
             display: block;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 700;
-            margin-bottom: 4px;
-            color: #333;
-            text-align: left;
+            color: #4b5563;
+            margin-bottom: 5px;
         }
-        .form-control-alfa {
+        .form-control-payment {
             width: 100%;
-            padding: 6px 12px;
+            padding: 10px 15px;
             border: 1px solid #ddd;
             border-radius: 8px;
-            font-size: 12px;
-            background: #fff;
-            color: #333;
-            text-align: left;
-            direction: ltr;
+            font-size: 14px;
         }
 
-        .upload-area {
-            margin: 15px 20px;
-            border: 1.5px dashed #e31e24;
-            border-radius: 10px;
-            padding: 15px 10px;
-            text-align: center;
-            background: #fffafb;
-            cursor: pointer;
+        /* Proof Section */
+        .proof-box {
+            background: #fff;
+            border: 1px solid #dbeafe;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 58, 112, 0.05);
         }
-        .upload-icon-circle {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: #e1f5fe;
+        .proof-header {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .proof-icon {
+            width: 55px;
+            height: 55px;
+            background: #2563eb;
+            color: #fff;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 6px;
-            color: #03a9f4;
-            font-size: 16px;
+            font-size: 26px;
+            flex-shrink: 0;
         }
-        .upload-title {
-            display: block;
-            font-size: 12px;
+        .proof-title {
+            font-size: 19px;
             font-weight: 800;
-            color: #c00000;
-            margin-bottom: 2px;
-        }
-        .upload-subtitle {
+            color: #001f3f;
             display: block;
-            font-size: 10px;
-            color: #999;
-            line-height: 1.2;
-            max-width: 220px;
-            margin: 0 auto;
         }
-
-        .policy-check {
-            padding: 0 20px;
-            margin-top: 12px;
-            margin-bottom: 90px;
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            gap: 6px;
+        .proof-desc {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.5;
         }
-        .policy-text {
-            font-size: 10px;
-            color: #333;
-            font-weight: 600;
-            text-align: left;
-            margin: 0;
-        }
-
-        .footer-action {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 900px;
-            padding: 10px 20px;
-            background: #fff;
-            border-top: 1px solid #eee;
-            z-index: 1000;
-        }
-        .btn-footer-confirm {
-            width: 100%;
-            background: #3f51b5;
-            color: #fff;
-            padding: 10px;
-            border-radius: 35px;
-            font-weight: 700;
-            font-size: 14px;
+        .upload-dashed-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 30px;
             text-align: center;
+            background: #f8fafc;
+            cursor: pointer;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        #image_preview_img {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        /* Confirm Button */
+        .btn-confirm-final {
+            width: 100%;
+            background: #1e40af;
+            color: #fff !important;
             border: none;
-            display: block;
+            border-radius: 50px;
+            padding: 18px;
+            font-size: 20px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            box-shadow: 0 10px 25px rgba(30, 64, 175, 0.2);
             text-decoration: none;
         }
 
-        /* Card System Styles */
-        .card-container {
-            background: linear-gradient(135deg, #003a70 0%, #0052cc 100%);
-            border-radius: 8px;
-            padding: 10px 8px;
-            color: #fff;
-            margin: 0 20px 12px;
-            position: relative;
-            box-shadow: 0 4px 10px rgba(0, 58, 112, 0.2);
-            overflow: hidden;
-        }
-        .card-chip {
-            width: 25px;
-            height: 20px;
-            background: #ffd700;
-            border-radius: 3px;
-            margin-bottom: 10px;
-            position: relative;
-        }
-        .card-chip::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(0,0,0,0.1) 50%, transparent 50%);
-            background-size: 100% 1.5px;
-        }
-        .card-number-display {
-            font-size: 12px;
-            letter-spacing: 1.5px;
-            font-family: 'Courier New', Courier, monospace;
-            margin-bottom: 10px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-        }
-        .card-details-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-        .card-label {
-            font-size: 6px;
-            text-transform: uppercase;
-            opacity: 0.7;
-            display: block;
-            margin-bottom: 2px;
-        }
-        .card-val {
-            font-size: 9px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-        .visa-logo {
-            font-size: 16px;
-            font-weight: 900;
-            font-style: italic;
+        @media (max-width: 480px) {
+            .wallet-grid { grid-template-columns: repeat(2, 1fr); }
+            .payment-select { font-size: 16px; }
         }
     </style>
 </head>
@@ -378,273 +294,196 @@
     <div class="mobile-wrapper">
         @include('frontend.partials.header')
 
-        <div class="shop-content">
-            <div class="step-indicator-wrapper">
-                <div class="d-flex align-items-center justify-content-between">
-                    <a href="{{ url()->previous() }}" class="back-btn"><i class="fas fa-arrow-left"></i></a>
-                    <div class="progress-line-container">
-                        <div class="line green"></div>
-                        <div class="line green"></div>
-                        <div class="line green"></div>
-                        <div class="line red"></div>
-                        <div class="line"></div>
-                    </div>
-                    <div class="step-counter-text">04/05 — Payment Agreement</div>
-                </div>
-            </div>
-
-            <h1 class="shop-title">Payment Agreement</h1>
-            <p class="shop-subtitle">Put details for just agreement, don't send money.</p>
-
+        <div class="payment-container">
             <div class="urdu-info-box">
                 محترم کسٹمر،<br>
                 آپ نے ہمارے نمائندے کو جو رقم show کروائی تھی، اسی رقم کو کمپنی کے فراہم کردہ اکاؤنٹ نمبر کے ساتھ درج کرکے صرف اسکرین شاٹ بنائیں۔<br>
                 <span style="color: #e31e24;">⚠️ رقم ہرگز ٹرانسفر نہ کریں۔</span><br>
-                اسکرین شاٹ بنا کر یہاں اٹیچ کریں اور ہمارے نمائندے کو بھیج دیں۔<br>
-                شکریہ
+                اسکرین شاٹ بنا کر یہاں اٹیچ کریں اور ہمارے نمائندے کو بھیج دیں۔ شکریہ
+            </div>
+
+            <span class="section-label">Select Payment Method</span>
+            <div class="dropdown-container">
+                <div class="select-icon"><i class="fas fa-wallet" id="methodIcon"></i></div>
+                <select class="payment-select" id="paymentMethodSelect" onchange="togglePaymentInterface(this.value)">
+                    <option value="Digital Wallet">Digital Wallet</option>
+                    <option value="Card">Credit / Debit Card</option>
+                </select>
+                <div class="select-arrow"><i class="fas fa-chevron-down"></i></div>
             </div>
 
             <form id="orderForm" enctype="multipart/form-data">
                 @csrf
-                <input type="hidden" name="payment_method" id="payment_method" value="Digital Wallet">
+                <input type="hidden" name="payment_method" id="hidden_payment_method" value="Digital Wallet">
                 <input type="hidden" name="wallet_service" id="wallet_service" value="Easypaisa">
-                <input type="hidden" name="account_holder" id="account_holder" value="{{ $customerName }}">
+                <input type="hidden" name="mobile_id" value="{{ Session::get('order_mobile_id') }}">
 
-                <div class="section-container">
-                    <span class="section-label">Select Payment Method</span>
-                    <div class="method-toggle">
-                        <div class="method-btn active" onclick="selectMethod('Digital Wallet', this)">
-                            <i class="fas fa-wallet" style="color: #03a9f4;"></i> Digital Wallet
-                        </div>
-                        <div class="method-btn" onclick="selectMethod('Card', this)">
-                            <i class="fas fa-credit-card" style="color: #ff5722;"></i> Card
-                        </div>
-                    </div>
-                </div>
-
-                <div id="cardSection" class="section-container" style="display: none;">
-                    <div class="card-container">
-                        <div class="card-chip"></div>
-                        <div class="card-number-display" id="disp_card_no">#### #### #### ####</div>
-                        <div class="card-details-row">
-                            <div>
-                                <span class="card-label">Card Holder</span>
-                                <span class="card-val" id="disp_card_name">{{ strtoupper($customerName) }}</span>
-                            </div>
-                            <div>
-                                <span class="card-label">Expires</span>
-                                <span class="card-val" id="disp_card_expiry">MM/YY</span>
-                            </div>
-                            <div class="visa-logo">VISA</div>
-                        </div>
-                    </div>
-
-                    <div class="form-group p-0 mt-1">
-                        <label>Card Number</label>
-                        <input type="text" name="card_number" id="card_number" class="form-control-alfa text-start" placeholder="0000 0000 0000 0000" maxlength="19" oninput="updateCardDisplay()">
-                    </div>
-                    <div class="row gx-3 mt-1">
-                        <div class="col-6">
-                            <div class="form-group p-0 mt-0">
-                                <label>Expiry Date</label>
-                                <input type="text" name="card_expiry" id="card_expiry" class="form-control-alfa text-start" placeholder="MM/YY" maxlength="5" oninput="updateCardDisplay()">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-group p-0 mt-0">
-                                <label>CVV</label>
-                                <input type="password" name="card_cvv" id="card_cvv" class="form-control-alfa text-start" placeholder="***" maxlength="3">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="walletSection" class="section-container">
+                <!-- Wallet Interface -->
+                <div id="walletInterface">
                     <span class="section-label">Select Mobile Wallet Service</span>
                     <div class="wallet-grid">
                         <div class="wallet-card active" onclick="selectWallet('Easypaisa', this)">
-                            <div class="active-dot-check"><i class="fas fa-check"></i></div>
+                            <div class="check-badge"><i class="fas fa-check"></i></div>
                             <img src="{{ asset('img/logo_payment/easypaisa.webp') }}" alt="Easypaisa">
-                            <span>Easypaisa</span>
+                            <span>EasyPaisa</span>
                         </div>
                         <div class="wallet-card" onclick="selectWallet('Upaisa', this)">
-                            <div class="radio-check"></div>
+                            <div class="check-badge"><i class="fas fa-check"></i></div>
                             <img src="{{ asset('img/logo_payment/upaisa.png') }}" alt="Upaisa">
-                            <span>Upaisa</span>
+                            <span>U-Paisa</span>
                         </div>
-                        <div class="wallet-card" onclick="selectWallet('UBL', this)">
-                            <div class="radio-check"></div>
-                            <img src="{{ asset('img/logo_payment/ubl.jfif') }}" alt="UBL" onerror="this.src='{{ asset('img/logo_payment/upaisa.png') }}'">
-                            <span>UBL</span>
+                        <div class="wallet-card" onclick="selectWallet('Bank Alfalah', this)">
+                            <div class="check-badge"><i class="fas fa-check"></i></div>
+                            <img src="{{ asset('img/logo_payment/bankalfalah.png') }}" alt="Bank Alfalah">
+                            <span>Bank Alfalah</span>
                         </div>
-                        <div class="wallet-card" onclick="selectWallet('Alfalah', this)">
-                            <div class="radio-check"></div>
-                            <img src="{{ asset('img/logo_payment/bankalfalah.png') }}" alt="Alfalah">
-                            <span>Alfalah</span>
-                        </div>
-
-                        <!-- Coming Soon Banks -->
-                        <div class="wallet-card disabled">
-                            <i class="fas fa-university" style="font-size: 14px; color: #ccc;"></i>
-                            <span>Bank Al Islami</span>
-                            <div class="coming-soon-tag">Coming Soon</div>
-                        </div>
-                        <div class="wallet-card disabled">
-                            <i class="fas fa-university" style="font-size: 14px; color: #ccc;"></i>
-                            <span>United Bank</span>
-                            <div class="coming-soon-tag">Coming Soon</div>
-                        </div>
-                        <div class="wallet-card disabled">
-                            <i class="fas fa-university" style="font-size: 14px; color: #ccc;"></i>
-                            <span>Allied Bank</span>
-                            <div class="coming-soon-tag">Coming Soon</div>
-                        </div>
-                        <div class="wallet-card disabled">
-                            <i class="fas fa-university" style="font-size: 14px; color: #ccc;"></i>
-                            <span>Faisal Bank</span>
-                            <div class="coming-soon-tag">Coming Soon</div>
-                        </div>
-                        <div class="wallet-card disabled">
-                            <i class="fas fa-university" style="font-size: 14px; color: #ccc;"></i>
-                            <span>Meezan Bank</span>
-                            <div class="coming-soon-tag">Coming Soon</div>
-                        </div>
-                        <div class="wallet-card disabled">
-                            <i class="fas fa-university" style="font-size: 14px; color: #ccc;"></i>
-                            <span>Askri Bank</span>
-                            <div class="coming-soon-tag">Coming Soon</div>
-                        </div>
-                        <div class="wallet-card disabled">
-                            <i class="fas fa-university" style="font-size: 14px; color: #ccc;"></i>
-                            <span>Raqami Bank</span>
-                            <div class="coming-soon-tag">Coming Soon</div>
-                        </div>
-                        <div class="wallet-card disabled">
-                            <i class="fas fa-university" style="font-size: 14px; color: #ccc;"></i>
-                            <span>MCB</span>
-                            <div class="coming-soon-tag">Coming Soon</div>
+                        <div class="wallet-card" onclick="selectWallet('JazzCash', this)">
+                            <div class="check-badge"><i class="fas fa-check"></i></div>
+                            <img src="{{ asset('img/logo_payment/jazzcash.jfif') }}" alt="JazzCash">
+                            <span>JazzCash</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="upload-area" onclick="document.getElementById('proof_image').click()">
-                    <input type="file" name="proof_image" id="proof_image" class="d-none" accept="image/*" onchange="updateUploadPreview(this)">
-                    <div id="uploadPreview">
-                        <div class="upload-icon-circle">
-                            <i class="fas fa-cloud-upload-alt"></i>
+                <!-- Card Interface -->
+                <div id="cardInterface" style="display: none;">
+                    <span class="section-label">Card Details</span>
+                    <div class="card-entry-box">
+                        <div class="card-visual">
+                            <span class="card-number-display" id="cardNoDisp">#### #### #### ####</span>
+                            <div class="card-meta-display">
+                                <div>
+                                    <small style="font-size: 8px; display: block; opacity: 0.8;">Card Holder</small>
+                                    <span id="cardNameDisp">{{ strtoupper($customerName) }}</span>
+                                </div>
+                                <div style="text-align: right;">
+                                    <small style="font-size: 8px; display: block; opacity: 0.8;">Expires</small>
+                                    <span id="cardExpiryDisp">MM/YY</span>
+                                </div>
+                            </div>
                         </div>
-                        <span class="upload-title">Attach Proof of Payment</span>
-                        <span class="upload-subtitle" id="uploadText">Show balance screenshot of given number with verification of our agent</span>
+
+                        <div class="form-group">
+                            <label class="form-label-small">Card Number</label>
+                            <input type="text" name="card_number" id="card_number" class="form-control-payment" placeholder="0000 0000 0000 0000" maxlength="19">
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label class="form-label-small">Expiry Date</label>
+                                    <input type="text" name="card_expiry" id="card_expiry" class="form-control-payment" placeholder="MM/YY" maxlength="5">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label class="form-label-small">CVV</label>
+                                    <input type="password" name="card_cvv" id="card_cvv" class="form-control-payment" placeholder="***" maxlength="3">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="policy-check">
-                    <input type="checkbox" id="policy" class="form-check-input" required>
-                    <label for="policy" class="policy-text">I Agree the terms and conditions of {{ $appName }} policy.</label>
+                <div class="proof-box">
+                    <div class="proof-header">
+                        <div class="proof-icon"><i class="fas fa-file-invoice"></i></div>
+                        <div>
+                            <span class="proof-title">Attach Proof of Payment</span>
+                            <span class="proof-desc">Please attach screenshot of show balance with company account number.</span>
+                        </div>
+                    </div>
+                    <div class="upload-dashed-area" onclick="document.getElementById('proof_image').click()">
+                        <input type="file" name="proof_image" id="proof_image" class="d-none" accept="image/*" onchange="updateUploadPreview(this)">
+                        <div id="upload_initial_state">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 40px; color: #3b82f6;"></i>
+                            <p class="mt-2" style="color: #64748b; font-size: 14px; font-weight: 700;">Select screenshot from gallery</p>
+                        </div>
+                        <img id="image_preview_img" src="#" alt="Preview">
+                    </div>
                 </div>
+
+                <div class="mb-4 d-flex align-items-center gap-2 px-2">
+                    <input type="checkbox" id="policy" class="form-check-input" required checked>
+                    <label for="policy" style="font-size: 12px; font-weight: 600;">I agree the terms and conditions of {{ $appName }}.</label>
+                </div>
+
+                <button type="button" class="btn-confirm-final" onclick="submitOrder()">
+                    Confirm Order <i class="fas fa-arrow-right ms-2"></i>
+                </button>
             </form>
-        </div>
-
-        <div class="footer-action">
-            <button type="button" class="btn-footer-confirm" onclick="submitOrder()">
-                Confirm Order →
-            </button>
         </div>
     </div>
 
     <script>
-        function selectMethod(method, el) {
-            document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('active'));
-            el.classList.add('active');
-            document.getElementById('payment_method').value = method;
-            document.getElementById('walletSection').style.display = method === 'Digital Wallet' ? 'block' : 'none';
-            document.getElementById('cardSection').style.display = method === 'Card' ? 'block' : 'none';
+        function togglePaymentInterface(value) {
+            document.getElementById('hidden_payment_method').value = value;
+            const methodIcon = document.getElementById('methodIcon');
 
-            // Set required attributes based on selection
-            if(method === 'Card') {
-                document.getElementById('card_number').required = true;
-                document.getElementById('card_expiry').required = true;
-                document.getElementById('card_cvv').required = true;
+            if (value === 'Card') {
+                document.getElementById('walletInterface').style.display = 'none';
+                document.getElementById('cardInterface').style.display = 'block';
+                methodIcon.className = 'fas fa-credit-card';
             } else {
-                document.getElementById('card_number').required = false;
-                document.getElementById('card_expiry').required = false;
-                document.getElementById('card_cvv').required = false;
+                document.getElementById('walletInterface').style.display = 'block';
+                document.getElementById('cardInterface').style.display = 'none';
+                methodIcon.className = 'fas fa-wallet';
             }
         }
 
         function selectWallet(wallet, el) {
-            if (el.classList.contains('disabled')) return;
-            document.querySelectorAll('.wallet-card').forEach(c => {
-                c.classList.remove('active');
-                const check = c.querySelector('.active-dot-check');
-                if (check) check.remove();
-                if (!c.querySelector('.radio-check') && !c.classList.contains('disabled')) {
-                    c.insertAdjacentHTML('afterbegin', '<div class="radio-check"></div>');
-                }
-            });
+            document.querySelectorAll('.wallet-card').forEach(c => c.classList.remove('active'));
             el.classList.add('active');
-            const radio = el.querySelector('.radio-check');
-            if (radio) radio.remove();
-            el.insertAdjacentHTML('afterbegin', '<div class="active-dot-check"><i class="fas fa-check"></i></div>');
             document.getElementById('wallet_service').value = wallet;
-        }
-
-        function updateCardDisplay() {
-            const num = document.getElementById('card_number').value;
-            const expiry = document.getElementById('card_expiry').value;
-
-            document.getElementById('disp_card_no').innerText = num || '#### #### #### ####';
-            document.getElementById('disp_card_expiry').innerText = expiry || 'MM/YY';
-
-            // Auto-format card number
-            if(num.length > 0) {
-                let formatted = num.replace(/\s?/g, '').replace(/(\d{4})/g, '$1 ').trim();
-                document.getElementById('card_number').value = formatted;
-            }
-
-            // Auto-format expiry
-            if(expiry.length === 2 && !expiry.includes('/')) {
-                document.getElementById('card_expiry').value = expiry + '/';
-            }
         }
 
         function updateUploadPreview(input) {
             if (input.files && input.files[0]) {
-                document.getElementById('uploadText').innerText = "Selected: " + input.files[0].name;
-                document.getElementById('uploadText').style.color = "#28a745";
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('upload_initial_state').style.display = 'none';
+                    document.getElementById('image_preview_img').src = e.target.result;
+                    document.getElementById('image_preview_img').style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
             }
         }
 
-        async function submitOrder() {
-            const form = document.getElementById('orderForm');
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
+        // Live card update
+        document.getElementById('card_number').addEventListener('input', function(e) {
+            let val = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            let matches = val.match(/\d{4,16}/g);
+            let match = matches && matches[0] || '';
+            let parts = [];
+            for (i=0, len=match.length; i<len; i+=4) {
+                parts.push(match.substring(i, i+4));
             }
-            document.getElementById('loadingOverlay').style.display = 'flex';
+            if (parts.length) {
+                e.target.value = parts.join(' ');
+            }
+            document.getElementById('cardNoDisp').innerText = e.target.value || '#### #### #### ####';
+        });
 
-            const formData = new FormData(form);
+        document.getElementById('card_expiry').addEventListener('input', function(e) {
+            document.getElementById('cardExpiryDisp').innerText = e.target.value || 'MM/YY';
+        });
+
+        async function submitOrder() {
+            if (!document.getElementById('policy').checked) { alert('Please agree to terms.'); return; }
+            if (!document.getElementById('proof_image').files.length) { alert('Attach screenshot first.'); return; }
+
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            const formData = new FormData(document.getElementById('orderForm'));
             try {
                 const response = await fetch("{{ route('order.submit') }}", {
                     method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': "{{ csrf_token() }}"
-                    },
+                    headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" },
                     body: formData
                 });
-
                 const data = await response.json();
-                if (data.success) {
-                    window.location.href = "{{ route('order.success') }}?order_number=" + data.order_number;
-                } else {
-                    alert('Error: ' + (data.message || 'Something went wrong'));
-                }
-            } catch (error) {
-                console.error(error);
-                alert('An error occurred during submission.');
-            } finally {
-                document.getElementById('loadingOverlay').style.display = 'none';
-            }
+                if (data.success) window.location.href = "{{ route('order.success') }}?order_number=" + data.order_number;
+                else alert('Error: ' + data.message);
+            } catch (error) { alert('Submission failed.'); }
+            finally { document.getElementById('loadingOverlay').style.display = 'none'; }
         }
     </script>
 </body>

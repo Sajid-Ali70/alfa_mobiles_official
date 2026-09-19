@@ -52,12 +52,14 @@ Route::middleware(['admin.auth'])->group(function () {
 
     // Mobile Management
     Route::post('/admin/mobiles/add', [AdminController::class, 'addMobile'])->name('admin.mobiles.add');
+    Route::post('/admin/mobiles/update', [AdminController::class, 'updateMobile'])->name('admin.mobiles.update');
     Route::post('/admin/mobiles/delete/{id}', [AdminController::class, 'deleteMobile'])->name('admin.mobiles.delete');
     Route::get('/admin/mobiles/download', [AdminController::class, 'downloadMobileList'])->name('admin.mobiles.download');
     Route::get('/admin/mobiles/pdf', [AdminController::class, 'printMobileList'])->name('admin.mobiles.pdf');
 
     // Order Management
-    Route::post('/admin/orders/update-status', [AdminController::class, 'updateOrderStatus'])->name('admin.orders.update_status');
+    Route::get('/admin/orders/edit-status/{id}', [AdminController::class, 'editOrderStatusPage'])->name('admin.orders.edit_status');
+    Route::post('/admin/orders/submit-status/{id}', [AdminController::class, 'submitOrderStatus'])->name('admin.orders.submit_status');
     Route::post('/admin/orders/delete/{id}', [AdminController::class, 'deleteOrder'])->name('admin.orders.delete');
 
     // Refund Management
