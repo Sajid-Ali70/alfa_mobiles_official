@@ -167,10 +167,23 @@ class FrontendController extends Controller
         $brands = DB::table('brands')->get();
         $brandId = $request->query('brand');
         $seriesId = $request->query('series');
-        $query = DB::table('mobiles');
-        if ($brandId) $query->where('brand_id', $brandId);
-        if ($seriesId && $seriesId !== 'all') $query->where('series_id', $seriesId);
-        $mobiles = $query->get();
+
+        $query = DB::table('mobiles')
+            ->leftJoin('storages', 'mobiles.storage_id', '=', 'storages.id');
+
+        if ($brandId) $query->where('mobiles.brand_id', $brandId);
+        if ($seriesId && $seriesId !== 'all') $query->where('mobiles.series_id', $seriesId);
+
+        $mobiles = $query->select('mobiles.*', 'storages.name as storage_name')->get();
+        $mobileVariants = DB::table('mobile_variants')
+            ->leftJoin('storages', 'mobile_variants.storage_id', '=', 'storages.id')
+            ->select('mobile_variants.*', 'storages.name as storage_name')
+            ->get()
+            ->groupBy('mobile_id');
+        foreach ($mobiles as $mobile) {
+            $mobile->variants = $mobileVariants->get($mobile->id, collect())->values();
+        }
+
         $series = DB::table('series')->when($brandId, function($q) use ($brandId) {
             return $q->where('brand_id', $brandId);
         })->get();
@@ -181,11 +194,33 @@ class FrontendController extends Controller
     public function plan(Request $request)
     {
         $id = $request->query('id');
-        $mobile = DB::table('mobiles')->where('id', $id)->first();
+        $variantId = $request->query('variant_id');
+        $mobile = DB::table('mobiles')
+            ->leftJoin('storages', 'mobiles.storage_id', '=', 'storages.id')
+            ->where('mobiles.id', $id)
+            ->select('mobiles.*', 'storages.name as storage_name')
+            ->first();
+
         if (!$mobile) return redirect()->route('shop');
+        $variants = DB::table('mobile_variants')
+            ->leftJoin('storages', 'mobile_variants.storage_id', '=', 'storages.id')
+            ->where('mobile_variants.mobile_id', $id)
+            ->select('mobile_variants.*', 'storages.name as storage_name')
+            ->get();
+        if (!$variantId && $variants->isNotEmpty()) {
+            $variantId = $variants->first()->id;
+        }
+        if ($variantId) {
+            $selectedVariant = $variants->firstWhere('id', (int)$variantId);
+            if ($selectedVariant) {
+                $mobile->price = $selectedVariant->price;
+                $mobile->status = $selectedVariant->status;
+                $mobile->storage_name = $selectedVariant->storage_name;
+            }
+        }
         $settings = DB::table('app_settings')->where('id', 1)->first();
         Session::put('order_mobile_id', $id);
-        return view('frontend.plan', compact('settings', 'mobile'));
+        return view('frontend.plan', compact('settings', 'mobile', 'variants', 'variantId'));
     }
 
     public function customerInfo(Request $request)
@@ -328,5 +363,85 @@ class FrontendController extends Controller
         $settings = DB::table('app_settings')->where('id', 1)->first();
 
         return view('frontend.track_result', compact('settings', 'order', 'mobile'));
+    }
+
+    public function refund()
+    {
+        $settings = DB::table('app_settings')->where('id', 1)->first();
+        return view('frontend.refund', compact('settings'));
+    }
+
+    public function refundAgreement(Request $request)
+    {
+        $settings = DB::table('app_settings')->where('id', 1)->first();
+        Session::put('refund_customer_name', $request->customer_name);
+        Session::put('refund_order_id', $request->order_id);
+        Session::put('refund_amount', $request->refund_amount);
+        return view('frontend.refund_agreement', compact('settings'));
+    }
+
+    public function submitRefund(Request $request)
+    {
+        try {
+            $this->patchDatabaseSchema();
+            $customerName = Session::get('refund_customer_name');
+            $orderId = Session::get('refund_order_id');
+            $refundAmount = Session::get('refund_amount');
+
+            if (!$customerName) {
+                return response()->json(['success' => false, 'message' => 'Session expired. Please restart.'], 400);
+            }
+
+            $refundId = 'RF-' . date('ymd') . '-' . rand(1000, 9999);
+            $proofPath = null;
+            if ($request->hasFile('proof_image')) {
+                $file = $request->file('proof_image');
+                $fileName = 'refund_' . time() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/refunds'), $fileName);
+                $proofPath = '/uploads/refunds/' . $fileName;
+            }
+
+            DB::table('refund_requests')->insert([
+                'refund_id' => $refundId,
+                'customer_name' => $customerName,
+                'order_id' => $orderId,
+                'refund_amount' => $refundAmount,
+                'payment_method' => $request->payment_method,
+                'proof_image' => $proofPath,
+                'status' => 'Pending',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            return response()->json(['success' => true, 'refund_id' => $refundId]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function refundSuccess(Request $request)
+    {
+        $settings = DB::table('app_settings')->where('id', 1)->first();
+        $refundId = $request->query('refund_id');
+        $refund = DB::table('refund_requests')->where('refund_id', $refundId)->first();
+        return view('frontend.refund_success', compact('settings', 'refund'));
+    }
+
+    public function calculator()
+    {
+        $settings = DB::table('app_settings')->where('id', 1)->first();
+        $brands = DB::table('brands')->get();
+        return view('frontend.calculator', compact('settings', 'brands'));
+    }
+
+    public function getModels($brandId)
+    {
+        $mobiles = DB::table('mobiles')
+            ->leftJoin('storages', 'mobiles.storage_id', '=', 'storages.id')
+            ->leftJoin('series', 'mobiles.series_id', '=', 'series.id')
+            ->where('mobiles.brand_id', $brandId)
+            ->select('mobiles.*', 'storages.name as storage_name', 'series.name as series_name')
+            ->get();
+        return response()->json($mobiles);
     }
 }

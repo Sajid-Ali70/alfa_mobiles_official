@@ -100,6 +100,14 @@ class AdminController extends Controller
         }
 
         $mobiles = $mobilesQuery->orderBy('mobiles.id', 'desc')->get();
+        $mobileVariants = DB::table('mobile_variants')
+            ->leftJoin('storages', 'mobile_variants.storage_id', '=', 'storages.id')
+            ->select('mobile_variants.*', 'storages.name as storage_name')
+            ->get()
+            ->groupBy('mobile_id');
+        foreach ($mobiles as $mobile) {
+            $mobile->variants = $mobileVariants->get($mobile->id, collect())->values();
+        }
         $orders = DB::table('orders')->orderBy('id', 'desc')->get();
 
         $refunds = [];
@@ -227,6 +235,96 @@ class AdminController extends Controller
         }
         DB::table('app_settings')->updateOrInsert(['id' => 1], $data);
         return response()->json(['message' => 'Settings updated']);
+    }
+
+    public function addMobile(Request $request)
+    {
+        $validated = $request->validate([
+            'brand_id' => 'required|integer|exists:brands,id',
+            'series_id' => 'nullable|integer',
+            'name' => 'required|string|max:255',
+            'specs' => 'nullable|string',
+            'colors' => 'nullable|string',
+            'image' => 'nullable|image|max:5120',
+            'variants' => 'required|array|min:1',
+            'variants.*.storage_id' => 'required|integer|exists:storages,id',
+            'variants.*.price' => 'required|string|max:100',
+            'variants.*.status' => 'nullable|in:pta,non-pta,jv',
+        ]);
+
+        $brand = DB::table('brands')->find($validated['brand_id']);
+        $firstVariant = $validated['variants'][0];
+        $data = collect($validated)->except(['image', 'variants'])->toArray();
+        $data['storage_id'] = $firstVariant['storage_id'];
+        $data['price'] = $firstVariant['price'];
+        $data['status'] = $brand && stripos($brand->name, 'apple') !== false ? ($firstVariant['status'] ?? null) : null;
+
+        if ($request->hasFile('image')) {
+            $fileName = 'mobile_' . time() . '.' . $request->file('image')->getClientOriginalExtension();
+            $request->file('image')->move(public_path('uploads/mobiles'), $fileName);
+            $data['image_url'] = '/uploads/mobiles/' . $fileName;
+        }
+
+        DB::table('mobiles')->insert($data + ['created_at' => now(), 'updated_at' => now()]);
+        $mobileId = DB::getPdo()->lastInsertId();
+        $this->saveMobileVariants($mobileId, $request->input('variants', []));
+        return response()->json(['message' => 'Mobile added']);
+    }
+
+    public function updateMobile(Request $request)
+    {
+        $validated = $request->validate([
+            'id' => 'required|integer|exists:mobiles,id',
+            'brand_id' => 'required|integer|exists:brands,id',
+            'series_id' => 'nullable|integer',
+            'name' => 'required|string|max:255',
+            'specs' => 'nullable|string',
+            'colors' => 'nullable|string',
+            'image' => 'nullable|image|max:5120',
+            'variants' => 'required|array|min:1',
+            'variants.*.storage_id' => 'required|integer|exists:storages,id',
+            'variants.*.price' => 'required|string|max:100',
+            'variants.*.status' => 'nullable|in:pta,non-pta,jv',
+        ]);
+
+        $brand = DB::table('brands')->find($validated['brand_id']);
+        $firstVariant = $validated['variants'][0];
+        $data = collect($validated)->except(['id', 'image', 'variants'])->toArray();
+        $data['storage_id'] = $firstVariant['storage_id'];
+        $data['price'] = $firstVariant['price'];
+        $data['status'] = $brand && stripos($brand->name, 'apple') !== false ? ($firstVariant['status'] ?? null) : null;
+
+        if ($request->hasFile('image')) {
+            $fileName = 'mobile_' . time() . '.' . $request->file('image')->getClientOriginalExtension();
+            $request->file('image')->move(public_path('uploads/mobiles'), $fileName);
+            $data['image_url'] = '/uploads/mobiles/' . $fileName;
+        }
+
+        DB::table('mobiles')->where('id', $validated['id'])->update($data + ['updated_at' => now()]);
+        $this->saveMobileVariants($validated['id'], $request->input('variants', []));
+        return response()->json(['message' => 'Mobile updated']);
+    }
+
+    private function saveMobileVariants($mobileId, array $variants)
+    {
+        DB::table('mobile_variants')->where('mobile_id', $mobileId)->delete();
+
+        foreach ($variants as $variant) {
+            DB::table('mobile_variants')->insert([
+                'mobile_id' => $mobileId,
+                'storage_id' => $variant['storage_id'],
+                'price' => $variant['price'],
+                'status' => $variant['status'] ?? null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+    }
+
+    public function deleteMobile($id)
+    {
+        DB::table('mobiles')->where('id', $id)->delete();
+        return response()->json(['message' => 'Mobile deleted']);
     }
 
     public function logout()

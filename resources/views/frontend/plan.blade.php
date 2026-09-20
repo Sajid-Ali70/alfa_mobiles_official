@@ -105,6 +105,29 @@
             color: #555;
         }
 
+        .p-summary-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            color: #555;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .plan-status-badge {
+            padding: 5px 13px;
+            border-radius: 999px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .plan-status-standard { background: #64748b; }
+        .plan-status-pta { background: #0ab866; }
+        .plan-status-non-pta { background: #f5a900; }
+        .plan-status-jv { background: #f23b64; }
+
         .section-shop-label {
             display: block;
             font-size: 18px;
@@ -252,6 +275,12 @@
         $availableColors = array_map('trim', explode(',', $mobile->colors ?? 'Black,Silver,Blue'));
         $price = (int)$mobile->price;
         $storage = $mobile->storage_name ?? 'Standard';
+        $selectedVariantId = $variantId ?? null;
+        $selectedStatus = strtoupper($mobile->status ?? 'Standard');
+        $statusClass = 'plan-status-' . strtolower(str_replace(' ', '-', $selectedStatus));
+        $statusOptions = collect($variants)->map(function ($variant) {
+            return strtoupper($variant->status ?? 'Standard');
+        })->unique()->values();
     @endphp
 
     <div class="mobile-wrapper">
@@ -282,11 +311,13 @@
                 <div class="p-summary-info">
                     <div class="p-summary-name">{{ $mobile->name }}</div>
                     <div class="p-summary-base">Base Price: <span>Rs. {{ number_format($price) }}</span></div>
+                    <div class="p-summary-status">Status: <span id="selectedStatus" class="plan-status-badge {{ $statusClass }}">{{ $selectedStatus }}</span></div>
                 </div>
             </div>
 
             <form id="planForm" action="{{ route('customer_info') }}" method="GET">
                 <input type="hidden" name="mobile_id" value="{{ $mobile->id }}">
+                <input type="hidden" name="variant_id" id="selectedVariantId" value="{{ $selectedVariantId }}">
                 <input type="hidden" name="color" id="selectedColor" value="{{ $availableColors[0] ?? 'Black' }}">
                 <input type="hidden" name="storage" value="{{ $storage }}">
                 <input type="hidden" name="tenure" id="selectedTenure" value="12 Months">
@@ -306,14 +337,33 @@
                     </div>
                 </div>
 
+                <!-- Select Status -->
+                <div class="plan-section" id="statusOptionsSection">
+                    <span class="section-shop-label">Select Status</span>
+                    <div class="options-flex">
+                        @foreach($statusOptions as $statusOption)
+                        <div class="pill-option {{ $selectedStatus === $statusOption ? 'active' : '' }}" onclick="selectStatus('{{ strtolower($statusOption) }}', this)">
+                            <span class="plan-status-badge plan-status-{{ strtolower(str_replace(' ', '-', $statusOption)) }}">{{ $statusOption }}</span>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+
                 <!-- Select Storage -->
-                <div class="plan-section">
+                <div class="plan-section" id="storageOptionsSection">
                     <span class="section-shop-label">Storage Option</span>
                     <div class="options-flex">
+                        @forelse($variants as $index => $variant)
+                        <div class="pill-option {{ ($selectedVariantId && $selectedVariantId == $variant->id) || (!$selectedVariantId && $index === 0) ? 'active' : '' }}" data-variant-status="{{ strtolower($variant->status ?? 'standard') }}" onclick="updateVariant({{ $variant->id }}, '{{ $variant->storage_name }}', '{{ $variant->price }}', '{{ strtoupper($variant->status ?? 'Standard') }}', this)">
+                            <div class="dot-color" style="background-color: #e31e24;"></div>
+                            <span>{{ $variant->storage_name }}<small class="d-block">Rs. {{ number_format((int)$variant->price) }}</small></span>
+                        </div>
+                        @empty
                         <div class="pill-option active">
                             <div class="dot-color" style="background-color: #e31e24;"></div>
                             <span>{{ $storage }} Storage</span>
                         </div>
+                        @endforelse
                     </div>
                 </div>
 
@@ -354,10 +404,49 @@
     </div>
 
     <script>
+        const mobileVariants = @json($variants);
+
         function updateColor(color, el) {
             el.parentElement.querySelectorAll('.pill-option').forEach(b => b.classList.remove('active'));
             el.classList.add('active');
             document.getElementById('selectedColor').value = color;
+        }
+
+        function updateVariant(id, storage, price, status, el) {
+            const numericPrice = parseInt(price, 10) || 0;
+            const normalizedStatus = status.toLowerCase();
+            el.parentElement.querySelectorAll('.pill-option').forEach(option => option.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('selectedVariantId').value = id;
+            document.querySelector('input[name="storage"]').value = storage + ' / ' + status;
+            const statusBadge = document.getElementById('selectedStatus');
+            statusBadge.innerText = status;
+            statusBadge.className = 'plan-status-badge plan-status-' + status.toLowerCase().replace(/\s+/g, '-');
+            filterStorageOptions(normalizedStatus);
+            document.querySelectorAll('#statusOptionsSection .pill-option').forEach(option => option.classList.remove('active'));
+            document.querySelectorAll('#statusOptionsSection .pill-option span').forEach(option => {
+                if (option.innerText.toLowerCase() === status.toLowerCase()) option.parentElement.classList.add('active');
+            });
+            document.querySelector('input[name="emi"]').value = 'Rs. ' + Math.round(numericPrice / 12).toLocaleString();
+            document.querySelector('input[name="total"]').value = 'Rs. ' + numericPrice.toLocaleString();
+            document.querySelector('.p-summary-base span').innerText = 'Rs. ' + numericPrice.toLocaleString();
+            document.querySelector('.sum-row.total').previousElementSibling.querySelector('span:last-child').innerText = 'Rs. ' + numericPrice.toLocaleString();
+            updateTenure('12 Months', Math.round(numericPrice / 12).toLocaleString(), document.querySelector('.tenure-card-shop'));
+        }
+
+        function selectStatus(status, el) {
+            const selectedVariant = mobileVariants.find(variant => (variant.status || 'standard').toLowerCase() === status);
+            if (!selectedVariant) return;
+            const storageOption = Array.from(document.querySelectorAll('#storageOptionsSection .pill-option'))
+                .find(option => option.innerText.toLowerCase().startsWith(selectedVariant.storage_name.toLowerCase()));
+            updateVariant(selectedVariant.id, selectedVariant.storage_name, selectedVariant.price, (selectedVariant.status || 'Standard').toUpperCase(), storageOption || el);
+        }
+
+        function filterStorageOptions(status) {
+            document.querySelectorAll('#storageOptionsSection .pill-option[data-variant-status]').forEach(option => {
+                const isAvailable = option.dataset.variantStatus === status;
+                option.classList.toggle('d-none', !isAvailable);
+            });
         }
 
         function updateTenure(tenure, emi, el) {
@@ -368,6 +457,8 @@
             document.getElementById('displayTenure').innerText = tenure;
             document.getElementById('displayEmi').innerText = 'Rs. ' + emi + ' / mo';
         }
+
+        filterStorageOptions('{{ strtolower($selectedStatus) }}');
     </script>
 </body>
 </html>

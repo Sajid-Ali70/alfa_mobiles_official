@@ -35,11 +35,6 @@
                 <span class="btn-text">Book Your Mobile</span>
                 <i class="fas fa-chevron-right chevron-home"></i>
             </a>
-            <a href="{{ route('calculator') }}" class="action-card-home bg-purple">
-                <div class="action-icon-home"><i class="fas fa-calculator"></i></div>
-                <span class="btn-text">Available stock</span>
-                <i class="fas fa-chevron-right chevron-home"></i>
-            </a>
             <a href="{{ route('refund') }}" class="action-card-home bg-red">
                 <div class="action-icon-home"><i class="fas fa-sync-alt"></i></div>
                 <span class="btn-text">Refund Payment</span>

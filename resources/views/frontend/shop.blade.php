@@ -171,7 +171,7 @@
                     <select id="mobileSelect" class="shop-select-custom">
                         <option value="all">Select Model ({{ count($mobiles) }} available)</option>
                         @foreach($mobiles as $mobile)
-                        <option value="{{ $mobile->id }}">{{ $mobile->name }} ({{ $mobile->storage_name ?? 'Standard' }})</option>
+                        <option value="{{ $mobile->id }}">{{ $mobile->name }} ({{ $mobile->variants->count() ? $mobile->variants->count() . ' options' : ($mobile->storage_name ?? 'Standard') }})</option>
                         @endforeach
                     </select>
                 </div>

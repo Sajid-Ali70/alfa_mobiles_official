@@ -223,6 +223,137 @@
         }
         select.form-control { background-image: none; }
 
+        .edit-mobile-dialog {
+            max-width: 1140px;
+        }
+
+        .edit-mobile-modal {
+            background: #0c2137;
+            border: 1px solid #3c6084 !important;
+            border-radius: 10px !important;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+        }
+
+        .edit-mobile-modal .modal-header,
+        .edit-mobile-modal .modal-footer {
+            border-color: #2d4d6c !important;
+            padding: 15px 22px;
+        }
+
+        .edit-mobile-modal .modal-title {
+            font-size: 1.45rem;
+            font-weight: 700;
+        }
+
+        .edit-mobile-modal .modal-body {
+            padding: 22px;
+        }
+
+        .edit-mobile-modal .form-label {
+            color: #e0e9f3;
+            font-size: 0.92rem;
+            font-weight: 600;
+        }
+
+        .edit-mobile-modal .form-control,
+        .edit-mobile-modal .form-select {
+            min-height: 44px;
+            background-color: #0a1a2c;
+            border-color: #3a5c7f;
+            border-radius: 6px;
+            color: #f4f8fc;
+        }
+
+        .edit-mobile-modal .form-control:focus,
+        .edit-mobile-modal .form-select:focus {
+            background-color: #0a1a2c;
+            border-color: #2d8cff;
+            color: #fff;
+            box-shadow: 0 0 0 2px rgba(45, 140, 255, 0.18);
+        }
+
+        .edit-mobile-modal .form-select option {
+            background: #0c2137;
+        }
+
+        .edit-status-panel {
+            display: grid;
+            grid-template-columns: 1.15fr 1.4fr;
+            border: 1px solid #315372;
+            border-radius: 7px;
+            overflow: hidden;
+            background: rgba(6, 22, 38, 0.35);
+        }
+
+        .edit-status-panel > div {
+            min-height: 92px;
+            padding: 14px 18px;
+            border-right: 1px solid #315372;
+        }
+
+        .edit-status-panel > div:last-child { border-right: 0; }
+
+        .edit-status-title {
+            color: #dfe9f3;
+            font-size: 0.92rem;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        .status-pill {
+            display: inline-block;
+            min-width: 76px;
+            padding: 5px 14px;
+            border-radius: 20px;
+            color: #fff;
+            font-size: 0.83rem;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .status-pill-pta { background: #0ab866; }
+        .status-pill-non-pta { background: #f5a900; }
+        .status-pill-jv { background: #f23b64; }
+
+        .edit-price-heading {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+            margin: -3px 0 12px;
+        }
+
+        .edit-price-heading .status-pill {
+            min-width: 92px;
+        }
+
+        .edit-mobile-modal textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .edit-mobile-image-preview {
+            display: block;
+            width: 108px;
+            height: 78px;
+            margin-top: 8px;
+            border: 1px solid #3a5c7f;
+            border-radius: 6px;
+            object-fit: contain;
+            background: #081625;
+        }
+
+        .edit-mobile-modal .modal-footer .btn {
+            min-width: 130px;
+            min-height: 44px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 767px) {
+            .edit-mobile-dialog { margin: 10px; }
+            .edit-status-panel { grid-template-columns: 1fr; }
+            .edit-status-panel > div { border-right: 0; border-bottom: 1px solid #315372; }
+            .edit-status-panel > div:last-child { border-bottom: 0; }
+        }
+
         .btn-primary-custom {
             background: var(--accent-blue);
             color: white;
@@ -578,19 +709,8 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Storage</label>
-                            <select name="storage_id" class="form-control">
-                                <option value="">Select Storage</option>
-                                @foreach($storages as $st) <option value="{{ $st->id }}">{{ $st->name }}</option> @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-3">
                             <label class="form-label">Model Name</label>
                             <input type="text" name="name" class="form-control" placeholder="Model Name" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Price (Rs.)</label>
-                            <input type="text" name="price" class="form-control" placeholder="Price" required>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Image</label>
@@ -600,6 +720,11 @@
                             <label class="form-label">Available Colors (Comma separated)</label>
                             <input type="text" name="colors" class="form-control" placeholder="Black, Silver, Blue">
                         </div>
+                            <div class="col-12">
+                                <label class="form-label">Storage, Price & Status Variants</label>
+                                <div id="add_mobile_variants"></div>
+                                <button type="button" class="btn btn-outline-info btn-sm" onclick="addMobileVariant('add_mobile_variants')"><i class="fas fa-plus me-1"></i>Add Storage Variant</button>
+                            </div>
                         <div class="col-12">
                             <label class="form-label">Specs Summary</label>
                             <textarea name="specs" class="form-control" placeholder="Specs Summary"></textarea>
@@ -612,7 +737,7 @@
                 <h5 class="section-title">Mobile Inventory</h5>
                 <div class="table-responsive">
                     <table class="table-custom">
-                        <thead><tr><th>Image</th><th>Name</th><th>Brand</th><th>Series</th><th>Storage</th><th>Price</th><th>Colors</th><th>Action</th></tr></thead>
+                        <thead><tr><th>Image</th><th>Name</th><th>Brand</th><th>Series</th><th>Storage / Variants</th><th>Price</th><th>Colors</th><th>Status</th><th>Action</th></tr></thead>
                         <tbody>
                             @foreach($mobiles as $mobile)
                             <tr>
@@ -620,9 +745,22 @@
                                 <td>{{ $mobile->name }}</td>
                                 <td>{{ $mobile->brand_name }}</td>
                                 <td>{{ $mobile->series_name ?? '-' }}</td>
-                                <td>{{ $mobile->storage_name ?? '-' }}</td>
-                                <td>Rs. {{ number_format((int)$mobile->price) }}</td>
+                                <td>
+                                    @forelse($mobile->variants as $variant)
+                                        <div>{{ $variant->storage_name }} / {{ strtoupper($variant->status ?? 'standard') }}</div>
+                                    @empty
+                                        {{ $mobile->storage_name ?? '-' }}
+                                    @endforelse
+                                </td>
+                                <td>
+                                    @forelse($mobile->variants as $variant)
+                                        <div>Rs. {{ number_format((int)$variant->price) }}</div>
+                                    @empty
+                                        Rs. {{ number_format((int)$mobile->price) }}
+                                    @endforelse
+                                </td>
                                 <td>{{ $mobile->colors ?? 'N/A' }}</td>
+                                <td>{{ $mobile->status ? strtoupper($mobile->status) : '-' }}</td>
                                 <td>
                                     <div class="d-flex gap-2">
                                         <button class="btn btn-sm btn-warning text-white" onclick="openEditMobileModal({{ json_encode($mobile) }})"><i class="fas fa-edit"></i></button>
@@ -725,10 +863,10 @@
 
     <!-- Edit Mobile Modal -->
     <div class="modal fade" id="editMobileModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content bg-dark text-white border-secondary rounded-4">
+        <div class="modal-dialog modal-xl edit-mobile-dialog">
+            <div class="modal-content edit-mobile-modal text-white">
                 <div class="modal-header border-secondary px-4 py-3">
-                    <h5 class="modal-title">✏️ Edit Mobile Phone</h5>
+                    <h5 class="modal-title"><i class="fas fa-pencil-alt text-warning me-2"></i>Edit Mobile Phone</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="editMobileForm" enctype="multipart/form-data">
@@ -749,29 +887,24 @@
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label">Storage</label>
-                                <select name="storage_id" id="edit_storage_select" class="form-control">
-                                    <option value="">Select Storage</option>
-                                    @foreach($storages as $st) <option value="{{ $st->id }}">{{ $st->name }}</option> @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-6">
                                 <label class="form-label">Model Name</label>
                                 <input type="text" name="name" id="edit_mobile_name" class="form-control" required>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Price (Rs.)</label>
-                                <input type="text" name="price" id="edit_mobile_price" class="form-control" required>
+                            <div class="col-12">
+                                <label class="form-label">Storage, Price & Status Variants</label>
+                                <div id="edit_mobile_variants"></div>
+                                <button type="button" class="btn btn-outline-info btn-sm" onclick="addMobileVariant('edit_mobile_variants')"><i class="fas fa-plus me-1"></i>Add Storage Variant</button>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Update Image (Leave blank to keep existing)</label>
-                                <input type="file" name="image" class="form-control" accept="image/*">
+                            <div class="col-md-4">
+                                <label class="form-label">Update Image (Choose File)</label>
+                                <input type="file" name="image" id="edit_mobile_image" class="form-control" accept="image/*" onchange="previewEditMobileImage(this)">
+                                <img id="edit_mobile_image_preview" class="edit-mobile-image-preview d-none" alt="Mobile preview">
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="form-label">Available Colors (Comma separated)</label>
                                 <input type="text" name="colors" id="edit_mobile_colors" class="form-control">
                             </div>
-                            <div class="col-12">
+                            <div class="col-md-4">
                                 <label class="form-label">Specs Summary</label>
                                 <textarea name="specs" id="edit_mobile_specs" class="form-control" rows="3"></textarea>
                             </div>
@@ -789,13 +922,55 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const allSeries = @json($series);
+        const allStorages = @json($storages);
         const baseUrl = "{{ url('/') }}";
+
+        function addMobileVariant(containerId, variant = {}) {
+            const container = document.getElementById(containerId);
+            const index = container.querySelectorAll('.mobile-variant-row').length;
+            const storageOptions = allStorages.map(storage => `<option value="${storage.id}" ${storage.id == (variant.storage_id || '') ? 'selected' : ''}>${storage.name}</option>`).join('');
+            const row = document.createElement('div');
+            row.className = 'mobile-variant-row row g-2 align-items-end mb-2';
+            row.innerHTML = `
+                <div class="col-md-4">
+                    <label class="form-label small">Storage</label>
+                    <select name="variants[${index}][storage_id]" class="form-control" required>
+                        <option value="">Select Storage</option>${storageOptions}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small">Status</label>
+                    <select name="variants[${index}][status]" class="form-control">
+                        <option value="" ${!variant.status ? 'selected' : ''}>Standard</option>
+                        <option value="pta" ${variant.status === 'pta' ? 'selected' : ''}>PTA</option>
+                        <option value="non-pta" ${variant.status === 'non-pta' ? 'selected' : ''}>Non-PTA</option>
+                        <option value="jv" ${variant.status === 'jv' ? 'selected' : ''}>JV</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small">Price (Rs.)</label>
+                    <input type="text" name="variants[${index}][price]" class="form-control" value="${variant.price || ''}" placeholder="Price" required>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-outline-danger w-100" onclick="this.closest('.mobile-variant-row').remove()"><i class="fas fa-trash"></i></button>
+                </div>`;
+            container.appendChild(row);
+        }
+
+        function populateMobileVariants(containerId, variants, mobile) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            if (variants.length) {
+                variants.forEach(variant => addMobileVariant(containerId, variant));
+            } else if (mobile && (mobile.storage_id || mobile.price)) {
+                addMobileVariant(containerId, {storage_id: mobile.storage_id, price: mobile.price, status: mobile.status});
+            }
+        }
 
         function updateSeriesDropdown() {
             const brandId = document.getElementById('brand_select').value;
             const seriesSelect = document.getElementById('series_select');
             seriesSelect.innerHTML = '<option value="">Select Series</option>';
-
             const filteredSeries = allSeries.filter(s => s.brand_id == brandId);
             filteredSeries.forEach(s => {
                 seriesSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`;
@@ -806,7 +981,6 @@
             const brandId = document.getElementById('edit_brand_select').value;
             const seriesSelect = document.getElementById('edit_series_select');
             seriesSelect.innerHTML = '<option value="">Select Series</option>';
-
             const filteredSeries = allSeries.filter(s => s.brand_id == brandId);
             filteredSeries.forEach(s => {
                 const selected = s.id == selectedSeriesId ? 'selected' : '';
@@ -817,17 +991,29 @@
         function openEditMobileModal(mobile) {
             document.getElementById('edit_mobile_id').value = mobile.id;
             document.getElementById('edit_brand_select').value = mobile.brand_id;
-            document.getElementById('edit_storage_select').value = mobile.storage_id || '';
             document.getElementById('edit_mobile_name').value = mobile.name;
-            document.getElementById('edit_mobile_price').value = mobile.price;
             document.getElementById('edit_mobile_colors').value = mobile.colors || '';
             document.getElementById('edit_mobile_specs').value = mobile.specs || '';
+            populateMobileVariants('edit_mobile_variants', mobile.variants || [], mobile);
+            const imagePreview = document.getElementById('edit_mobile_image_preview');
+            imagePreview.src = mobile.image_url || '';
+            imagePreview.classList.toggle('d-none', !mobile.image_url);
 
             updateEditSeriesDropdown(mobile.series_id);
 
             const editModal = new bootstrap.Modal(document.getElementById('editMobileModal'));
             editModal.show();
         }
+
+        function previewEditMobileImage(input) {
+            const preview = document.getElementById('edit_mobile_image_preview');
+            if (input.files && input.files[0]) {
+                preview.src = URL.createObjectURL(input.files[0]);
+                preview.classList.remove('d-none');
+            }
+        }
+
+        addMobileVariant('add_mobile_variants');
 
         document.getElementById('editMobileForm').onsubmit = async (e) => {
             e.preventDefault();

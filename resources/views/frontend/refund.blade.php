@@ -11,37 +11,19 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <style>
-        .refund-alert-box {
+        .urdu-info-box {
             background-color: #fffafa;
             border: 1px solid #ffcccc;
-            border-radius: 20px;
-            padding: 30px;
+            border-radius: 12px;
+            padding: 20px;
             margin: 30px 20px;
-            display: flex;
-            gap: 20px;
-        }
-        .refund-alert-icon {
-            color: #e31e24;
-            font-size: 32px;
-            margin-top: 8px;
-        }
-        .urdu-text {
             direction: rtl;
             text-align: right;
-            flex-grow: 1;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: #333;
             line-height: 1.8;
-        }
-        .urdu-text h3 {
-            font-size: 28px;
-            font-weight: 800;
-            margin-bottom: 15px;
-        }
-        .urdu-text p {
-            margin-bottom: 0;
-            font-size: 20px;
+            font-size: 15px;
             font-weight: 600;
+            box-shadow: 0 4px 10px rgba(227, 30, 36, 0.03);
         }
         .section-header {
             padding: 0 30px;
@@ -151,21 +133,11 @@
         @include('frontend.partials.header')
 
         <!-- Urdu Alert Box -->
-        <div class="refund-alert-box">
-            <div class="refund-alert-icon"><i class="fas fa-exclamation-circle"></i></div>
-            <div class="urdu-text">
-                <h3>محترم کسٹمر!</h3>
-                <p>
-                    اس مرحلہ پر ادائیگی درکار نہیں تھی،<br>
-                    اس لئے اگر آپ نے غلطی سے رقم منتقل کر دی ہے تو<br>
-                    ہمیں اس پر افسوس ہے۔<br>
-                    برائے کرم درج ذیل معلومات ارسال کریں تاکہ<br>
-                    تصدیق کے بعد آپ کی رقم واپس کی جا سکے۔<br>
-                    تمام معلومات کی تصدیق کے بعد آپ کی رقم<br>
-                    جلد از جلد اسی اکاؤنٹ میں واپس کر دی جائے گی۔<br>
-                    شکریہ۔
-                </p>
-            </div>
+        <div class="urdu-info-box">
+            محترم کسٹمر،<br>
+            اس مرحلہ پر ادائیگی درکار نہیں تھی، اگر آپ نے غلطی سے رقم منتقل کر دی ہے تو ہمیں اس پر افسوس ہے۔<br>
+            برائے کرم درج ذیل معلومات ارسال کریں تاکہ تصدیق کے بعد آپ کی رقم واپس کی جا سکے۔<br>
+            تمام معلومات کی تصدیق کے بعد آپ کی رقم جلد از جلد اسی اکاؤنٹ میں واپس کر دی جائے گی۔ شکریہ۔
         </div>
 
         <!-- Customer Details Section -->
