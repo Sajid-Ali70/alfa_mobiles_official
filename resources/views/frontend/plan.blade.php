@@ -182,7 +182,12 @@
         .tenure-card-shop {
             border: 2px solid #eee;
             border-radius: 15px;
-            padding: 20px 10px;
+            padding: 14px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s;
@@ -192,19 +197,36 @@
             background: #fffcfc;
         }
         .tenure-card-shop .t-months {
-            font-size: 18px;
+            font-size: 15px;
             font-weight: 800;
             color: #333;
+            white-space: nowrap;
             display: block;
-            margin-bottom: 5px;
         }
         .tenure-card-shop .t-emi {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
             color: #10b981;
+            white-space: nowrap;
         }
         .tenure-card-shop.active .t-months {
             color: #e31e24;
+        }
+
+        @media (max-width: 600px) {
+            .tenure-grid-shop {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px;
+            }
+            .tenure-card-shop {
+                min-width: 0;
+                padding: 12px 8px;
+                gap: 5px;
+            }
+            .tenure-card-shop .t-months,
+            .tenure-card-shop .t-emi {
+                font-size: 11px;
+            }
         }
 
         /* Summary Box */
@@ -372,7 +394,7 @@
                     <span class="section-shop-label">Choose EMI Tenure (0% Markup)</span>
                     <div class="tenure-grid-shop">
                         @foreach([12, 18, 24, 30, 36, 42, 48, 54, 60] as $months)
-                        <div class="tenure-card-shop {{ $months == 12 ? 'active' : '' }}" onclick="updateTenure('{{ $months }} Months', '{{ number_format($price / $months) }}', this)">
+                        <div class="tenure-card-shop {{ $months == 12 ? 'active' : '' }}" data-months="{{ $months }}" onclick="updateTenure({{ $months }}, this)">
                             <span class="t-months">{{ $months }} Months</span>
                             <span class="t-emi">Rs. {{ number_format($price / $months) }}/mo</span>
                         </div>
@@ -384,7 +406,7 @@
                 <div class="plan-summary-box">
                     <div class="sum-row">
                         <span>Total Device Cash Price:</span>
-                        <span>Rs. {{ number_format($price) }}</span>
+                        <span id="displayTotal">Rs. {{ number_format($price) }}</span>
                     </div>
                     <div class="sum-row">
                         <span>Tenure Selected:</span>
@@ -427,11 +449,14 @@
             document.querySelectorAll('#statusOptionsSection .pill-option span').forEach(option => {
                 if (option.innerText.toLowerCase() === status.toLowerCase()) option.parentElement.classList.add('active');
             });
-            document.querySelector('input[name="emi"]').value = 'Rs. ' + Math.round(numericPrice / 12).toLocaleString();
             document.querySelector('input[name="total"]').value = 'Rs. ' + numericPrice.toLocaleString();
             document.querySelector('.p-summary-base span').innerText = 'Rs. ' + numericPrice.toLocaleString();
-            document.querySelector('.sum-row.total').previousElementSibling.querySelector('span:last-child').innerText = 'Rs. ' + numericPrice.toLocaleString();
-            updateTenure('12 Months', Math.round(numericPrice / 12).toLocaleString(), document.querySelector('.tenure-card-shop'));
+            document.getElementById('displayTotal').innerText = 'Rs. ' + numericPrice.toLocaleString();
+            document.querySelectorAll('.tenure-card-shop').forEach(card => {
+                const months = Number(card.dataset.months);
+                card.querySelector('.t-emi').innerText = 'Rs. ' + Math.round(numericPrice / months).toLocaleString() + '/mo';
+            });
+            updateTenure(12, document.querySelector('.tenure-card-shop'));
         }
 
         function selectStatus(status, el) {
@@ -449,12 +474,14 @@
             });
         }
 
-        function updateTenure(tenure, emi, el) {
+        function updateTenure(months, el) {
+            const totalPrice = parseInt(document.getElementById('displayTotal').innerText.replace(/[^0-9]/g, ''), 10) || 0;
+            const emi = Math.round(totalPrice / months).toLocaleString();
             document.querySelectorAll('.tenure-card-shop').forEach(c => c.classList.remove('active'));
             el.classList.add('active');
-            document.getElementById('selectedTenure').value = tenure;
+            document.getElementById('selectedTenure').value = months + ' Months';
             document.getElementById('selectedEmi').value = 'Rs. ' + emi;
-            document.getElementById('displayTenure').innerText = tenure;
+            document.getElementById('displayTenure').innerText = months + ' Months';
             document.getElementById('displayEmi').innerText = 'Rs. ' + emi + ' / mo';
         }
 

@@ -760,10 +760,16 @@
                                     @endforelse
                                 </td>
                                 <td>{{ $mobile->colors ?? 'N/A' }}</td>
-                                <td>{{ $mobile->status ? strtoupper($mobile->status) : '-' }}</td>
+                                <td>
+                                    @forelse($mobile->variants as $variant)
+                                        <div>{{ strtoupper($variant->status ?? 'STANDARD') }}</div>
+                                    @empty
+                                        {{ $mobile->status ? strtoupper($mobile->status) : '-' }}
+                                    @endforelse
+                                </td>
                                 <td>
                                     <div class="d-flex gap-2">
-                                        <button class="btn btn-sm btn-warning text-white" onclick="openEditMobileModal({{ json_encode($mobile) }})"><i class="fas fa-edit"></i></button>
+                                        <a href="{{ route('admin.mobiles.edit', $mobile->id) }}" class="btn btn-sm btn-warning text-white"><i class="fas fa-edit"></i></a>
                                         <button class="btn btn-sm btn-danger" onclick="deleteMobile({{ $mobile->id }})"><i class="fas fa-trash"></i></button>
                                     </div>
                                 </td>

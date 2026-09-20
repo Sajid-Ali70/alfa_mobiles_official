@@ -302,7 +302,7 @@ class FrontendController extends Controller
                 <div style='font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;'>
                     <h2 style='color: #28a745; text-align: center;'>Order Successfully Placed!</h2>
                     <p>Dear <strong>{$data['full_name']}</strong>,</p>
-                    <p>Congratulations! Your installment order for <strong>{$mobile->name}</strong> has been received.</p>
+                    <p>Congratulations! Your installment order for <strong>{$mobile->name}</strong> has been placed.</p>
 
                     <h3 style='color: #333;'>Order Summary:</h3>
                     <table style='width: 100%; border-collapse: collapse;'>

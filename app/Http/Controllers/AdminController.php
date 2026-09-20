@@ -271,6 +271,24 @@ class AdminController extends Controller
         return response()->json(['message' => 'Mobile added']);
     }
 
+    public function editMobilePage($id)
+    {
+        $mobile = DB::table('mobiles')->where('id', $id)->first();
+        if (!$mobile) return redirect()->route('admin.dashboard');
+
+        $settings = DB::table('app_settings')->where('id', 1)->first();
+        $brands = DB::table('brands')->get();
+        $series = DB::table('series')->get();
+        $storages = DB::table('storages')->get();
+        $variants = DB::table('mobile_variants')
+            ->leftJoin('storages', 'mobile_variants.storage_id', '=', 'storages.id')
+            ->where('mobile_variants.mobile_id', $id)
+            ->select('mobile_variants.*', 'storages.name as storage_name')
+            ->get();
+
+        return view('admin.edit_mobile', compact('settings', 'mobile', 'brands', 'series', 'storages', 'variants'));
+    }
+
     public function updateMobile(Request $request)
     {
         $validated = $request->validate([
@@ -302,7 +320,7 @@ class AdminController extends Controller
 
         DB::table('mobiles')->where('id', $validated['id'])->update($data + ['updated_at' => now()]);
         $this->saveMobileVariants($validated['id'], $request->input('variants', []));
-        return response()->json(['message' => 'Mobile updated']);
+        return redirect()->route('admin.dashboard')->with('success', 'Mobile updated successfully');
     }
 
     private function saveMobileVariants($mobileId, array $variants)

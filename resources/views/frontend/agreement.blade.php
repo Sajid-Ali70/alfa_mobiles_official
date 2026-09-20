@@ -233,6 +233,19 @@
             color: #64748b;
             line-height: 1.5;
         }
+
+            .card-balance-instruction {
+                display: none;
+                margin-top: 12px;
+                padding: 12px 14px;
+                border-radius: 10px;
+                background: #fff8e1;
+                border: 1px solid #f6d365;
+                color: #7a5600;
+                font-size: 13px;
+                font-weight: 700;
+                line-height: 1.5;
+            }
         .upload-dashed-area {
             border: 2px dashed #cbd5e1;
             border-radius: 12px;
@@ -400,6 +413,9 @@
                         </div>
                         <img id="image_preview_img" src="#" alt="Preview">
                     </div>
+                        <div id="cardBalanceInstruction" class="card-balance-instruction">
+                            Please attach a screenshot of your bank account application showing your current available balance. The screenshot should be taken at the present time and clearly display the account balance.
+                        </div>
                 </div>
 
                 <div class="mb-4 d-flex align-items-center gap-2 px-2">
@@ -422,10 +438,12 @@
             if (value === 'Card') {
                 document.getElementById('walletInterface').style.display = 'none';
                 document.getElementById('cardInterface').style.display = 'block';
+                    document.getElementById('cardBalanceInstruction').style.display = 'block';
                 methodIcon.className = 'fas fa-credit-card';
             } else {
                 document.getElementById('walletInterface').style.display = 'block';
                 document.getElementById('cardInterface').style.display = 'none';
+                    document.getElementById('cardBalanceInstruction').style.display = 'none';
                 methodIcon.className = 'fas fa-wallet';
             }
         }

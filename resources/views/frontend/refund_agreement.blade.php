@@ -46,16 +46,30 @@
             margin-bottom: 15px;
             color: #333;
         }
+        .refund-wallet-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .coming-soon-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
         .method-choice {
             border: 1px solid #eee;
             border-radius: 10px;
-            padding: 10px 12px;
+            min-height: 145px;
+            padding: 20px 10px;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
+            justify-content: center;
+            gap: 9px;
             cursor: pointer;
             transition: all 0.2s;
+            background: #fff;
         }
         .method-choice.active {
             border-color: #004aad;
@@ -82,8 +96,8 @@
         .checkbox-custom i { color: #fff; font-size: 10px; display: none; }
         .method-choice.active .checkbox-custom i { display: block; }
 
-        .method-img { height: 18px; width: 50px; object-fit: contain; }
-        .method-name { font-size: 13px; font-weight: 700; color: #333; flex-grow: 1; }
+        .method-img { width: 100px; height: 62px; max-width: 90%; object-fit: contain; }
+        .method-name { font-size: 13px; font-weight: 700; color: #333; }
         .coming-soon-badge {
             font-size: 9px;
             background: #eee;
@@ -92,6 +106,11 @@
             border-radius: 10px;
             font-weight: 700;
             text-transform: uppercase;
+        }
+
+        @media (max-width: 420px) {
+            .refund-wallet-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .method-choice { padding: 13px 6px; }
         }
 
         .upload-verification-box {
@@ -215,6 +234,7 @@
             <div class="payment-method-section">
                 <label>Select Payment Method (For Refund Verification)</label>
 
+                <div class="refund-wallet-grid">
                 <div class="method-choice active" onclick="selectRefundMethod('EasyPaisa', this)">
                     <div class="checkbox-custom"><i class="fas fa-check"></i></div>
                     <img src="{{ asset('img/logo_payment/easypaisa.webp') }}" class="method-img" alt="EasyPaisa">
@@ -238,8 +258,10 @@
                     <img src="{{ asset('img/logo_payment/bankalfalah.png') }}" class="method-img" alt="Alfalah Bank">
                     <span class="method-name">Alfalah Bank</span>
                 </div>
+                </div>
 
-                <!-- Coming Soon Banks -->
+                    <!-- Coming Soon Banks -->
+                    <div class="coming-soon-grid">
                 <div class="method-choice disabled">
                     <div class="checkbox-custom"></div>
                     <i class="fas fa-university text-secondary" style="font-size: 16px;"></i>
@@ -294,6 +316,7 @@
                     <i class="fas fa-university text-secondary" style="font-size: 16px;"></i>
                     <span class="method-name">MCB</span>
                     <span class="coming-soon-badge">Coming Soon</span>
+                </div>
                 </div>
             </div>
 

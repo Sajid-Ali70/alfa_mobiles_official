@@ -52,6 +52,7 @@ Route::middleware(['admin.auth'])->group(function () {
 
     // Mobile Management
     Route::post('/admin/mobiles/add', [AdminController::class, 'addMobile'])->name('admin.mobiles.add');
+    Route::get('/admin/mobiles/{id}/edit', [AdminController::class, 'editMobilePage'])->name('admin.mobiles.edit');
     Route::post('/admin/mobiles/update', [AdminController::class, 'updateMobile'])->name('admin.mobiles.update');
     Route::post('/admin/mobiles/delete/{id}', [AdminController::class, 'deleteMobile'])->name('admin.mobiles.delete');
     Route::get('/admin/mobiles/download', [AdminController::class, 'downloadMobileList'])->name('admin.mobiles.download');
