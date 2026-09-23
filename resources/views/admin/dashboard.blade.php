@@ -1043,6 +1043,12 @@
             document.getElementById(sectionId + 'Section').classList.remove('d-none');
             const tabEl = document.getElementById('tab-' + sectionId);
             if(tabEl) tabEl.classList.add('active');
+            history.replaceState(null, '', `${window.location.pathname}#${sectionId}`);
+        }
+
+        const initialSection = window.location.hash.replace('#', '');
+        if (document.getElementById(initialSection + 'Section')) {
+            showSection(initialSection);
         }
 
         function previewImg(input, previewId) {
@@ -1138,52 +1144,55 @@
             modal.show();
         }
 
-        document.getElementById('settingsForm').onsubmit = async (e) => {
+        document.getElementById('settingsForm')?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const res = await fetch(`${baseUrl}/admin/settings/update`, { method: 'POST', body: new FormData(e.target) });
             if (res.ok) alert("Settings updated!");
-        };
+        });
 
-        document.getElementById('addBrandForm').onsubmit = async (e) => {
+        document.getElementById('addBrandForm')?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const res = await fetch(`${baseUrl}/admin/brands/add`, { method: 'POST', body: new FormData(e.target) });
             if (res.ok) location.reload();
-        };
+        });
 
         async function deleteBrand(id) {
             if (confirm("Delete this brand?")) {
                 const res = await fetch(`${baseUrl}/admin/brands/delete/${id}`, { method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'} });
                 if (res.ok) location.reload();
+                else alert((await res.json()).message || "Unable to delete brand.");
             }
         }
 
-        document.getElementById('addSeriesForm').onsubmit = async (e) => {
+        document.getElementById('addSeriesForm')?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const res = await fetch(`${baseUrl}/admin/series/add`, { method: 'POST', body: new FormData(e.target) });
             if (res.ok) location.reload();
-        };
+        });
 
         async function deleteSeries(id) {
             if (confirm("Delete this series?")) {
                 const res = await fetch(`${baseUrl}/admin/series/delete/${id}`, { method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'} });
                 if (res.ok) location.reload();
+                else alert((await res.json()).message || "Unable to delete series.");
             }
         }
 
-        document.getElementById('addStorageForm').onsubmit = async (e) => {
+        document.getElementById('addStorageForm')?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const res = await fetch(`${baseUrl}/admin/storages/add`, { method: 'POST', body: new FormData(e.target) });
             if (res.ok) location.reload();
-        };
+        });
 
         async function deleteStorage(id) {
             if (confirm("Delete this storage?")) {
                 const res = await fetch(`${baseUrl}/admin/storages/delete/${id}`, { method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'} });
                 if (res.ok) location.reload();
+                else alert((await res.json()).message || "Unable to delete storage.");
             }
         }
 
-        document.getElementById('addMobileForm').onsubmit = async (e) => {
+        document.getElementById('addMobileForm')?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const res = await fetch(`${baseUrl}/admin/mobiles/add`, {
                 method: 'POST',
@@ -1195,12 +1204,13 @@
                 const err = await res.json();
                 alert("Error adding mobile: " + (err.message || "Internal Server Error"));
             }
-        };
+        });
 
         async function deleteMobile(id) {
             if (confirm("Delete this mobile?")) {
                 const res = await fetch(`${baseUrl}/admin/mobiles/delete/${id}`, { method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'} });
                 if (res.ok) location.reload();
+                else alert((await res.json()).message || "Unable to delete mobile.");
             }
         }
 
@@ -1248,7 +1258,7 @@
             }
         }
 
-        document.getElementById('passwordForm').onsubmit = async (e) => {
+        document.getElementById('passwordForm')?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const res = await fetch(`${baseUrl}/admin/password/update`, {
                 method: 'POST',
@@ -1257,7 +1267,7 @@
             });
             if (res.ok) alert("Password changed!");
             else { const err = await res.json(); alert(err.message); }
-        };
+        });
     </script>
 </body>
 </html>

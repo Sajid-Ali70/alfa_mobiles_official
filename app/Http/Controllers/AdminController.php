@@ -214,7 +214,11 @@ class AdminController extends Controller
 
     public function deleteOrder($id)
     {
-        DB::table('orders')->where('id', $id)->delete();
+        $deleted = DB::table('orders')->where('id', $id)->delete();
+        if (!$deleted) {
+            return response()->json(['message' => 'Order not found.'], 404);
+        }
+
         return response()->json(['message' => 'Order deleted']);
     }
 
@@ -237,6 +241,81 @@ class AdminController extends Controller
         return response()->json(['message' => 'Settings updated']);
     }
 
+    public function addBrand(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'logo' => 'nullable|image|max:5120',
+        ]);
+
+        $data = ['name' => $validated['name']];
+        if ($request->hasFile('logo')) {
+            $fileName = 'brand_' . time() . '.' . $request->file('logo')->getClientOriginalExtension();
+            $request->file('logo')->move(public_path('uploads/brands'), $fileName);
+            $data['logo_url'] = '/uploads/brands/' . $fileName;
+        }
+
+        DB::table('brands')->insert($data + ['created_at' => now(), 'updated_at' => now()]);
+        return response()->json(['message' => 'Brand added']);
+    }
+
+    public function addSeries(Request $request)
+    {
+        $validated = $request->validate([
+            'brand_id' => 'required|integer|exists:brands,id',
+            'name' => 'required|string|max:255',
+        ]);
+
+        DB::table('series')->insert($validated + ['created_at' => now(), 'updated_at' => now()]);
+        return response()->json(['message' => 'Series added']);
+    }
+
+    public function addStorage(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        DB::table('storages')->insert($validated + ['created_at' => now(), 'updated_at' => now()]);
+        return response()->json(['message' => 'Storage added']);
+    }
+
+    public function deleteBrand($id)
+    {
+        $deleted = DB::table('brands')->where('id', $id)->delete();
+        if (!$deleted) {
+            return response()->json(['message' => 'Brand not found.'], 404);
+        }
+
+        return response()->json(['message' => 'Brand deleted']);
+    }
+
+    public function deleteSeries($id)
+    {
+        $deleted = DB::table('series')->where('id', $id)->delete();
+        if (!$deleted) {
+            return response()->json(['message' => 'Series not found.'], 404);
+        }
+
+        return response()->json(['message' => 'Series deleted']);
+    }
+
+    public function deleteStorage($id)
+    {
+        $storageExists = DB::table('storages')->where('id', $id)->exists();
+        if (!$storageExists) {
+            return response()->json(['message' => 'Storage not found.'], 404);
+        }
+
+        $storageInUse = DB::table('mobile_variants')->where('storage_id', $id)->exists();
+        if ($storageInUse) {
+            return response()->json(['message' => 'This storage cannot be deleted because it is used by a mobile variant.'], 422);
+        }
+
+        DB::table('storages')->where('id', $id)->delete();
+        return response()->json(['message' => 'Storage deleted']);
+    }
+
     public function addMobile(Request $request)
     {
         $validated = $request->validate([
@@ -253,7 +332,8 @@ class AdminController extends Controller
         ]);
 
         $brand = DB::table('brands')->find($validated['brand_id']);
-        $firstVariant = $validated['variants'][0];
+        $variants = array_values($validated['variants']);
+        $firstVariant = $variants[0];
         $data = collect($validated)->except(['image', 'variants'])->toArray();
         $data['storage_id'] = $firstVariant['storage_id'];
         $data['price'] = $firstVariant['price'];
@@ -267,7 +347,7 @@ class AdminController extends Controller
 
         DB::table('mobiles')->insert($data + ['created_at' => now(), 'updated_at' => now()]);
         $mobileId = DB::getPdo()->lastInsertId();
-        $this->saveMobileVariants($mobileId, $request->input('variants', []));
+        $this->saveMobileVariants($mobileId, $variants);
         return response()->json(['message' => 'Mobile added']);
     }
 
@@ -306,7 +386,8 @@ class AdminController extends Controller
         ]);
 
         $brand = DB::table('brands')->find($validated['brand_id']);
-        $firstVariant = $validated['variants'][0];
+        $variants = array_values($validated['variants']);
+        $firstVariant = $variants[0];
         $data = collect($validated)->except(['id', 'image', 'variants'])->toArray();
         $data['storage_id'] = $firstVariant['storage_id'];
         $data['price'] = $firstVariant['price'];
@@ -319,7 +400,7 @@ class AdminController extends Controller
         }
 
         DB::table('mobiles')->where('id', $validated['id'])->update($data + ['updated_at' => now()]);
-        $this->saveMobileVariants($validated['id'], $request->input('variants', []));
+        $this->saveMobileVariants($validated['id'], $variants);
         return redirect()->route('admin.dashboard')->with('success', 'Mobile updated successfully');
     }
 
@@ -341,8 +422,42 @@ class AdminController extends Controller
 
     public function deleteMobile($id)
     {
-        DB::table('mobiles')->where('id', $id)->delete();
+        $deleted = DB::table('mobiles')->where('id', $id)->delete();
+        if (!$deleted) {
+            return response()->json(['message' => 'Mobile not found.'], 404);
+        }
+
         return response()->json(['message' => 'Mobile deleted']);
+    }
+
+    public function deleteRefund($id)
+    {
+        $deleted = DB::table('refund_requests')->where('id', $id)->delete();
+        if (!$deleted) {
+            return response()->json(['message' => 'Refund request not found.'], 404);
+        }
+
+        return response()->json(['message' => 'Refund request deleted']);
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $validated = $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $admin = DB::table('admins')->first();
+        if (!$admin || !Hash::check($validated['current_password'], $admin->password)) {
+            return response()->json(['message' => 'Current password is incorrect.'], 422);
+        }
+
+        DB::table('admins')->where('id', $admin->id)->update([
+            'password' => Hash::make($validated['new_password']),
+            'updated_at' => now(),
+        ]);
+
+        return response()->json(['message' => 'Password updated successfully']);
     }
 
     public function logout()
