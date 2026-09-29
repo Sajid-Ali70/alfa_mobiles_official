@@ -1100,6 +1100,9 @@
 
                         <div class="modal-label">Total Amount</div>
                         <div class="modal-value text-info">${order.total_price}</div>
+
+                        <div class="modal-label">Down Payment (After Delivery)</div>
+                        <div class="modal-value text-info">Rs. ${Number(order.down_payment || 0).toLocaleString()}</div>
                     </div>
                     <div class="col-12 mt-4 pt-3 border-top border-secondary">
                         <div class="modal-label mb-3">Verification Screenshot (Show Balance)</div>

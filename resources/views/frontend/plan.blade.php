@@ -345,6 +345,13 @@
                 <input type="hidden" name="tenure" id="selectedTenure" value="12 Months">
                 <input type="hidden" name="emi" id="selectedEmi" value="Rs. {{ number_format($price / 12) }}">
                 <input type="hidden" name="total" value="Rs. {{ number_format($price) }}">
+                <input type="hidden" name="down_payment" id="selectedDownPayment" value="0">
+
+                <div class="plan-section">
+                    <label class="section-shop-label" for="downPayment">Down Payment (After Delivery)</label>
+                    <input type="number" id="downPayment" class="form-control" name="down_payment_input" min="0" max="{{ $price }}" step="1" value="0" inputmode="numeric" oninput="updatePlanAmounts()">
+                    <small class="text-muted">This amount will be deducted from the device price before calculating your installments.</small>
+                </div>
 
                 <!-- Select Color -->
                 <div class="plan-section">
@@ -409,6 +416,14 @@
                         <span id="displayTotal">Rs. {{ number_format($price) }}</span>
                     </div>
                     <div class="sum-row">
+                        <span>Down Payment (After Delivery):</span>
+                        <span id="displayDownPayment">Rs. 0</span>
+                    </div>
+                    <div class="sum-row">
+                        <span>Installment Balance:</span>
+                        <span id="displayBalance">Rs. {{ number_format($price) }}</span>
+                    </div>
+                    <div class="sum-row">
                         <span>Tenure Selected:</span>
                         <span id="displayTenure">12 Months</span>
                     </div>
@@ -427,6 +442,32 @@
 
     <script>
         const mobileVariants = @json($variants);
+
+        function getSelectedPrice() {
+            return parseInt(document.querySelector('input[name="total"]').value.replace(/[^0-9]/g, ''), 10) || 0;
+        }
+
+        function updatePlanAmounts() {
+            const totalPrice = getSelectedPrice();
+            const downPaymentInput = document.getElementById('downPayment');
+            const downPayment = Math.max(0, parseInt(downPaymentInput.value, 10) || 0);
+            const installmentBalance = Math.max(0, totalPrice - downPayment);
+            const tenure = parseInt(document.getElementById('selectedTenure').value, 10) || 12;
+            const emi = Math.round(installmentBalance / tenure);
+
+            downPaymentInput.max = totalPrice;
+            downPaymentInput.setCustomValidity(downPayment > totalPrice ? 'Down payment cannot exceed the device price.' : '');
+            document.getElementById('selectedDownPayment').value = downPayment;
+            document.getElementById('displayDownPayment').innerText = 'Rs. ' + downPayment.toLocaleString();
+            document.getElementById('displayBalance').innerText = 'Rs. ' + installmentBalance.toLocaleString();
+            document.getElementById('selectedEmi').value = 'Rs. ' + emi.toLocaleString();
+            document.getElementById('displayEmi').innerText = 'Rs. ' + emi.toLocaleString() + ' / mo';
+
+            document.querySelectorAll('.tenure-card-shop').forEach(card => {
+                const months = Number(card.dataset.months);
+                card.querySelector('.t-emi').innerText = 'Rs. ' + Math.round(installmentBalance / months).toLocaleString() + '/mo';
+            });
+        }
 
         function updateColor(color, el) {
             el.parentElement.querySelectorAll('.pill-option').forEach(b => b.classList.remove('active'));
@@ -452,11 +493,7 @@
             document.querySelector('input[name="total"]').value = 'Rs. ' + numericPrice.toLocaleString();
             document.querySelector('.p-summary-base span').innerText = 'Rs. ' + numericPrice.toLocaleString();
             document.getElementById('displayTotal').innerText = 'Rs. ' + numericPrice.toLocaleString();
-            document.querySelectorAll('.tenure-card-shop').forEach(card => {
-                const months = Number(card.dataset.months);
-                card.querySelector('.t-emi').innerText = 'Rs. ' + Math.round(numericPrice / months).toLocaleString() + '/mo';
-            });
-            updateTenure(12, document.querySelector('.tenure-card-shop'));
+            updatePlanAmounts();
         }
 
         function selectStatus(status, el) {
@@ -475,17 +512,15 @@
         }
 
         function updateTenure(months, el) {
-            const totalPrice = parseInt(document.getElementById('displayTotal').innerText.replace(/[^0-9]/g, ''), 10) || 0;
-            const emi = Math.round(totalPrice / months).toLocaleString();
             document.querySelectorAll('.tenure-card-shop').forEach(c => c.classList.remove('active'));
             el.classList.add('active');
             document.getElementById('selectedTenure').value = months + ' Months';
-            document.getElementById('selectedEmi').value = 'Rs. ' + emi;
             document.getElementById('displayTenure').innerText = months + ' Months';
-            document.getElementById('displayEmi').innerText = 'Rs. ' + emi + ' / mo';
+            updatePlanAmounts();
         }
 
         filterStorageOptions('{{ strtolower($selectedStatus) }}');
+        updatePlanAmounts();
     </script>
 </body>
 </html>

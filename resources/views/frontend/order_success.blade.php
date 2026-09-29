@@ -103,6 +103,7 @@
         <div class="success-wrapper">
             <h1 class="success-title">Order Placed Successfully!</h1>
             <p style="color: #64748b;">Thank you, <strong>{{ $order->full_name }}</strong>. Your request is registered.</p>
+            <p style="color: #002d5a; font-weight: 800;">Order ID: {{ $order->order_number }}</p>
 
             <div class="summary-card">
                 <div class="info-grid">

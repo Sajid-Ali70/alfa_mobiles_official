@@ -36,6 +36,10 @@ class FrontendController extends Controller
                 DB::statement("ALTER TABLE `orders` ADD `storage` varchar(100) DEFAULT NULL AFTER `color` ");
             }
 
+            if (!Schema::hasColumn('orders', 'down_payment')) {
+                DB::statement("ALTER TABLE `orders` ADD COLUMN `down_payment` varchar(100) DEFAULT NULL AFTER `total_price` ");
+            }
+
             if (!Schema::hasColumn('orders', 'email')) {
                 DB::statement("ALTER TABLE `orders` ADD COLUMN `email` VARCHAR(255) NULL AFTER `full_name` ");
             }
@@ -229,11 +233,15 @@ class FrontendController extends Controller
         if ($request->has('mobile_id')) {
             Session::put('order_mobile_id', $request->mobile_id);
         }
+        $total = (int)preg_replace('/\D/', '', (string)$request->input('total', '0'));
+        $downPayment = min($total, max(0, (int)$request->input('down_payment', 0)));
+        $tenure = max(1, (int)preg_replace('/\D/', '', (string)$request->input('tenure', '12')));
         Session::put('order_color', $request->color);
         Session::put('order_storage', $request->storage);
-        Session::put('order_tenure', $request->tenure);
-        Session::put('order_emi', $request->emi);
+        Session::put('order_tenure', $tenure . ' Months');
+        Session::put('order_emi', 'Rs. ' . number_format((int)round(($total - $downPayment) / $tenure)));
         Session::put('order_total', $request->total);
+        Session::put('order_down_payment', $downPayment);
         return view('frontend.customer_info', compact('settings'));
     }
 
@@ -286,6 +294,7 @@ class FrontendController extends Controller
                 'tenure' => Session::get('order_tenure'),
                 'monthly_emi' => Session::get('order_emi'),
                 'total_price' => Session::get('order_total'),
+                'down_payment' => Session::get('order_down_payment', 0),
                 'status' => 'Waiting for Approval',
                 'created_at' => now(), 'updated_at' => now(),
             ];
@@ -315,6 +324,7 @@ class FrontendController extends Controller
                     <div style='background: #f9f9f9; padding: 15px; border-radius: 8px;'>
                         <table style='width: 100%; border-collapse: collapse;'>
                             <tr><td style='padding: 8px 0; color: #666;'>Total Device Price:</td><td style='padding: 8px 0; font-weight: bold; text-align: right;'>{$data['total_price']}</td></tr>
+                            <tr><td style='padding: 8px 0; color: #666;'>Down Payment (After Delivery):</td><td style='padding: 8px 0; font-weight: bold; text-align: right;'>Rs. {$data['down_payment']}</td></tr>
                             <tr><td style='padding: 8px 0; color: #666;'>Plan Duration:</td><td style='padding: 8px 0; font-weight: bold; text-align: right;'>{$data['tenure']}</td></tr>
                             <tr><td style='padding: 8px 0; color: #666;'>Monthly Installment:</td><td style='padding: 8px 0; font-weight: bold; color: #28a745; text-align: right;'>{$data['monthly_emi']}</td></tr>
                         </table>
