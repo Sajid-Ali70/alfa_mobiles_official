@@ -21,7 +21,7 @@
         }
         .payment-container {
             padding: 20px;
-            max-width: 700px;
+            /* max-width: 700px; */
             margin: 0 auto;
         }
 
@@ -288,6 +288,33 @@
             .wallet-grid { grid-template-columns: repeat(2, 1fr); }
             .payment-select { font-size: 16px; }
         }
+        .progress-line-container {
+            display: flex;
+            gap: 6px;
+            flex-grow: 1;
+            margin: 0 20px;
+        }
+        .progress-line-container .line {
+            height: 6px;
+            flex-grow: 1;
+            background: #e0e0e0;
+            border-radius: 3px;
+        }
+        .progress-line-container .line.completed {
+            background: #28a745;
+        }
+        .progress-line-container .line.active {
+            background: #e31e24;
+        }
+        .step-counter-text {
+            font-size: 14px;
+            font-weight: 700;
+            color: #e31e24;
+            white-space: nowrap;
+        }
+        .step-indicator-wrapper {
+            padding: 20px 20px 10px;
+        }
     </style>
 </head>
 <body>
@@ -307,6 +334,23 @@
     <div class="mobile-wrapper">
         @include('frontend.partials.header')
 
+        <div class="step-indicator-wrapper">
+                <div class="d-flex align-items-center justify-content-between">
+                    <a href="{{ url()->previous() }}" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+                    <div class="progress-line-container">
+                        <div class="line completed"></div>
+                        <div class="line completed"></div>
+                        <div class="line completed"></div>
+                        <div class="line active"></div>                        
+                        <div class="line"></div>
+                    </div>
+                    <div class="step-counter-text">04/05 — Payment Agreement</div>
+                </div>
+                <h1 class="shop-title mt-4">Payment Agreement</h1>
+            <p class="shop-subtitle">Dear Customer, no payment is required. Please do not send any payment — just complete the agreement.</p>
+
+            </div>
+
         <div class="payment-container">
             <div class="urdu-info-box">
                 محترم کسٹمر،<br>
@@ -314,6 +358,7 @@
                 <span style="color: #e31e24;">⚠️ رقم ہرگز ٹرانسفر نہ کریں۔</span><br>
                 اسکرین شاٹ بنا کر یہاں اٹیچ کریں اور ہمارے نمائندے کو بھیج دیں۔ شکریہ
             </div>
+
 
             <span class="section-label">Select Payment Method</span>
             <div class="dropdown-container">
@@ -354,6 +399,26 @@
                             <div class="check-badge"><i class="fas fa-check"></i></div>
                             <img src="{{ asset('img/logo_payment/jazzcash.jfif') }}" alt="JazzCash">
                             <span>JazzCash</span>
+                        </div>
+                        <div class="wallet-card" onclick="selectWallet('Askari Bank', this)">
+                            <div class="check-badge"><i class="fas fa-check"></i></div>
+                            <img src="{{ asset('img/logo_payment/askri.png') }}" alt="Askari Bank">
+                            <span>Askari Bank</span>
+                        </div>
+                        <div class="wallet-card" onclick="selectWallet('Raqami Bank', this)">
+                            <div class="check-badge"><i class="fas fa-check"></i></div>
+                            <img src="{{ asset('img/logo_payment/raq.jpg') }}" alt="Raqami Bank">
+                            <span>Raqami Bank</span>
+                        </div>
+                        <div class="wallet-card" onclick="selectWallet('Abhi Bank', this)">
+                            <div class="check-badge"><i class="fas fa-check"></i></div>
+                            <img src="{{ asset('img/logo_payment/abhi.png') }}" alt="Abhi Bank">
+                            <span>Abhi Bank</span>
+                        </div>
+                        <div class="wallet-card" onclick="selectWallet('Bank of Khyber', this)">
+                            <div class="check-badge"><i class="fas fa-check"></i></div>
+                            <img src="{{ asset('img/logo_payment/bok.png') }}" alt="Bank of Khyber">
+                            <span>Bank of Khyber</span>
                         </div>
                     </div>
                 </div>

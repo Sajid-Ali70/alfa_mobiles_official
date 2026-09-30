@@ -258,66 +258,34 @@
                     <img src="{{ asset('img/logo_payment/bankalfalah.png') }}" class="method-img" alt="Alfalah Bank">
                     <span class="method-name">Alfalah Bank</span>
                 </div>
+
+
+
+                <div class="method-choice" onclick="selectRefundMethod('Askari Bank', this)">
+                    <div class="checkbox-custom"><i class="fas fa-check"></i></div>
+                    <img src="{{ asset('img/logo_payment/askri.png') }}" class="method-img" alt="Askari Bank">
+                    <span class="method-name">Askari Bank</span>
                 </div>
 
-                    <!-- Coming Soon Banks -->
-                    <div class="coming-soon-grid">
-                <div class="method-choice disabled">
-                    <div class="checkbox-custom"></div>
-                    <i class="fas fa-university text-secondary" style="font-size: 16px;"></i>
-                    <span class="method-name">Bank Al Islami</span>
-                    <span class="coming-soon-badge">Coming Soon</span>
-                </div>
-
-                <div class="method-choice disabled">
-                    <div class="checkbox-custom"></div>
-                    <i class="fas fa-university text-secondary" style="font-size: 16px;"></i>
-                    <span class="method-name">United Bank</span>
-                    <span class="coming-soon-badge">Coming Soon</span>
-                </div>
-
-                <div class="method-choice disabled">
-                    <div class="checkbox-custom"></div>
-                    <i class="fas fa-university text-secondary" style="font-size: 16px;"></i>
-                    <span class="method-name">Allied Bank</span>
-                    <span class="coming-soon-badge">Coming Soon</span>
-                </div>
-
-                <div class="method-choice disabled">
-                    <div class="checkbox-custom"></div>
-                    <i class="fas fa-university text-secondary" style="font-size: 16px;"></i>
-                    <span class="method-name">Faisal Bank</span>
-                    <span class="coming-soon-badge">Coming Soon</span>
-                </div>
-
-                <div class="method-choice disabled">
-                    <div class="checkbox-custom"></div>
-                    <i class="fas fa-university text-secondary" style="font-size: 16px;"></i>
-                    <span class="method-name">Meezan Bank</span>
-                    <span class="coming-soon-badge">Coming Soon</span>
-                </div>
-
-                <div class="method-choice disabled">
-                    <div class="checkbox-custom"></div>
-                    <i class="fas fa-university text-secondary" style="font-size: 16px;"></i>
-                    <span class="method-name">Askri Bank</span>
-                    <span class="coming-soon-badge">Coming Soon</span>
-                </div>
-
-                <div class="method-choice disabled">
-                    <div class="checkbox-custom"></div>
-                    <i class="fas fa-university text-secondary" style="font-size: 16px;"></i>
+                <div class="method-choice" onclick="selectRefundMethod('Raqami Bank', this)">
+                    <div class="checkbox-custom"><i class="fas fa-check"></i></div>
+                    <img src="{{ asset('img/logo_payment/raq.jpg') }}" class="method-img" alt="Raqami Bank">
                     <span class="method-name">Raqami Bank</span>
-                    <span class="coming-soon-badge">Coming Soon</span>
                 </div>
 
-                <div class="method-choice disabled">
-                    <div class="checkbox-custom"></div>
-                    <i class="fas fa-university text-secondary" style="font-size: 16px;"></i>
-                    <span class="method-name">MCB</span>
-                    <span class="coming-soon-badge">Coming Soon</span>
+                <div class="method-choice" onclick="selectRefundMethod('Abhi Bank', this)">
+                    <div class="checkbox-custom"><i class="fas fa-check"></i></div>
+                    <img src="{{ asset('img/logo_payment/abhi.png') }}" class="method-img" alt="Abhi Bank">
+                    <span class="method-name">Abhi Bank</span>
+                </div>
+
+                <div class="method-choice" onclick="selectRefundMethod('Bank of Khyber', this)">
+                    <div class="checkbox-custom"><i class="fas fa-check"></i></div>
+                    <img src="{{ asset('img/logo_payment/bok.png') }}" class="method-img" alt="Bank of Khyber">
+                    <span class="method-name">Bank of Khyber</span>
                 </div>
                 </div>
+                                
             </div>
 
             <div class="upload-verification-box">

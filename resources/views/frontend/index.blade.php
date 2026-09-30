@@ -57,11 +57,7 @@
                 <div class="partner-logo-box">
                     <img src="{{ asset('img/logo_payment/mastercard.png') }}" alt="Mastercard">
                     <span>Mastercard</span>
-                </div>
-                <div class="partner-logo-box">
-                    <img src="{{ asset('img/logo_payment/visacard.webp') }}" alt="Visa Card">
-                    <span>Visa Card</span>
-                </div>
+                </div>                
                 <div class="partner-box-item">
                     <img src="{{ asset('img/logo_payment/easypaisa.webp') }}" alt="Easypaisa">
                     <span>easypaisa</span>
@@ -69,6 +65,26 @@
                 <div class="partner-box-item">
                     <img src="{{ asset('img/logo_payment/upaisa.png') }}" alt="U-Paisa">
                     <span>U-Paisa</span>
+                </div>
+            </div>
+        </div>
+        <div class="partners-section-home">
+            <div class="partners-flex-home">
+                <div class="partner-logo-box">
+                    <img src="{{ asset('img/logo_payment/askri.png') }}" alt="Askari Bank">
+                    <span>Askari Bank</span>
+                </div>
+                <div class="partner-logo-box">
+                    <img src="{{ asset('img/logo_payment/raq.jpg') }}" alt="Raqami Bank">
+                    <span>Raqami Bank</span>
+                </div>                
+                <div class="partner-box-item">
+                    <img src="{{ asset('img/logo_payment/abhi.png') }}" alt="Abhi Bank">
+                    <span>Abhi Bank</span>
+                </div>
+                <div class="partner-box-item">
+                    <img src="{{ asset('img/logo_payment/bok.png') }}" alt="Bank of Khyber">
+                    <span>Bank of Khyber</span>
                 </div>
             </div>
         </div>

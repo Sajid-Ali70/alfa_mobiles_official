@@ -237,7 +237,7 @@ header {
 }
 
 .partner-logo-box img, .partner-box-item img {
-    height: 22px;
+    height: 60px;
     max-width: 100%;
     object-fit: contain;
 }

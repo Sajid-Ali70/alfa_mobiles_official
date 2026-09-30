@@ -125,14 +125,13 @@
             <div class="shop-step-header">
                 <a href="{{ url('/') }}" class="back-circle-nav"><i class="fas fa-arrow-left"></i></a>
                 <div class="step-dots-flex">
-                    <div class="dot-seg active"></div>
-                    <div class="dot-seg active"></div>
+                    <div class="dot-seg active"></div>                    
                     <div class="dot-seg"></div>
                     <div class="dot-seg"></div>
                     <div class="dot-seg"></div>
                     <div class="dot-seg"></div>
                 </div>
-                <div class="step-label-indicator">01/03 — Select Mobile</div>
+                <div class="step-label-indicator">01/05 — Select Mobile</div>
             </div>
 
             <h1 class="shop-main-h">Select Your Mobile</h1>

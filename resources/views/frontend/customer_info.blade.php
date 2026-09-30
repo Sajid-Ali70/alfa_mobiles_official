@@ -222,7 +222,7 @@
                         <div class="line"></div>
                         <div class="line"></div>
                     </div>
-                    <div class="step-counter-text">02/05 — Customer info</div>
+                    <div class="step-counter-text">03/05 — Customer info</div>
                 </div>
             </div>
 

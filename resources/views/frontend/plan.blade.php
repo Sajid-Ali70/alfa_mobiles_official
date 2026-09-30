@@ -225,7 +225,7 @@
             }
             .tenure-card-shop .t-months,
             .tenure-card-shop .t-emi {
-                font-size: 11px;
+                font-size: 14px;
             }
         }
 
@@ -290,6 +290,28 @@
                 width: 92%;
             }
         }
+        .sum-row.total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 10px;
+}
+
+.sum-row.total span {
+    white-space: nowrap;
+}
+
+@media (max-width: 576px) {
+    .sum-row.total {
+        font-size: 13px;
+        gap: 5px;
+    }
+
+    .sum-row.total .emi-val {
+        font-size: 13px;
+    }
+}
     </style>
 </head>
 <body>
@@ -428,9 +450,11 @@
                         <span id="displayTenure">12 Months</span>
                     </div>
                     <div class="sum-row total">
-                        <span>Monthly EMI (0% Markup):</span>
-                        <span class="emi-val" id="displayEmi">Rs. {{ number_format($price / 12) }} / mo</span>
-                    </div>
+    <span>Monthly EMI (0% Markup):</span>
+    <span class="emi-val" id="displayEmi">
+        Rs. {{ number_format($price / 12) }} / mo
+    </span>
+</div>
                 </div>
 
                 <button type="submit" class="btn-next-step">
