@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <style>
+        .mobile-wrapper {
+            width: 100%;
+        }
+
         .shop-page-container {
             background: #fff;
             padding: 30px 20px 60px;

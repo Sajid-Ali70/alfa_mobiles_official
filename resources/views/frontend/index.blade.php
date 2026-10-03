@@ -98,7 +98,7 @@
                     </div>
                     <div class="feature-text-box">
                         <h5>EASY INSTALLMENTS</h5>
-                        <p>Up to 6 Months</p>
+                        <p>Up to 60 Months</p>
                     </div>
                 </div>
                 <div class="feature-card-home">

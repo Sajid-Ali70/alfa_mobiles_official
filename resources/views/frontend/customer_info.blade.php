@@ -185,7 +185,7 @@
             left: 50%;
             transform: translateX(-50%);
             width: 100%;
-            max-width: 900px;
+            max-width: 500px;
             padding: 20px;
             background: #fff;
             border-top: 1px solid #eee;

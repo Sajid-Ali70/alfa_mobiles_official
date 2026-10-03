@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <style>
         .mobile-wrapper {
-            max-width: 900px;
             margin: 0 auto;
             background: #fff;
             min-height: 100vh;

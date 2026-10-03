@@ -270,7 +270,7 @@
             left: 50%;
             transform: translateX(-50%);
             width: 100%;
-            max-width: 900px;
+            max-width: 500px;
             padding: 22px;
             background: #e31e24;
             color: #fff !important;

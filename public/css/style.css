@@ -26,7 +26,8 @@ body {
 }
 
 .mobile-wrapper {
-    max-width: 900px;
+    width: 100%;
+    max-width: 100%;
     margin: 0 auto;
     background: #fff;
     min-height: 100vh;
@@ -252,35 +253,36 @@ header {
 
 /* Features Grid */
 .bottom-features-home {
-    padding: 0 20px 40px;
+    padding: 0 12px 30px;
 }
 
 .bottom-grid-home {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
 }
 
 .feature-card-home {
+    min-width: 0;
     background: #fff;
     border: 1px solid #f0f4f8;
     border-radius: 15px;
-    padding: 15px;
+    padding: 10px 8px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.03);
 }
 
 .feature-icon-box {
-    width: 45px;
-    height: 45px;
+    width: 32px;
+    height: 32px;
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
-    flex-shrink: 0;
+    font-size: 16px;
+    flex: 0 0 32px;
 }
 
 .blue-bg { background-color: #e6efff; color: #0052cc; }
@@ -288,19 +290,25 @@ header {
 .green-bg { background-color: #e7f9ee; color: #28a745; }
 .purple-bg { background-color: #f3e5f5; color: #8e44ad; }
 
+.feature-text-box {
+    min-width: 0;
+}
+
 .feature-text-box h5 {
-    font-size: 14px;
+    font-size: 11px;
     font-weight: 800;
     margin: 0;
     color: #333;
     line-height: 1.2;
+    overflow-wrap: anywhere;
 }
 
 .feature-text-box p {
-    font-size: 12px;
+    font-size: 10px;
     color: #777;
     margin: 4px 0 0;
     font-weight: 600;
+    overflow-wrap: anywhere;
 }
 
 /* Layout responsiveness */
@@ -333,5 +341,32 @@ header {
         border: none !important;
         padding: 0 !important;
         margin: 0 !important;
+    }
+}
+
+@media (min-width: 481px) {
+    .mobile-wrapper {
+        max-width: 500px;
+    }
+    .mobile-wrapper .btn-track-main,
+    .mobile-wrapper .contact-label-main {
+        display: none !important;
+    }
+    .mobile-wrapper .contact-box-header {
+        border: none;
+        padding: 0;
+        margin: 0;
+    }
+    .home-page-layout .promo-text-home {
+        font-size: 18px;
+    }
+    .home-page-layout .action-card-home {
+        font-size: 18px;
+        padding: 18px 20px;
+    }
+    .home-page-layout .action-icon-home {
+        font-size: 26px;
+        width: 35px;
+        margin-right: 15px;
     }
 }

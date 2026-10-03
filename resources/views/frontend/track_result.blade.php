@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <style>
         body { background-color: #f8fbff; color: #001f3f; font-family: 'Segoe UI', sans-serif; }
-        .track-wrapper { padding: 20px; max-width: 600px; margin: 0 auto; background: #fff; min-height: 100vh; }
+        .track-wrapper { width: 100%; padding: 20px; max-width: 500px; margin: 0 auto; background: #fff; min-height: 100vh; }
 
         /* Summary Card */
         .summary-card {
