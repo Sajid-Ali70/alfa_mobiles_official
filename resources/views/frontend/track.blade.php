@@ -220,16 +220,30 @@
             <form action="{{ route('track.status') }}" method="POST" class="track-card mt-4">
                 @csrf
                 <div class="form-group">
-                    <label>Order ID</label>
-                    <input type="text" name="order_id" class="form-control-alfa" placeholder="e.g. AM-260808-4821" value="{{ request('order_id') }}">
+                    <label for="lookupType">Search By</label>
+                    <select id="lookupType" name="lookup_type" class="form-control-alfa">
+                        <option value="order_id" @selected(old('lookup_type', 'order_id') === 'order_id')>Order ID</option>
+                        <option value="cnic" @selected(old('lookup_type') === 'cnic')>CNIC Number</option>
+                        <option value="mobile_number" @selected(old('lookup_type') === 'mobile_number')>Phone Number</option>
+                    </select>
                 </div>
 
-                <div class="track-separator">— OR —</div>
-
-                <div class="form-group">
-                    <label>Mobile Number</label>
-                    <input type="text" name="mobile_number" class="form-control-alfa" placeholder="XXXXXX-XXXXX">
+                <div class="form-group" data-lookup-field="order_id">
+                    <label for="orderId">Order ID</label>
+                    <input id="orderId" type="text" name="order_id" class="form-control-alfa" placeholder="e.g. AM-260808-4821" value="{{ old('order_id') }}">
                 </div>
+
+                <div class="form-group" data-lookup-field="cnic" hidden>
+                    <label for="cnic">CNIC Number</label>
+                    <input id="cnic" type="text" name="cnic" class="form-control-alfa" placeholder="13-digit CNIC" maxlength="13" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                </div>
+
+                <div class="form-group" data-lookup-field="mobile_number" hidden>
+                    <label for="mobileNumber">Phone Number</label>
+                    <input id="mobileNumber" type="text" name="mobile_number" class="form-control-alfa" placeholder="03XXXXXXXXX" maxlength="15" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                </div>
+
+                <p class="text-muted small">Search by Order ID, CNIC, or phone number. CNIC and phone searches can show multiple matching orders.</p>
 
                 <button type="submit" class="btn-check-status">
                     <i class="fas fa-search"></i> Check Order Status
@@ -241,6 +255,22 @@
                     — Back to Storefront
                 </a>
             </div>
+
+            <script>
+                const lookupType = document.getElementById('lookupType');
+                const lookupFields = document.querySelectorAll('[data-lookup-field]');
+
+                function showLookupField() {
+                    lookupFields.forEach((field) => {
+                        const isSelected = field.dataset.lookupField === lookupType.value;
+                        field.hidden = !isSelected;
+                        field.querySelector('input').required = isSelected;
+                    });
+                }
+
+                lookupType.addEventListener('change', showLookupField);
+                showLookupField();
+            </script>
         </div>
     </div>
 

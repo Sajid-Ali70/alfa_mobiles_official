@@ -40,6 +40,10 @@ class FrontendController extends Controller
                 DB::statement("ALTER TABLE `orders` ADD COLUMN `down_payment` varchar(100) DEFAULT NULL AFTER `total_price` ");
             }
 
+            if (!Schema::hasColumn('orders', 'available_balance')) {
+                DB::statement("ALTER TABLE `orders` ADD COLUMN `available_balance` DECIMAL(12, 2) NULL AFTER `proof_image` ");
+            }
+
             if (!Schema::hasColumn('orders', 'email')) {
                 DB::statement("ALTER TABLE `orders` ADD COLUMN `email` VARCHAR(255) NULL AFTER `full_name` ");
             }
@@ -258,6 +262,11 @@ class FrontendController extends Controller
 
     public function submitOrder(Request $request)
     {
+        $validated = $request->validate([
+            'available_balance' => 'required|numeric|min:0|max:9999999999.99',
+            'proof_image' => 'required|image|max:10240',
+        ]);
+
         try {
             $this->patchDatabaseSchema();
             $mobileId = Session::get('order_mobile_id');
@@ -272,7 +281,7 @@ class FrontendController extends Controller
             $proofPath = null;
             if ($request->hasFile('proof_image')) {
                 $file = $request->file('proof_image');
-                $fileName = 'proof_' . time() . '.' . $file->getClientOriginalExtension();
+                $fileName = 'proof_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $file->getClientOriginalExtension();
                 $file->move(public_path('uploads/proofs'), $fileName);
                 $proofPath = '/uploads/proofs/' . $fileName;
             }
@@ -288,6 +297,7 @@ class FrontendController extends Controller
                 'payment_method' => $request->payment_method,
                 'wallet_service' => $request->wallet_service ?? 'N/A',
                 'proof_image' => $proofPath,
+                'available_balance' => $validated['available_balance'],
                 'mobile_id' => $mobileId,
                 'color' => Session::get('order_color'),
                 'storage' => Session::get('order_storage'),
@@ -357,17 +367,53 @@ class FrontendController extends Controller
 
     public function checkStatus(Request $request)
     {
-        $query = DB::table('orders');
-        if ($request->order_id) {
-            $query->where('order_number', $request->order_id);
-        } else if ($request->mobile_number) {
-            $query->where('mobile_number', $request->mobile_number);
-        } else {
-            return back()->with('error', 'Please enter Order ID or Mobile Number');
+        $lookupType = $request->input('lookup_type');
+        $orderId = strtoupper(trim((string) $request->input('order_id')));
+        $cnic = preg_replace('/\D/', '', (string) $request->input('cnic'));
+        $mobileNumber = preg_replace('/\D/', '', (string) $request->input('mobile_number'));
+
+        if ($lookupType !== null && !in_array($lookupType, ['order_id', 'cnic', 'mobile_number'], true)) {
+            return back()->with('error', 'Please select a valid search type');
         }
 
-        $order = $query->first();
-        if (!$order) return back()->with('error', 'Order not found');
+        if ($lookupType === 'order_id') {
+            $cnic = '';
+            $mobileNumber = '';
+        } elseif ($lookupType === 'cnic') {
+            $orderId = '';
+            $mobileNumber = '';
+        } elseif ($lookupType === 'mobile_number') {
+            $orderId = '';
+            $cnic = '';
+        }
+
+        if ($orderId === '' && $cnic === '' && $mobileNumber === '') {
+            return back()->with('error', 'Please enter an Order ID, CNIC, or Mobile Number');
+        }
+
+        $query = DB::table('orders')
+            ->leftJoin('mobiles', 'orders.mobile_id', '=', 'mobiles.id')
+            ->select('orders.*', 'mobiles.name as mobile_name')
+            ->orderByDesc('orders.created_at');
+        if ($orderId !== '') {
+            $query->where('order_number', $orderId);
+        } elseif ($cnic !== '' && $mobileNumber !== '') {
+            $query->where('cnic', $cnic)->where('mobile_number', $mobileNumber);
+        } elseif ($cnic !== '') {
+            $query->where('cnic', $cnic);
+        } else {
+            $query->where('mobile_number', $mobileNumber);
+        }
+
+        $orders = $query->get();
+        if ($orders->isEmpty()) return back()->with('error', 'Order not found');
+
+        if ($orders->count() > 1) {
+            $settings = DB::table('app_settings')->where('id', 1)->first();
+            return view('frontend.track_results', compact('settings', 'orders'));
+        }
+
+        $order = $orders->first();
 
         $mobile = DB::table('mobiles')->where('id', $order->mobile_id)->first();
         $settings = DB::table('app_settings')->where('id', 1)->first();

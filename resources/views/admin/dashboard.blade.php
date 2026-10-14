@@ -527,9 +527,9 @@
                         <tbody>
                             @foreach($orders as $order)
                             <tr>
-                                <td>{{ $order->order_number }}</td>
+                                <td>{{ $order->order_number }}<br><small class="text-secondary">Created: {{ $order->created_at_display }}</small></td>
                                 <td>{{ $order->full_name }}<br><small class="text-secondary">{{ $order->mobile_number }}</small></td>
-                                <td>ID: {{ $order->mobile_id }}<br><small class="text-info">EMI: {{ $order->monthly_emi }}</small></td>
+                                <td>{{ $order->mobile_name ?? 'N/A' }}<br><small class="text-secondary">{{ $order->color ?? 'N/A' }} / {{ $order->storage ?? 'N/A' }}</small><br><small class="text-info">EMI: {{ $order->monthly_emi ?? 'N/A' }}</small></td>
                                 <td>
                                     <span class="badge-status badge-pending">{{ $order->status }}</span>
                                     <a href="{{ route('admin.orders.edit_status', $order->id) }}" class="btn btn-sm btn-outline-info ms-2">
@@ -1062,53 +1062,82 @@
         function viewOrder(order) {
             const modal = new bootstrap.Modal(document.getElementById('detailModal'));
             document.getElementById('modalTitle').innerText = "📋 Order ID: " + order.order_number;
+            const orderStatus = String(order.status || 'Pending');
+            const escapeHtml = value => String(value ?? 'N/A').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            })[char]);
 
             let statusBadgeClass = 'badge-pending';
-            if (order.status.includes('Delivered')) statusBadgeClass = 'badge-completed';
-            if (order.status.includes('Approved')) statusBadgeClass = 'badge-completed';
+            if (orderStatus.includes('Delivered')) statusBadgeClass = 'badge-completed';
+            if (orderStatus.includes('Approved')) statusBadgeClass = 'badge-completed';
+            const hasProofImage = typeof order.proof_image === 'string' && order.proof_image.startsWith('/uploads/');
+            const downPayment = String(order.down_payment || '0');
+            const numericDownPayment = Number(downPayment.replace(/[^\d.-]/g, ''));
+            const formattedDownPayment = Number.isFinite(numericDownPayment)
+                ? numericDownPayment.toLocaleString()
+                : escapeHtml(downPayment);
 
             document.getElementById('modalBody').innerHTML = `
                 <div class="row g-4">
                     <div class="col-md-12 mb-2">
-                        <span class="badge-status ${statusBadgeClass} fs-6 px-3 py-2">Current Status: ${order.status}</span>
+                        <span class="badge-status ${statusBadgeClass} fs-6 px-3 py-2">Current Status: ${escapeHtml(orderStatus)}</span>
                     </div>
                     <div class="col-md-6">
+                        <div class="modal-label">Created At</div>
+                        <div class="modal-value">${escapeHtml(order.created_at_display)}</div>
+
                         <div class="modal-label">Customer Name</div>
-                        <div class="modal-value">${order.full_name}</div>
+                        <div class="modal-value">${escapeHtml(order.full_name)}</div>
 
                         <div class="modal-label">Email Address</div>
-                        <div class="modal-value text-info">${order.email || 'N/A'}</div>
+                        <div class="modal-value text-info">${escapeHtml(order.email)}</div>
 
                         <div class="modal-label">Mobile Number</div>
-                        <div class="modal-value">${order.mobile_number}</div>
+                        <div class="modal-value">${escapeHtml(order.mobile_number)}</div>
 
                         <div class="modal-label">CNIC Number</div>
-                        <div class="modal-value">${order.cnic}</div>
+                        <div class="modal-value">${escapeHtml(order.cnic)}</div>
 
                         <div class="modal-label">Delivery Address</div>
-                        <div class="modal-value text-secondary">${order.address}</div>
+                        <div class="modal-value text-secondary">${escapeHtml(order.address)}</div>
+
+                        <div class="modal-label">Delivery Option</div>
+                        <div class="modal-value">${escapeHtml(order.delivery_type)}</div>
                     </div>
                     <div class="col-md-6">
+                        <div class="modal-label">Device</div>
+                        <div class="modal-value">${escapeHtml(order.mobile_name)}</div>
+
+                        <div class="modal-label">Color / Storage</div>
+                        <div class="modal-value">${escapeHtml(order.color)} / ${escapeHtml(order.storage)}</div>
+
                         <div class="modal-label">Payment Mode</div>
-                        <div class="modal-value">${order.payment_method} (${order.wallet_service})</div>
+                        <div class="modal-value">${escapeHtml(order.payment_method)} (${escapeHtml(order.wallet_service)})</div>
+
+                        <div class="modal-label">Available Account Balance (PKR)</div>
+                        <div class="modal-value text-info">${escapeHtml(order.available_balance)}</div>
 
                         <div class="modal-label">Tenure Plan</div>
-                        <div class="modal-value">${order.tenure} Months</div>
+                        <div class="modal-value">${escapeHtml(order.tenure)}</div>
 
                         <div class="modal-label">Monthly EMI</div>
-                        <div class="modal-value text-success">${order.monthly_emi}</div>
+                        <div class="modal-value text-success">${escapeHtml(order.monthly_emi)}</div>
 
                         <div class="modal-label">Total Amount</div>
-                        <div class="modal-value text-info">${order.total_price}</div>
+                        <div class="modal-value text-info">${escapeHtml(order.total_price)}</div>
 
                         <div class="modal-label">Down Payment (After Delivery)</div>
-                        <div class="modal-value text-info">Rs. ${Number(order.down_payment || 0).toLocaleString()}</div>
+                        <div class="modal-value text-info">Rs. ${formattedDownPayment}</div>
                     </div>
                     <div class="col-12 mt-4 pt-3 border-top border-secondary">
                         <div class="modal-label mb-3">Verification Screenshot (Show Balance)</div>
-                        <div class="proof-img-container">
-                            <img src="${order.proof_image}" class="w-100 d-block shadow-lg">
-                        </div>
+                        ${hasProofImage
+                            ? `<div class="proof-img-container"><img src="${escapeHtml(order.proof_image)}" alt="Order payment proof" class="w-100 d-block shadow-lg"></div>`
+                            : '<div class="modal-value text-secondary">No proof image was uploaded.</div>'}
                     </div>
                 </div>
             `;

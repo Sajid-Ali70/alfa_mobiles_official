@@ -234,6 +234,29 @@
             line-height: 1.5;
         }
 
+        .balance-note {
+            margin: 12px 0 14px;
+            padding: 12px 14px;
+            border: 1px solid #f6d365;
+            border-radius: 10px;
+            background: #fff8e1;
+            color: #7a5600;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .balance-note strong { color: #7a5600; }
+        .balance-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #fff;
+        }
+        .balance-input:focus {
+            outline: 2px solid rgba(37, 99, 235, 0.2);
+            border-color: #2563eb;
+        }
+
             .card-balance-instruction {
                 display: none;
                 margin-top: 12px;
@@ -467,14 +490,33 @@
                         <div class="proof-icon"><i class="fas fa-file-invoice"></i></div>
                         <div>
                             <span class="proof-title">Attach Proof of Payment</span>
-                            <span class="proof-desc">Please attach screenshot of show balance with company account number.</span>
+                            <span class="proof-desc">Enter your available account balance and attach a screenshot showing that balance with the company account number.</span>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label for="available_balance" class="form-label-small">Available Balance In Your Account (PKR)</label>
+                        <input
+                            type="number"
+                            name="available_balance"
+                            id="available_balance"
+                            class="balance-input"
+                            placeholder="Enter available balance (e.g., 150,000)"
+                            min="0"
+                            max="9999999999.99"
+                            step="0.01"
+                            inputmode="decimal"
+                            required
+                        >
+                    </div>
+                    <div class="balance-note">
+                        <i class="fas fa-exclamation-circle me-1"></i>
+                        <strong>Note:</strong> The amount entered above must match the amount shown in the screenshot below. Otherwise, your order will be cancelled.
+                    </div>
                     <div class="upload-dashed-area" onclick="document.getElementById('proof_image').click()">
-                        <input type="file" name="proof_image" id="proof_image" class="d-none" accept="image/*" onchange="updateUploadPreview(this)">
+                        <input type="file" name="proof_image" id="proof_image" class="d-none" accept="image/*" required onchange="updateUploadPreview(this)">
                         <div id="upload_initial_state">
                             <i class="fas fa-cloud-upload-alt" style="font-size: 40px; color: #3b82f6;"></i>
-                            <p class="mt-2" style="color: #64748b; font-size: 14px; font-weight: 700;">Select screenshot from gallery</p>
+                            <p class="mt-2" style="color: #64748b; font-size: 14px; font-weight: 700;">Select Show Balance Screenshot<br>with Company Account Number</p>
                         </div>
                         <img id="image_preview_img" src="#" alt="Preview">
                     </div>
@@ -552,6 +594,7 @@
 
         async function submitOrder() {
             if (!document.getElementById('policy').checked) { alert('Please agree to terms.'); return; }
+            if (!document.getElementById('available_balance').reportValidity()) return;
             if (!document.getElementById('proof_image').files.length) { alert('Attach screenshot first.'); return; }
 
             document.getElementById('loadingOverlay').style.display = 'flex';
@@ -559,12 +602,15 @@
             try {
                 const response = await fetch("{{ route('order.submit') }}", {
                     method: 'POST',
-                    headers: { 'X-CSRF-TOKEN': "{{ csrf_token() }}" },
+                    headers: {
+                        'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                        'Accept': 'application/json'
+                    },
                     body: formData
                 });
                 const data = await response.json();
                 if (data.success) window.location.href = "{{ route('order.success') }}?order_number=" + data.order_number;
-                else alert('Error: ' + data.message);
+                else alert('Error: ' + (data.message || 'Please check the balance and screenshot details.'));
             } catch (error) { alert('Submission failed.'); }
             finally { document.getElementById('loadingOverlay').style.display = 'none'; }
         }

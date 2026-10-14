@@ -108,7 +108,16 @@ class AdminController extends Controller
         foreach ($mobiles as $mobile) {
             $mobile->variants = $mobileVariants->get($mobile->id, collect())->values();
         }
-        $orders = DB::table('orders')->orderBy('id', 'desc')->get();
+        $orders = DB::table('orders')
+            ->leftJoin('mobiles', 'orders.mobile_id', '=', 'mobiles.id')
+            ->select('orders.*', 'mobiles.name as mobile_name')
+            ->orderBy('orders.id', 'desc')
+            ->get();
+        foreach ($orders as $order) {
+            $order->created_at_display = $order->created_at
+                ? \Carbon\Carbon::parse($order->created_at)->format('d M Y, h:i A')
+                : 'N/A';
+        }
 
         $refunds = [];
         try { $refunds = DB::table('refund_requests')->orderBy('id', 'desc')->get(); } catch (\Exception $e) {}
