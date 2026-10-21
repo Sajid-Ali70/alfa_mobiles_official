@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class AdminController extends Controller
 {
@@ -118,7 +119,6 @@ class AdminController extends Controller
                 ? \Carbon\Carbon::parse($order->created_at)->format('d M Y, h:i A')
                 : 'N/A';
         }
-
         $refunds = [];
         try { $refunds = DB::table('refund_requests')->orderBy('id', 'desc')->get(); } catch (\Exception $e) {}
 
@@ -233,7 +233,26 @@ class AdminController extends Controller
 
     public function updateSettings(Request $request)
     {
+        $validated = $request->validate([
+            'payment_account_number' => 'nullable|string|max:100',
+            'payment_purpose' => 'required|string|max:255',
+            'payment_account_logo' => 'nullable|image|max:5120',
+        ]);
+
+        $settingsColumns = [
+            'payment_account_number' => 'VARCHAR(100) NULL',
+            'payment_purpose' => 'VARCHAR(255) NULL',
+            'payment_account_logo' => 'VARCHAR(255) NULL',
+        ];
+        foreach ($settingsColumns as $column => $definition) {
+            if (!Schema::hasColumn('app_settings', $column)) {
+                DB::statement("ALTER TABLE `app_settings` ADD COLUMN `{$column}` {$definition}");
+            }
+        }
+
         $data = $request->only(['app_name', 'contact_number', 'contact_email', 'telegram_token', 'telegram_chat_id']);
+        $data['payment_account_number'] = $validated['payment_account_number'] ?? null;
+        $data['payment_purpose'] = $validated['payment_purpose'];
         if ($request->hasFile('app_icon_file')) {
             $file = $request->file('app_icon_file');
             $fileName = 'logo_' . time() . '.' . $file->getClientOriginalExtension();
@@ -246,7 +265,14 @@ class AdminController extends Controller
             $file->move(public_path('uploads'), $fileName);
             $data['banner_url'] = '/uploads/' . $fileName;
         }
+        if ($request->hasFile('payment_account_logo')) {
+            $file = $request->file('payment_account_logo');
+            $fileName = 'payment_account_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads'), $fileName);
+            $data['payment_account_logo'] = '/uploads/' . $fileName;
+        }
         DB::table('app_settings')->updateOrInsert(['id' => 1], $data);
+
         return response()->json(['message' => 'Settings updated']);
     }
 

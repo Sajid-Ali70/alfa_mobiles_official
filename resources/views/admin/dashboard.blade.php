@@ -828,6 +828,54 @@
                 </div>
 
                 <div class="admin-card">
+                    <h5 class="section-title">Payment Agreement Details</h5>
+                    <p class="text-secondary">Set the single account, purpose, and logo to display on the payment agreement. The account title is not shown.</p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Account Number</label>
+                            <input
+                                type="text"
+                                name="payment_account_number"
+                                class="form-control"
+                                value="{{ $settings->payment_account_number ?? '' }}"
+                                placeholder="Enter account number"
+                                maxlength="100"
+                            >
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Payment Purpose</label>
+                            <input
+                                type="text"
+                                name="payment_purpose"
+                                class="form-control"
+                                value="{{ $settings->payment_purpose ?? 'Verification for Down Payment' }}"
+                                placeholder="e.g. Verification for Down Payment"
+                                maxlength="255"
+                                required
+                            >
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Payment Account Logo</label>
+                            <div class="d-flex align-items-center gap-3">
+                                @if(!empty($settings->payment_account_logo))
+                                    <img src="{{ asset($settings->payment_account_logo) }}" class="preview-img-small" id="paymentAccountLogoPreview" alt="Payment account logo">
+                                @else
+                                    <img src="" class="preview-img-small d-none" id="paymentAccountLogoPreview" alt="Payment account logo">
+                                @endif
+                                <input
+                                    type="file"
+                                    name="payment_account_logo"
+                                    class="form-control"
+                                    accept="image/*"
+                                    onchange="previewImg(this, 'paymentAccountLogoPreview')"
+                                >
+                            </div>
+                            <small class="text-secondary">Upload the logo for the account shown to every customer.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-card">
                     <h5 class="section-title">General Settings</h5>
                     <div class="row g-3">
                         <div class="col-md-6"><label class="form-label">App/Website Name</label><input type="text" name="app_name" class="form-control" value="{{ $settings->app_name }}"></div>
@@ -1179,7 +1227,12 @@
         document.getElementById('settingsForm')?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const res = await fetch(`${baseUrl}/admin/settings/update`, { method: 'POST', body: new FormData(e.target) });
-            if (res.ok) alert("Settings updated!");
+            if (res.ok) {
+                alert("Settings updated!");
+            } else {
+                const error = await res.json();
+                alert(error.message || "Unable to update settings.");
+            }
         });
 
         document.getElementById('addBrandForm')?.addEventListener('submit', async (e) => {

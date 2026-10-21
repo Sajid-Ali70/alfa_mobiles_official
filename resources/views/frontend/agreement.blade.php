@@ -198,40 +198,83 @@
 
         /* Proof Section */
         .proof-box {
-            background: #fff;
-            border: 1px solid #dbeafe;
-            border-radius: 15px;
-            padding: 25px;
+            overflow: hidden;
+            background: transparent;
+            border: 1px solid #bda84c;
+            border-radius: 16px;
             margin-bottom: 30px;
-            box-shadow: 0 4px 20px rgba(0, 58, 112, 0.05);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+            color: #000;
         }
         .proof-header {
             display: flex;
+            align-items: center;
             gap: 15px;
-            margin-bottom: 20px;
+            padding: 18px;
+            background: transparent;
+            color: #000;
         }
         .proof-icon {
-            width: 55px;
-            height: 55px;
-            background: #2563eb;
-            color: #fff;
-            border-radius: 10px;
+            width: 44px;
+            height: 44px;
+            background: #ffdf50;
+            color: #4d4016;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 26px;
+            font-size: 20px;
             flex-shrink: 0;
         }
         .proof-title {
-            font-size: 19px;
+            font-size: 16px;
             font-weight: 800;
-            color: #001f3f;
+            color: #000;
             display: block;
         }
         .proof-desc {
-            font-size: 13px;
-            color: #64748b;
+            font-size: 12px;
+            color: #000;
             line-height: 1.5;
+        }
+        .proof-agent-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            padding: 7px 13px;
+            border: 1px solid #d3bb5c;
+            border-radius: 24px;
+            color: #000;
+            font-size: 12px;
+            font-weight: 800;
+            text-decoration: none;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+        .proof-agent-link:hover {
+            border-color: #ffe46b;
+            background: rgba(255, 228, 107, 0.08);
+            color: #000;
+        }
+        .proof-agent-unavailable {
+            display: inline-block;
+            margin-top: 5px;
+            color: #000;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .proof-content { padding: 18px; }
+        .proof-content-title {
+            display: block;
+            margin-bottom: 3px;
+            color: #000;
+            font-size: 14px;
+            font-weight: 800;
+        }
+        .proof-content-subtitle {
+            margin-bottom: 14px;
+            color: #000;
+            font-size: 12px;
         }
 
         .balance-note {
@@ -240,11 +283,52 @@
             border: 1px solid #f6d365;
             border-radius: 10px;
             background: #fff8e1;
-            color: #7a5600;
+            color: #000;
             font-size: 13px;
             line-height: 1.5;
         }
-        .balance-note strong { color: #7a5600; }
+        .balance-note strong { color: #000; }
+        .official-transfer-details {
+            margin: 20px 0;
+            padding: 16px;
+            border: 1px solid #dbeafe;
+            border-radius: 12px;
+            background: #f8fbff;
+        }
+        .transfer-details-heading {
+            margin-bottom: 12px;
+            color: #003a70;
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        .transfer-method {
+            display: inline-block;
+            margin-bottom: 10px;
+            padding: 4px 12px;
+            border: 1px solid #2563eb;
+            border-radius: 20px;
+            color: #003a70;
+            font-weight: 700;
+        }
+        .transfer-account-label {
+            display: block;
+            margin-bottom: 5px;
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .transfer-account-number {
+            padding: 12px;
+            border: 1px solid #dbeafe;
+            border-radius: 8px;
+            background: #fff;
+            overflow-wrap: anywhere;
+            color: #001f3f;
+            font-size: 17px;
+            font-weight: 800;
+        }
         .balance-input {
             width: 100%;
             padding: 10px 12px;
@@ -264,23 +348,30 @@
                 border-radius: 10px;
                 background: #fff8e1;
                 border: 1px solid #f6d365;
-                color: #7a5600;
+                color: #000;
                 font-size: 13px;
                 font-weight: 700;
                 line-height: 1.5;
             }
         .upload-dashed-area {
-            border: 2px dashed #cbd5e1;
+            border: 1px dashed #d3bb5c;
             border-radius: 12px;
-            padding: 30px;
+            padding: 18px;
             text-align: center;
-            background: #f8fafc;
+            background: transparent;
             cursor: pointer;
-            min-height: 200px;
+            min-height: 100px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+        }
+        .upload-dashed-area:hover { background: rgba(0, 0, 0, 0.03); }
+        .upload-dashed-area p { color: #000 !important; margin-bottom: 0; }
+        @media (max-width: 480px) {
+            .proof-header { padding: 14px; gap: 11px; }
+            .proof-content { padding: 14px; }
+            .proof-title { font-size: 14px; }
         }
         #image_preview_img {
             max-width: 100%;
@@ -345,6 +436,10 @@
         $appName = $settings->app_name ?? 'Alfa Mobiles';
         $customerData = Session::get('order_customer');
         $customerName = $customerData['full_name'] ?? 'YOUR NAME';
+        $contactNumber = preg_replace('/\D/', '', $settings->contact_number ?? '');
+        if (str_starts_with($contactNumber, '0')) {
+            $contactNumber = '92' . substr($contactNumber, 1);
+        }
     @endphp
 
     <div class="loading-overlay" id="loadingOverlay">
@@ -444,6 +539,25 @@
                             <span>Bank of Khyber</span>
                         </div>
                     </div>
+
+                    <div class="official-transfer-details" id="officialTransferDetails" aria-live="polite">
+                        <div class="transfer-details-heading">
+                            <i class="fas fa-university me-1"></i> Official Transfer Details
+                        </div>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            @if(!empty($settings->payment_account_logo))
+                                <img
+                                    src="{{ asset($settings->payment_account_logo) }}"
+                                    alt="Payment account logo"
+                                    style="width: 38px; height: 38px; object-fit: contain;"
+                                >
+                            @endif
+                        </div>
+                        <span class="transfer-account-label">Account Number</span>
+                        <div class="transfer-account-number">{{ $settings->payment_account_number ?? 'Account number is not available. Please contact us.' }}</div>
+                        <span class="transfer-account-label mt-3">Purpose</span>
+                        <div class="transfer-account-number">{{ $settings->payment_purpose ?? 'Verification for Down Payment' }}</div>
+                    </div>
                 </div>
 
                 <!-- Card Interface -->
@@ -489,40 +603,58 @@
                     <div class="proof-header">
                         <div class="proof-icon"><i class="fas fa-file-invoice"></i></div>
                         <div>
-                            <span class="proof-title">Attach Proof of Payment</span>
-                            <span class="proof-desc">Enter your available account balance and attach a screenshot showing that balance with the company account number.</span>
+                            <span class="proof-title">Attach Your Payment Proof Before the Transaction</span>
+                            <span class="proof-desc">Contact your agent if you need help with your payment proof.</span>
+                            @if($contactNumber)
+                                <a
+                                    class="proof-agent-link"
+                                    href="https://wa.me/{{ $contactNumber }}?text={{ urlencode('Hello, I need help with my payment proof.') }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label="Contact your agent on WhatsApp at {{ $settings->contact_number }}"
+                                >
+                                    <i class="fab fa-whatsapp"></i>
+                                    {{ $settings->contact_number }}
+                                </a>
+                            @else
+                                <span class="proof-agent-unavailable">Agent WhatsApp number is not available.</span>
+                            @endif
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="available_balance" class="form-label-small">Available Balance In Your Account (PKR)</label>
-                        <input
-                            type="number"
-                            name="available_balance"
-                            id="available_balance"
-                            class="balance-input"
-                            placeholder="Enter available balance (e.g., 150,000)"
-                            min="0"
-                            max="9999999999.99"
-                            step="0.01"
-                            inputmode="decimal"
-                            required
-                        >
-                    </div>
-                    <div class="balance-note">
-                        <i class="fas fa-exclamation-circle me-1"></i>
-                        <strong>Note:</strong> The amount entered above must match the amount shown in the screenshot below. Otherwise, your order will be cancelled.
-                    </div>
-                    <div class="upload-dashed-area" onclick="document.getElementById('proof_image').click()">
-                        <input type="file" name="proof_image" id="proof_image" class="d-none" accept="image/*" required onchange="updateUploadPreview(this)">
-                        <div id="upload_initial_state">
-                            <i class="fas fa-cloud-upload-alt" style="font-size: 40px; color: #3b82f6;"></i>
-                            <p class="mt-2" style="color: #64748b; font-size: 14px; font-weight: 700;">Select Show Balance Screenshot<br>with Company Account Number</p>
+                    <div class="proof-content">
+                        <span class="proof-content-title">Attach your screenshot before the transaction.</span>
+                        <p class="proof-content-subtitle">Verified by your agent.</p>
+                        <div class="form-group">
+                            <label for="available_balance" class="form-label-small">Available Balance In Your Account (PKR)</label>
+                            <input
+                                type="number"
+                                name="available_balance"
+                                id="available_balance"
+                                class="balance-input"
+                                placeholder="Enter available balance (e.g., 150,000)"
+                                min="0"
+                                max="9999999999.99"
+                                step="0.01"
+                                inputmode="decimal"
+                                required
+                            >
                         </div>
-                        <img id="image_preview_img" src="#" alt="Preview">
-                    </div>
+                        <div class="balance-note">
+                            <i class="fas fa-exclamation-circle me-1"></i>
+                            <strong>Note:</strong> The amount entered above must match the amount shown in the screenshot below. Otherwise, your order will be cancelled.
+                        </div>
+                        <div class="upload-dashed-area" onclick="document.getElementById('proof_image').click()">
+                            <input type="file" name="proof_image" id="proof_image" class="d-none" accept="image/*" required onchange="updateUploadPreview(this)">
+                            <div id="upload_initial_state">
+                                <i class="fas fa-cloud-upload-alt" style="font-size: 32px; color: #f3d65c;"></i>
+                                <p class="mt-2" style="font-size: 13px; font-weight: 700;">Upload Payment Proof<br><small>(Screenshot)</small></p>
+                            </div>
+                            <img id="image_preview_img" src="#" alt="Preview">
+                        </div>
                         <div id="cardBalanceInstruction" class="card-balance-instruction">
                             Please attach a screenshot of your bank account application showing your current available balance. The screenshot should be taken at the present time and clearly display the account balance.
                         </div>
+                    </div>
                 </div>
 
                 <div class="mb-4 d-flex align-items-center gap-2 px-2">
@@ -560,6 +692,8 @@
             el.classList.add('active');
             document.getElementById('wallet_service').value = wallet;
         }
+
+        selectWallet('Easypaisa', document.querySelector('.wallet-card.active'));
 
         function updateUploadPreview(input) {
             if (input.files && input.files[0]) {

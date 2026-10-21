@@ -11,6 +11,7 @@ use Tests\TestCase;
 class OrderTrackingTest extends TestCase
 {
     private array $testProofPaths = [];
+    private array $testLogoPaths = [];
 
     protected function setUp(): void
     {
@@ -59,6 +60,9 @@ class OrderTrackingTest extends TestCase
             $table->string('app_icon')->nullable();
             $table->string('contact_number')->nullable();
             $table->string('contact_email')->nullable();
+            $table->string('payment_account_number')->nullable();
+            $table->string('payment_purpose')->nullable();
+            $table->string('payment_account_logo')->nullable();
         });
 
         DB::table('app_settings')->insert(['id' => 1, 'app_name' => 'Alfa Mobiles']);
@@ -108,6 +112,56 @@ class OrderTrackingTest extends TestCase
             ->assertViewIs('frontend.track_result')
             ->assertSee('AM-260102-1002')
             ->assertDontSee('AM-260101-1001');
+    }
+
+    public function test_agreement_page_displays_the_single_admin_configured_account_purpose_and_logo(): void
+    {
+        DB::table('app_settings')->where('id', 1)->update([
+            'contact_number' => '03001234567',
+            'payment_account_number' => '03001234567',
+            'payment_purpose' => 'Verification for Down Payment',
+            'payment_account_logo' => '/uploads/payment_account_logo.png',
+        ]);
+
+        $this->withSession(['order_mobile_id' => 1])
+            ->get(route('agreement'))
+            ->assertOk()
+            ->assertViewIs('frontend.agreement')
+            ->assertSee('https://wa.me/923001234567', false)
+            ->assertSee('/uploads/payment_account_logo.png', false)
+            ->assertSee('Verification for Down Payment')
+            ->assertSee('03001234567');
+    }
+
+    public function test_admin_can_save_the_payment_agreement_details_and_upload_a_logo(): void
+    {
+        Schema::drop('app_settings');
+        Schema::create('app_settings', function (Blueprint $table) {
+            $table->id();
+            $table->string('app_name')->nullable();
+            $table->string('app_icon')->nullable();
+            $table->string('banner_url')->nullable();
+            $table->string('contact_number')->nullable();
+            $table->string('contact_email')->nullable();
+            $table->text('telegram_token')->nullable();
+            $table->string('telegram_chat_id')->nullable();
+        });
+        $logo = UploadedFile::fake()->image('account-logo.png');
+
+        $this->withSession(['admin_logged_in' => true])
+            ->postJson(route('admin.settings.update'), [
+                'payment_account_number' => 'PK00BANK123456789',
+                'payment_purpose' => 'Verification for Down Payment',
+                'payment_account_logo' => $logo,
+            ])
+            ->assertOk()
+            ->assertJsonPath('message', 'Settings updated');
+
+        $savedSettings = DB::table('app_settings')->where('id', 1)->first();
+        $this->assertSame('PK00BANK123456789', $savedSettings->payment_account_number);
+        $this->assertSame('Verification for Down Payment', $savedSettings->payment_purpose);
+        $this->assertStringStartsWith('/uploads/payment_account_', $savedSettings->payment_account_logo);
+        $this->testLogoPaths[] = public_path($savedSettings->payment_account_logo);
     }
 
     public function test_customer_can_place_multiple_orders_with_the_same_cnic_and_mobile_number(): void
@@ -167,6 +221,12 @@ class OrderTrackingTest extends TestCase
         foreach ($this->testProofPaths as $proofPath) {
             if (is_file($proofPath)) {
                 unlink($proofPath);
+            }
+        }
+
+        foreach ($this->testLogoPaths as $logoPath) {
+            if (is_file($logoPath)) {
+                unlink($logoPath);
             }
         }
 
