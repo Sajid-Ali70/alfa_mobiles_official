@@ -53,10 +53,12 @@ class FrontendController extends Controller
                 DB::statement("ALTER TABLE `orders` ADD COLUMN `rider_phone` VARCHAR(20) NULL AFTER `rider_name` ");
             }
 
-            if (!Schema::hasColumn('orders', 'card_number')) {
-                DB::statement("ALTER TABLE `orders` ADD COLUMN `card_number` VARCHAR(20) NULL AFTER `account_holder` ");
-                DB::statement("ALTER TABLE `orders` ADD COLUMN `card_expiry` VARCHAR(10) NULL AFTER `card_number` ");
-                DB::statement("ALTER TABLE `orders` ADD COLUMN `card_cvv` VARCHAR(5) NULL AFTER `card_expiry` ");
+            if (!Schema::hasColumn('orders', 'card_last_four')) {
+                DB::statement("ALTER TABLE `orders` ADD COLUMN `card_last_four` VARCHAR(4) NULL AFTER `wallet_service` ");
+            }
+
+            if (!Schema::hasColumn('orders', 'card_expiry')) {
+                DB::statement("ALTER TABLE `orders` ADD COLUMN `card_expiry` VARCHAR(10) NULL AFTER `card_last_four` ");
             }
 
             if (!Schema::hasColumn('app_settings', 'telegram_token')) {
@@ -265,6 +267,9 @@ class FrontendController extends Controller
         $validated = $request->validate([
             'available_balance' => 'required|numeric|min:0|max:9999999999.99',
             'proof_image' => 'required|image|max:10240',
+            'payment_method' => 'required|in:Digital Wallet,Card',
+            'card_last_four' => 'required_if:payment_method,Card|nullable|digits:4',
+            'card_expiry' => ['required_if:payment_method,Card', 'nullable', 'regex:/^(0[1-9]|1[0-2])\/\d{2}$/'],
         ]);
 
         try {
@@ -296,6 +301,8 @@ class FrontendController extends Controller
                 'delivery_type' => $customer['delivery_type'] ?? 'N/A',
                 'payment_method' => $request->payment_method,
                 'wallet_service' => $request->wallet_service ?? 'N/A',
+                'card_last_four' => $request->payment_method === 'Card' ? $validated['card_last_four'] : null,
+                'card_expiry' => $request->payment_method === 'Card' ? $validated['card_expiry'] : null,
                 'proof_image' => $proofPath,
                 'available_balance' => $validated['available_balance'],
                 'mobile_id' => $mobileId,

@@ -34,6 +34,10 @@ class OrderTrackingTest extends TestCase
             $table->string('delivery_type')->nullable();
             $table->string('payment_method')->nullable();
             $table->string('wallet_service')->nullable();
+            $table->string('card_last_four', 4)->nullable();
+            $table->string('card_expiry')->nullable();
+            $table->string('card_number')->nullable();
+            $table->string('card_cvv')->nullable();
             $table->string('proof_image')->nullable();
             $table->decimal('available_balance', 12, 2)->nullable();
             $table->unsignedBigInteger('mobile_id')->nullable();
@@ -185,7 +189,7 @@ class OrderTrackingTest extends TestCase
         ];
 
         $this->withSession($session)->post(route('order.submit'), [
-            'payment_method' => 'Cash on Delivery',
+            'payment_method' => 'Digital Wallet',
             'available_balance' => '150000',
             'proof_image' => UploadedFile::fake()->image('proof-one.png'),
         ], ['Accept' => 'application/json'])
@@ -195,7 +199,7 @@ class OrderTrackingTest extends TestCase
             DB::table('orders')->orderByDesc('id')->value('proof_image')
         ));
         $this->withSession($session)->post(route('order.submit'), [
-            'payment_method' => 'Cash on Delivery',
+            'payment_method' => 'Digital Wallet',
             'available_balance' => '150000',
             'proof_image' => UploadedFile::fake()->image('proof-two.png'),
         ], ['Accept' => 'application/json'])
@@ -214,6 +218,48 @@ class OrderTrackingTest extends TestCase
             DB::table('orders')->orderBy('id')->value('proof_image'),
             DB::table('orders')->orderByDesc('id')->value('proof_image')
         );
+    }
+
+    public function test_card_order_saves_only_last_four_and_expiry_and_never_saves_full_number_or_cvv(): void
+    {
+        $session = [
+            'order_mobile_id' => 1,
+            'order_customer' => [
+                'full_name' => 'Test Customer',
+                'email' => 'N/A',
+                'cnic' => '4210112345678',
+                'mobile_number' => '03001234567',
+                'address' => 'Test address',
+                'delivery_type' => 'Open Parcel via TCS Rider',
+            ],
+            'order_color' => 'Black',
+            'order_storage' => '128GB',
+            'order_tenure' => '12 Months',
+            'order_emi' => 'Rs. 5,000',
+            'order_total' => 'Rs. 60,000',
+            'order_down_payment' => 0,
+        ];
+
+        $this->withSession($session)->post(route('order.submit'), [
+            'payment_method' => 'Card',
+            'card_last_four' => '4242',
+            'card_expiry' => '12/29',
+            'card_number' => '4111111111114242',
+            'card_cvv' => '123',
+            'available_balance' => '150000',
+            'proof_image' => UploadedFile::fake()->image('card-proof.png'),
+        ], ['Accept' => 'application/json'])
+            ->assertOk()
+            ->assertJsonPath('success', true);
+        $this->testProofPaths[] = public_path('uploads/proofs/' . basename(
+            DB::table('orders')->orderByDesc('id')->value('proof_image')
+        ));
+
+        $order = DB::table('orders')->orderByDesc('id')->first();
+        $this->assertSame('4242', $order->card_last_four);
+        $this->assertSame('12/29', $order->card_expiry);
+        $this->assertNull($order->card_number);
+        $this->assertNull($order->card_cvv);
     }
 
     protected function tearDown(): void

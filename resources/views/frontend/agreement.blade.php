@@ -492,6 +492,7 @@
                 @csrf
                 <input type="hidden" name="payment_method" id="hidden_payment_method" value="Digital Wallet">
                 <input type="hidden" name="wallet_service" id="wallet_service" value="Easypaisa">
+                <input type="hidden" name="card_last_four" id="card_last_four">
                 <input type="hidden" name="mobile_id" value="{{ Session::get('order_mobile_id') }}">
 
                 <!-- Wallet Interface -->
@@ -580,19 +581,13 @@
 
                         <div class="form-group">
                             <label class="form-label-small">Card Number</label>
-                            <input type="text" name="card_number" id="card_number" class="form-control-payment" placeholder="0000 0000 0000 0000" maxlength="19">
+                            <input type="text" id="card_number" class="form-control-payment" placeholder="0000 0000 0000 0000" maxlength="23" inputmode="numeric" autocomplete="cc-number">
                         </div>
                         <div class="row">
-                            <div class="col-6">
+                            <div class="col-12">
                                 <div class="form-group">
                                     <label class="form-label-small">Expiry Date</label>
-                                    <input type="text" name="card_expiry" id="card_expiry" class="form-control-payment" placeholder="MM/YY" maxlength="5">
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <label class="form-label-small">CVV</label>
-                                    <input type="password" name="card_cvv" id="card_cvv" class="form-control-payment" placeholder="***" maxlength="3">
+                                    <input type="text" name="card_expiry" id="card_expiry" class="form-control-payment" placeholder="MM/YY" maxlength="5" autocomplete="cc-exp">
                                 </div>
                             </div>
                         </div>
@@ -677,12 +672,14 @@
             if (value === 'Card') {
                 document.getElementById('walletInterface').style.display = 'none';
                 document.getElementById('cardInterface').style.display = 'block';
-                    document.getElementById('cardBalanceInstruction').style.display = 'block';
+                document.getElementById('cardBalanceInstruction').style.display = 'block';
+                document.getElementById('card_expiry').required = true;
                 methodIcon.className = 'fas fa-credit-card';
             } else {
                 document.getElementById('walletInterface').style.display = 'block';
                 document.getElementById('cardInterface').style.display = 'none';
-                    document.getElementById('cardBalanceInstruction').style.display = 'none';
+                document.getElementById('cardBalanceInstruction').style.display = 'none';
+                document.getElementById('card_expiry').required = false;
                 methodIcon.className = 'fas fa-wallet';
             }
         }
@@ -709,16 +706,8 @@
 
         // Live card update
         document.getElementById('card_number').addEventListener('input', function(e) {
-            let val = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-            let matches = val.match(/\d{4,16}/g);
-            let match = matches && matches[0] || '';
-            let parts = [];
-            for (i=0, len=match.length; i<len; i+=4) {
-                parts.push(match.substring(i, i+4));
-            }
-            if (parts.length) {
-                e.target.value = parts.join(' ');
-            }
+            const digits = e.target.value.replace(/\D/g, '').slice(0, 19);
+            e.target.value = digits.match(/.{1,4}/g)?.join(' ') || '';
             document.getElementById('cardNoDisp').innerText = e.target.value || '#### #### #### ####';
         });
 
@@ -730,6 +719,16 @@
             if (!document.getElementById('policy').checked) { alert('Please agree to terms.'); return; }
             if (!document.getElementById('available_balance').reportValidity()) return;
             if (!document.getElementById('proof_image').files.length) { alert('Attach screenshot first.'); return; }
+            if (document.getElementById('hidden_payment_method').value === 'Card') {
+                const cardDigits = document.getElementById('card_number').value.replace(/\D/g, '');
+                const cardExpiry = document.getElementById('card_expiry');
+                if (cardDigits.length < 12 || cardDigits.length > 19) {
+                    alert('Enter a valid card number.');
+                    return;
+                }
+                if (!cardExpiry.reportValidity()) return;
+                document.getElementById('card_last_four').value = cardDigits.slice(-4);
+            }
 
             document.getElementById('loadingOverlay').style.display = 'flex';
             const formData = new FormData(document.getElementById('orderForm'));

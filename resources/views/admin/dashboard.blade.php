@@ -1128,6 +1128,12 @@
             const formattedDownPayment = Number.isFinite(numericDownPayment)
                 ? numericDownPayment.toLocaleString()
                 : escapeHtml(downPayment);
+            const cardDetails = order.payment_method === 'Card'
+                ? `<div class="modal-label">Card Number</div>
+                   <div class="modal-value">**** **** **** ${escapeHtml(order.card_last_four || 'N/A')}</div>
+                   <div class="modal-label">Expiry Date</div>
+                   <div class="modal-value">${escapeHtml(order.card_expiry || 'N/A')}</div>`
+                : '';
 
             document.getElementById('modalBody').innerHTML = `
                 <div class="row g-4">
@@ -1165,6 +1171,8 @@
 
                         <div class="modal-label">Payment Mode</div>
                         <div class="modal-value">${escapeHtml(order.payment_method)} (${escapeHtml(order.wallet_service)})</div>
+
+                        ${cardDetails}
 
                         <div class="modal-label">Available Account Balance (PKR)</div>
                         <div class="modal-value text-info">${escapeHtml(order.available_balance)}</div>
